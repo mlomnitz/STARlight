@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/!svn/ver/196/trunk/cmake_modules
+END
+FindDPMJet.cmake
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/84/trunk/cmake_modules/FindDPMJet.cmake
+END
+FindROOT.cmake
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/28/trunk/cmake_modules/FindROOT.cmake
+END
+FindPythia6.cmake
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/162/trunk/cmake_modules/FindPythia6.cmake
+END
+FindPythia8.cmake
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/196/trunk/cmake_modules/FindPythia8.cmake
+END
+CommonMacros.cmake
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/27/trunk/cmake_modules/CommonMacros.cmake
+END
+FindLHAPDF.cmake
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/3/trunk/cmake_modules/FindLHAPDF.cmake
+END
