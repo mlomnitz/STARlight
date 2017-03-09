@@ -49,9 +49,20 @@ beam::beam(const int              Z,
            const int              A,
 	   const int		  productionMode,
 	   const double		  beamLorentzGamma)
-	: nucleus(Z,
-	          A,
-		  productionMode)
+{
+  if( A == 0 )
+    electron(productionMode);
+  else
+    nucleus(Z, A, productionMode);
+  
+  _beamLorentzGamma(beamLorentzGamma)
+}
+
+
+//______________________________________________________________________________
+beam::beam(const int		  productionMode,
+	   const double		  beamLorentzGamma)
+	: electron(productionMode)
 	,_beamLorentzGamma(beamLorentzGamma)
 {
 }
