@@ -208,6 +208,9 @@ public:
 	double       ptBinWidthInterference() const { return _ptBinWidthInterference.value(); }  ///< returns width of p_T bins for interference calculation [GeV/c]
 	double 	     minGammaEnergy        () const { return _minGammaEnergy.value();         }  ///< returns minimum gamma energy in case of photo nuclear processes [GeV]
 	double       maxGammaEnergy        () const { return _maxGammaEnergy.value();         }  ///< returns maximum gamma energy in case of photo nuclear processes [GeV]
+	double       minGammaQ2            () const { return _minGammaQ2.value();             }  ///< return minimum gamma virtuality 
+	double       maxGammaQ2            () const { return _maxGammaQ2.value();             }  ///< return maximum gamma virtuality 
+	unsigned int nmbGammaQ2Bins        () const { return _nmbGammaQ2Bins.value();         }  ///< return number of gamma q2 bins
 	std::string  pythiaParams          () const { return _pythiaParams.value();           }  ///< returns parameters to be passed to pythia
 	bool         pythiaFullEventRecord () const { return _pythiaFullEventRecord.value();  }  ///< returns if the full pythia event record should be printed
 	int	     xsecCalcMethod        () const { return _xsecCalcMethod.value();         }  ///< returns the method used for the x-sec calculation
@@ -218,6 +221,7 @@ public:
 	starlightConstants::decayTypeEnum       prodParticleDecayType() const { return _decayType;       }  ///< returns decay type of produced particle
 	starlightConstants::interactionTypeEnum interactionType      () const { return _interactionType; }  ///< returns interaction type
 	double protonEnergy                () const { return _protonEnergy.value(); }
+	double electronEnergy              () const { return _electronEnergy.value(); }
         double inputBranchingRatio         () const { return _inputBranchingRatio; }
 	
         void setBaseFileName          (std::string v )  {  _baseFileName = v;     }
@@ -263,7 +267,8 @@ public:
 	void setInteractionType       (starlightConstants::interactionTypeEnum v) { _interactionType = v; }  ///< sets interaction type
 	 
 	void setProtonEnergy        (double v)    { _protonEnergy = v;            }  ///< sets proton energy 
-	
+	void setElectronEnergy      (double v)    { _electronEnergy = v;          }  ///< sets electron energy
+		
 	template<typename T>
 	inline bool setParameter(std::string expression);
 	
@@ -326,8 +331,12 @@ private:
 	parameter<unsigned int, VALIDITY_CHECK>    _nmbPtBinsInterference;   ///< number of p_T bins for interference calculation
 	parameter<double, VALIDITY_CHECK>          _ptBinWidthInterference;  ///< width of p_T bins for interference calculation [GeV/c]
 	parameter<double, VALIDITY_CHECK>          _protonEnergy;
+	parameter<double, VALIDITY_CHECK>          _electronEnergy;
 	parameter<double, VALIDITY_CHECK>          _minGammaEnergy;          ///< minimum gamma energy in case of photo nuclear processes [GeV]
 	parameter<double, VALIDITY_CHECK>          _maxGammaEnergy;          ///< maximum gamma energy in case of photo nuclear processes [GeV]
+	parameter<double, VALIDITY_CHECK>          _minGammaQ2;              ///< minimum gamma Q2 in case of photo nuclear processes
+	parameter<double, VALIDITY_CHECK>          _maxGammaQ2;              ///< maximum gamma Q2 in case of photo nuclear processes	
+	paramter<unsigned int, VALIDITY_CHECK>     _nmbGammaQ2Bins;          ///< number of gamma q2 bins
 	parameter<std::string,NO_VALIDITY_CHECK>   _pythiaParams;            ///< semi-colon separated parameters to pass to pythia, e.g. "mstj(1)=0;paru(13)=0.1" 
 	parameter<bool, NO_VALIDITY_CHECK>         _pythiaFullEventRecord;   ///< if the full pythia event record should be in the output
 	parameter<unsigned int, VALIDITY_CHECK>    _xsecCalcMethod;	     ///< Select x-sec calc method. (0 is standard starlight method, 1 must be used for assym. collisions (e.g. p-A), but is slow)	

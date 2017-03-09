@@ -80,8 +80,12 @@ inputParameters::inputParameters()
 	  _nmbPtBinsInterference ("INT_PT_N_BINS",0),
 	  _ptBinWidthInterference("INT_PT_WIDTH",0),
 	  _protonEnergy          ("PROTON_ENERGY",0, NOT_REQUIRED),
+	  _electronEnergy        ("ELECTRON ENERGY",0, NOT_REQUIRED),
 	  _minGammaEnergy	 ("MIN_GAMMA_ENERGY",6.0, NOT_REQUIRED),
 	  _maxGammaEnergy	 ("MAX_GAMMA_ENERGY",600000.0, NOT_REQUIRED),
+	  _minGammaQ2            ("MIN_GAMMA_Q2",0,NOT_REQUIRED),
+	  _maxGammaQ2            ("MAX_GAMMA_Q2",0,NOT_REQUIRED),
+	  _nmbGammaQ2Bins       ("INT_GAMMA_Q2_BINS",0,NOT_REQUIRED),
 	  _pythiaParams          ("PYTHIA_PARAMS","", NOT_REQUIRED),
 	  _pythiaFullEventRecord ("PYTHIA_FULL_EVENTRECORD",false, NOT_REQUIRED),
 	  _xsecCalcMethod	 ("XSEC_METHOD",0, NOT_REQUIRED),
@@ -130,6 +134,9 @@ inputParameters::inputParameters()
 	_ip.addParameter(_nmbPtBinsInterference);
 	_ip.addParameter(_minGammaEnergy);
 	_ip.addParameter(_maxGammaEnergy);
+	_ip.addParameter(_minGammaQ2);
+	_ip.addParameter(_maxGammaQ2);
+	_ip.addParameter(_nmbGammaQ2Bins);
 	_ip.addParameter(_pythiaParams);
 	_ip.addParameter(_pythiaFullEventRecord);
 	_ip.addParameter(_xsecCalcMethod);
@@ -178,6 +185,7 @@ inputParameters::configureFromFile(const std::string &_configFileName)
 	std::cout << "Rapidity beam 1: " << rap1 << ", rapidity beam 2: " << rap2 << ", rapidity CMS system: " << (rap1+rap2)/2 << ", beam gamma in CMS: " << _beamLorentzGamma<< std::endl;
 	_ptBinWidthInterference = maxPtInterference() / nmbPtBinsInterference();
 	_protonEnergy           = _beamLorentzGamma * protonMass;
+	_electronEnergy         = _beamLorentzGamma * starlightConstants::mel;
 
 	// check for deuteron or tritium - these must be the second beam
 	if((beam1Z()==1) && (beam1A()==2)){
