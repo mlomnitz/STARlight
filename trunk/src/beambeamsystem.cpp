@@ -122,6 +122,9 @@ beamBeamSystem::probabilityOfBreakup(const double D) const
 		pOfB = (1. - GammaProfile) * (1. - GammaProfile);
 		return pOfB;
 	}
+	// Do eX here - Lomnitz this still needs to be checked
+	else if( _beam1.A() == 0 || _beam2.A() == 0 )
+	  return 1.
 	else if ( ( (_beam1.A() == 1) && (_beam2.A() != 1) ) || ((_beam1.A() != 1) && (_beam2.A() == 1)) ) {  
 	  // This is pA
           if( _beam1.A() == 1 ){ 

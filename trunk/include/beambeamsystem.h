@@ -37,6 +37,7 @@
 
 
 #include "nucleus.h"
+#include "electron.h"
 #include "beam.h"
 #include <vector>
 #include "inputParameters.h"
