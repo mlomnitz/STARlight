@@ -54,6 +54,7 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	  _beamLorentzGamma  (inputParametersInstance.beamLorentzGamma()  ),
 	  _bbs               (bbsystem                                    ),
 	  _protonEnergy      (inputParametersInstance.protonEnergy()      ),
+	  _electronEnergy    (inputParametersInstance.electronEnergy()    ),
 	  _particleType      (inputParametersInstance.prodParticleType()  ),
 	  _beamBreakupMode   (inputParametersInstance.beamBreakupMode()   ),
           _productionMode    (inputParametersInstance.productionMode()    ),
@@ -63,6 +64,8 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	case RHO:
 		_slopeParameter = 11.0;  // [(GeV/c)^{-2}]
 		_vmPhotonCoupling = 2.02;
+		_vmQ2Power_c1 = 2.09;
+		_vmQ2Power_c2 = 73.; // [ GeV^{-2}]
 		_ANORM       = -2.75;
 		_BNORM       = 0.0;
 		_defaultC    = 1.0;
@@ -72,6 +75,8 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	case RHOZEUS:
 		_slopeParameter =11.0;
 		_vmPhotonCoupling=2.02;
+		_vmQ2Power_c1 = 2.09;
+		_vmQ2Power_c2 = 73.; // [GeV^{-2}]
 		_ANORM=-2.75;
 		_BNORM=1.84;
 		_defaultC=1.0;
@@ -81,6 +86,8 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	case FOURPRONG:
 		_slopeParameter      = 11.0;
 		_vmPhotonCoupling      = 2.02;
+		_vmQ2Power_c1 = 2.09;
+		_vmQ2Power_c2 = 73.; // [GeV^{-2}]
 		_ANORM       = -2.75;
 		_BNORM       = 0;  
 		_defaultC    = 11.0;
@@ -90,6 +97,8 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	case OMEGA:
 		_slopeParameter=10.0;
 		_vmPhotonCoupling=23.13;
+		_vmQ2Power_c1 = 2.09;
+		_vmQ2Power_c2 = 73.; // [GeV^{-2}]
 		_ANORM=-2.75;
 		_BNORM=0.0;
 		_defaultC=1.0;
@@ -99,6 +108,8 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	case PHI:
 		_slopeParameter=7.0;
 		_vmPhotonCoupling=13.71;
+		_vmQ2Power_c1 = 2.15;
+		_vmQ2Power_c2 = 74.; // [GeV^{-2}]
 		_ANORM=-2.75;
 		_BNORM=0.0;
 		_defaultC=1.0;
@@ -110,6 +121,8 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	case JPSI_mumu:
 		_slopeParameter=4.0;
 		_vmPhotonCoupling=10.45;
+		_vmQ2Power_c1 = 2.15;
+		_vmQ2Power_c2 = 74.; // [GeV^{-2}]
 		_ANORM=-2.75; 
 		_BNORM=0.0;
 		_defaultC=1.0;
@@ -121,6 +134,8 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	case JPSI2S_mumu:
 		_slopeParameter=4.3;
 		_vmPhotonCoupling=26.39;
+		_vmQ2Power_c1 = 2.09;
+		_vmQ2Power_c2 = 73.; // [GeV^{-2}]
 		_ANORM=-2.75; 
 		_BNORM=0.0;
 		_defaultC=1.0;
@@ -132,6 +147,8 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	case UPSILON_mumu:
 		_slopeParameter=4.0;
 		_vmPhotonCoupling=125.37;
+		_vmQ2Power_c1 = 2.09;
+		_vmQ2Power_c2 = 73.; // [GeV^{-2}]
 		_ANORM=-2.75; 
 		_BNORM=0.0;
 		_defaultC=1.0;
@@ -143,6 +160,8 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	case UPSILON2S_mumu:
 		_slopeParameter=4.0;
 		_vmPhotonCoupling=290.84;
+		_vmQ2Power_c1 = 2.09;
+		_vmQ2Power_c2 = 73.; // [GeV^{-2}]
 		_ANORM=-2.75;
 		_BNORM=0.0;
 		_defaultC=1.0;
@@ -154,6 +173,8 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	case UPSILON3S_mumu:
 		_slopeParameter=4.0;
 		_vmPhotonCoupling=415.10;
+		_vmQ2Power_c1 = 2.09;
+		_vmQ2Power_c2 = 73.; // [GeV^{-2}]
 		_ANORM=-2.75;
 		_BNORM=0.0;
 		_defaultC=1.0;
@@ -166,6 +187,7 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	}
 
 	_maxPhotonEnergy = 12. * _beamLorentzGamma * hbarc/(_bbs.beam1().nuclearRadius()+_bbs.beam2().nuclearRadius()); 
+	
 }
 
 
@@ -235,9 +257,9 @@ photonNucleusCrossSection::getcsgA(const double Egamma,
 	   for (int k = 1; k < NGAUSS; ++k) { 
 
 	       t    = ax * xg[k] + bx;
-               if( A_1 == 1 && A_2 != 1){ 
+               if( A_1 <= 1 && A_2 != 1){ 
 		  csgA = csgA + ag[k] * _bbs.beam2().formFactor(t) * _bbs.beam2().formFactor(t);
-               }else if(A_2 ==1 && A_1 != 1){
+               }else if(A_2 <=1 && A_1 != 1){
 		  csgA = csgA + ag[k] * _bbs.beam1().formFactor(t) * _bbs.beam1().formFactor(t);
                }else{     
                   if( beam==1 ){
@@ -250,9 +272,9 @@ photonNucleusCrossSection::getcsgA(const double Egamma,
                }
 
 	       t    = ax * (-xg[k]) + bx;
-               if( A_1 == 1 && A_2 != 1){ 
+               if( A_1 <= 1 && A_2 != 1){ 
 			  csgA = csgA + ag[k] * _bbs.beam2().formFactor(t) * _bbs.beam2().formFactor(t);
-               }else if(A_2 ==1 && A_1 != 1){
+               }else if(A_2 <=1 && A_1 != 1){
 			  csgA = csgA + ag[k] * _bbs.beam1().formFactor(t) * _bbs.beam1().formFactor(t);
                }else{     
                   if( beam==1 ){
@@ -273,7 +295,17 @@ photonNucleusCrossSection::getcsgA(const double Egamma,
 
 //______________________________________________________________________________
 double
-photonNucleusCrossSection::photonFlux(const double Egamma, const int beam)
+photonNucleusCrossSection::getcsgA_Q2_dep(const double Q2)
+{
+  double const mv2 = getChannelMass()*getChannelMass();
+  double const n = vmQ2Power(Q2);
+  return std::pow(mv2/(mv2+Q2),n);
+}
+
+
+//______________________________________________________________________________
+double
+photonNucleusCrossSection::photonFlux(const double Egamma)
 {
 	// This routine gives the photon flux as a function of energy Egamma
 	// It works for arbitrary nuclei and gamma; the first time it is
@@ -540,6 +572,38 @@ photonNucleusCrossSection::photonFlux(const double Egamma, const int beam)
 	}
   
 	return flux_r;
+}
+
+
+//______________________________________________________________________________
+double 
+photonBeamCrossSection::photonFlux(const double Egamma, const double Q2)
+{
+  //Need to check units later
+  //double const hbar = starlightConstants::hbarc / 2.99*pow(10,14); // 6.582 * pow (10,-16) [eVs]
+  //double omega = Egamma/ hbar;
+  //Do we even need a lookup table for this case? This should return N(E,Q2) from dn = N(E,Q2) dE dQ2
+  double const ratio = Egamma/_electronEnergy;
+  double const minQ2 = std::pow( starlightConstants::mel*Egamma,2.0) / _electronEnergy*(_electronEnergy - Egamma);
+  double to_ret = alpha/pi *( 1- ratio + ratio*ratio/2. - (1-ratio)( fabs(minQ2/Q2)) );
+  return to_ret/( Egamma*fabs(q2) );
+}
+
+
+//______________________________________________________________________________
+double 
+photonNucleusCrossSection::integrated_Q2_dep(double const Egamma)
+{
+  //Returns the integrated value  g(E_gamma) = \int d(Q2) g(E_gamma,Q2) in notes
+  double Q2_min = std::pow(starlightConstants::mel*Egamma,2.0)/_electronEnergy*(_electronEnergy-Egamma);
+  double Q2_max = 4.*_electronEnergy*(_electronEnergy-Egamma);
+  int const n_steps = 1000;
+  double step  = (Q2_max - Q2_min)/(double)n_steps.; //need to check this
+  // Integrate using trapezoidal rule
+  double g_int = 0.5*( g(Egamma,Qmin) + g(Egamma,Qmax) ); 
+  for( int ii = 1 ; ii < n_steps ; ++ii)
+    g_int += g(Egamma,Q2_min+double(ii)*step);
+  return step * g_int;
 }
 
 

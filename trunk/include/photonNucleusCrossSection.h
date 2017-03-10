@@ -51,8 +51,10 @@ public:
 	double         getBNORM        () const { return _BNORM;            }
 	beamBeamSystem getbbs          () const { return _bbs;              }  ///< returns beamBeamSystem
 	double         vmPhotonCoupling() const { return _vmPhotonCoupling; }  ///< vectormeson-photon coupling constant f_v / 4 pi (cf. Eq. 10 in KN PRC 60 (1999) 014903)
+	double         vmQ2Power       (double Q2) const { return _vmQ2Power_c1 + _vmQ2Power_c2*(_channelMass*_channelMass + Q2);        }
 	double         getDefaultC     () const { return _defaultC;         }
 	double         maxPhotonEnergy () const { return _maxPhotonEnergy;  }  ///< returns max photon energy in lab frame [GeV] (for vectormesons only)
+	double         g(double const Egamma, double const Q2) const { return photonFlux(Egamma,Q2)*getcsgA_Q2_dep(Q2); }
 
 	void crossSectionCalculation(const double bwnormsave);
 	// Use the wide or narrow constructor to calculate sigma
@@ -60,8 +62,15 @@ public:
 	double getcsgA(const double Egamma,
 	               const double W,
                        const int beam);
+	// Midification to csg due to virtuality
+	double getcsgA_Q2_dep(const double Q2);
 	double photonFlux(const double Egamma,
                        const int beam);
+	// --- Added for electron 
+	double photonFlux(const double Egamma,
+			  const double Q2);
+	double integrated_Q2_dep(const double Egamma);
+	// ---
 	double sigmagp(const double Wgp);
 	double sigma_A(const double sig_N, 
                        const int beam);
@@ -81,7 +90,7 @@ protected:
 	const double _wMin;
 	const double _wMax;
 	const double _yMax;
-	
+
 	const double _beamLorentzGamma;
 
 	double _photonNucleusSigma; 
@@ -92,6 +101,7 @@ private:
   
 	// copied from inputParameters
 	double                               _protonEnergy;
+	double                               _electronEnergy;
 	starlightConstants::particleTypeEnum _particleType;
 	int                                  _beamBreakupMode;     ///< breakup mode for beam particles
         int                                  _productionMode; 
@@ -100,6 +110,8 @@ private:
 	// locally defined parameters
 	double _slopeParameter;    ///< slope of t-distribution [(GeV/c)^{-2}]
 	double _vmPhotonCoupling;  ///< vectormeson-photon coupling constant f_v / 4 pi (cf. Eq. 10 in KN PRC 60 (1999) 014903)
+	double _vmQ2Power_c1;  ///< VM power law Q2 correction (Mv2/(Q2+Mv2))^n; with n = c1 + c2*(Q2+Mv2)
+	double _vmQ2Power_c2;  ///< VM power law Q2 correction (Mv2/(Q2+Mv2))^
 	double _ANORM;
 	double _BNORM;
 	double _defaultC;
