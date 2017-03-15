@@ -130,7 +130,7 @@ void e_readLuminosity::e_read()
     //Normalize f_WY array, g does not need to be normalized, it is used for normalization
     for(int i=0;i<_ReadInputnumw;i++){
       for(int j=0;j<_ReadInputnumy;j++){
-        _f_WYarray[i][j] = _f_WYarray[i][j]/_f_WYmax;
+        _f_WYarray[i][j] = _f_WYarray[i][j]/( _f_WYmax*g_Emax );
 	//_g_Earray[i][j] = _g_Earray[i][j]/_g_Emax;
       }
     }
