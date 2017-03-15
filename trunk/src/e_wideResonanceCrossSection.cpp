@@ -140,14 +140,14 @@ e_wideResonanceCrossSection::crossSectionCalculation(const double bwnormsave)
 			if(ega1 < Eth || ega2 < Eth) continue;
 			if(ega2 > maxPhotonEnergy()) continue;
           
-			g_Eg1 = integrated_Q2_dep(ega1);
-			g_Eg2 = integrated_Q2_dep(ega2);
-			g_Eg12 = integrated_Q2_dep(ega12);
 			//			
+			g_Eg1 = integrated_Q2_dep(ega1);
 			csgA1=getcsgA(ega1,W,beam);
 			//         >> Middle Point                      =====>>>
+			g_Eg12 = integrated_Q2_dep(ega12);
 			csgA12=getcsgA(ega12,W,beam);         
 			//         >> Second Point                      =====>>>
+			g_Eg2 = integrated_Q2_dep(ega2);
 			csgA2=getcsgA(ega2,W,beam);
       
 			//>> Sum the contribution for this W,Y. The 2 accounts for the 2 beams
