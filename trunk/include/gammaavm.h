@@ -118,5 +118,18 @@ class Gammaaincoherentvm : public Gammaavectormeson
   Gammaaincoherentvm(const inputParameters& input, beamBeamSystem& bbsystem);
   virtual ~Gammaaincoherentvm();
 };
+class e_Gammaanarrowvm : public Gammaavectormeson
+{
+ public:
+  e_Gammaanarrowvm(const inputParameters& input, beamBeamSystem& bbsystem);
+  virtual ~e_Gammaanarrowvm();
+};
+
+class e_Gammaawidevm : public Gammaavectormeson
+{  
+ public:
+  e_Gammaawidevm(const inputParameters& input, beamBeamSystem& bbsystem);
+  virtual ~e_Gammaawidevm();
+};
 
 #endif  // GAMMAAVM_H
