@@ -169,7 +169,7 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
       if( Egamma > Eth && Egamma < maxPhotonEnergy() ){
 
 	csgA=getcsgA(Egamma,W,beam);
-        f_WY = csgA*breitWigner(W,bwnorm);
+        f_WY = Egamma*csgA*breitWigner(W,bwnorm);
 	g_E = integrated_Q2_dep(Egamma);
       }
 
