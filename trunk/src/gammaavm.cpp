@@ -41,6 +41,9 @@
 #include "wideResonanceCrossSection.h"
 #include "narrowResonanceCrossSection.h"
 #include "incoherentVMCrossSection.h"
+//
+#include "e_narrowResonanceCrossSection.h"
+#include "e_wideResonanceCrossSection.h"
 
 using namespace std;
 
@@ -930,4 +933,40 @@ Gammaawidevm::Gammaawidevm(const inputParameters& input, beamBeamSystem& bbsyste
 
 //______________________________________________________________________________
 Gammaawidevm::~Gammaawidevm()
+{ }
+
+
+//______________________________________________________________________________
+Gammaanarrowvm::e_Gammaanarrowvm(const inputParameters& input, beamBeamSystem& bbsystem):Gammaavectormeson(input, bbsystem)
+{
+	cout<<"Reading in luminosity tables. Gammaanarrowvm()"<<endl;
+	e_read();
+	cout<<"Creating and calculating crosssection. Gammaanarrowvm()"<<endl;
+	e_narrowResonanceCrossSection sigma(input, bbsystem);
+	sigma.crossSectionCalculation(_bwnormsave);
+	setTotalChannelCrossSection(sigma.getPhotonNucleusSigma());
+	_VMbslope=sigma.slopeParameter(); 
+}
+
+
+//______________________________________________________________________________
+Gammaanarrowvm::~e_Gammaanarrowvm()
+{ }
+
+
+//______________________________________________________________________________
+Gammaawidevm::e_Gammaawidevm(const inputParameters& input, beamBeamSystem& bbsystem):Gammaavectormeson(input, bbsystem)
+{
+	cout<<"Reading in luminosity tables. Gammaawidevm()"<<endl;
+	e_read();
+	cout<<"Creating and calculating crosssection. Gammaawidevm()"<<endl;
+	e_wideResonanceCrossSection sigma(input, bbsystem);
+	sigma.crossSectionCalculation(_bwnormsave);
+	setTotalChannelCrossSection(sigma.getPhotonNucleusSigma());
+	_VMbslope=sigma.slopeParameter();
+}
+
+
+//______________________________________________________________________________
+Gammaawidevm::~e_Gammaawidevm()
 { }
