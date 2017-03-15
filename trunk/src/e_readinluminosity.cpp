@@ -75,7 +75,7 @@ void e_readLuminosity::e_read()
     _f_WYarray = new double*[_ReadInputnumw];
     for(int i = 0; i < _ReadInputnumw; i++)
     {
-      _f_WYarra[i] = new double[_ReadInputnumy];
+      _f_WYarray[i] = new double[_ReadInputnumy];
     }
   }
   if(!_g_Earray) 
