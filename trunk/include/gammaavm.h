@@ -55,9 +55,11 @@ class Gammaavectormeson : public eventChannel
   virtual ~Gammaavectormeson();
   starlightConstants::event produceEvent(int &ievent);
   
-   upcEvent produceEvent();
+  upcEvent produceEvent();
+  upcEvent e_produceEvent();
 
   void pickwy(double &W, double &Y);
+  void pickwyq2(double &W, double &Y, double &Q2);
   void momenta(double W,double Y,double &E,double &px,double &py,double &pz,int &tcheck);
   double pTgamma(double E); 
   void vmpt(double W,double Y,double &E,double &px,double &py, double &pz,int &tcheck);
@@ -75,6 +77,7 @@ class Gammaavectormeson : public eventChannel
   starlightConstants::particleTypeEnum _VMpidtest;
   int _VMnumw;
   int _VMnumy;
+  int _VMnumQ2;
   int _VMinterferencemode;
   int _ProductionMode;
   int _TargetBeam; 
@@ -87,6 +90,8 @@ class Gammaavectormeson : public eventChannel
   double _VMWmin;
   double _VMYmax;
   double _VMYmin;
+  double _VMQ2max;
+  double _VMQ2min;
   double _mass;
   double _width;
   double _VMptmax;
