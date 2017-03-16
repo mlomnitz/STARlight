@@ -336,7 +336,7 @@ private:
 	parameter<double, VALIDITY_CHECK>          _maxGammaEnergy;          ///< maximum gamma energy in case of photo nuclear processes [GeV]
 	parameter<double, VALIDITY_CHECK>          _minGammaQ2;              ///< minimum gamma Q2 in case of photo nuclear processes
 	parameter<double, VALIDITY_CHECK>          _maxGammaQ2;              ///< maximum gamma Q2 in case of photo nuclear processes	
-	paramter<unsigned int, VALIDITY_CHECK>     _nmbGammaQ2Bins;          ///< number of gamma q2 bins
+	parameter<unsigned int, VALIDITY_CHECK>     _nmbGammaQ2Bins;          ///< number of gamma q2 bins
 	parameter<std::string,NO_VALIDITY_CHECK>   _pythiaParams;            ///< semi-colon separated parameters to pass to pythia, e.g. "mstj(1)=0;paru(13)=0.1" 
 	parameter<bool, NO_VALIDITY_CHECK>         _pythiaFullEventRecord;   ///< if the full pythia event record should be in the output
 	parameter<unsigned int, VALIDITY_CHECK>    _xsecCalcMethod;	     ///< Select x-sec calc method. (0 is standard starlight method, 1 must be used for assym. collisions (e.g. p-A), but is slow)	
