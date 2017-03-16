@@ -82,6 +82,11 @@ void nucleus::init()
 		    _Radius = 0.7;
 		    _rho0 = -1.0; //Not relevant for protons
 		  }
+		  // this is electron
+		  else if(_A==0){
+		    _Radius = 0.;
+		    _rho0 = -1.0;
+		  }
 		  else {
 		    _Radius = 2.1;
 		    _rho0 = _A;

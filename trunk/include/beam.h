@@ -38,8 +38,7 @@
 //This calls inclues a single beam of nucleons
 #include "nucleus.h"
 
-
-class beam : public nucleus, public electron
+class beam : public nucleus
 {
 
 public:
@@ -53,9 +52,6 @@ public:
 
 	double photonDensity(const double impactparameter,
 	                     const double photonEnergy) const;  ///< calculates photon density (number of photons / (energy * area))
-
-	beam(const int		    productionMode,
-	     const double	    beamLorentzGamma); // Constructor for electron beam doesnt need all the extra bells and whistles
 
 	double rapidity() const { return acosh(_beamLorentzGamma); }
 	
