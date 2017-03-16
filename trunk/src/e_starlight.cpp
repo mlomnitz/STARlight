@@ -114,22 +114,12 @@ e_starlight::init()
 	const bool lumTableIsValid = luminosityTableIsValid();
 
 	// Do some sanity checks of the input parameters here.
-        if( _inputParameters->beam1Z() > _inputParameters->beam1A() ){
-	  printErr << endl << "A must be >= Z; A beam1 = "<<_inputParameters->beam1A()<<", Z beam1 = "<<_inputParameters->beam1Z()<<". Terminating."<<endl ;
+	if( _inputParameters->beam1A() != 0 && _inputParameters->beam2A() != 0 ){
+	  printErr << endl << "One of the two beams must be an electron in eSTARlight" << endl;
 	  return false;
 	}
-        if( _inputParameters->beam2Z() > _inputParameters->beam2A() ){
-	  printErr << endl << "A must be >= Z; A beam2 = "<<_inputParameters->beam2A()<<", Z beam2 = "<<_inputParameters->beam2Z()<<". Terminating."<<endl ;
-	  return false;
-	}
-	if( _inputParameters->interactionType() == PHOTONPOMERONINCOHERENT && _inputParameters->beam1A() == 1 &&
-	    _inputParameters->beam1Z() == 1 && _inputParameters->beam2A() == 1 && _inputParameters->beam2Z() ){
-          printErr << endl << " Do not use PROD_MODE = 4 for pp collisions. Use PROD_MODE = 2 or 3 instead. Terminating."<<endl;
-	  return false; 
-	}
-	//Sanity check for eX or Xe
-	if( _inputParameters->beam2A() != 0 && _inputParameters->beam1A() != 0 ){
-	  printErr << endl << " Use STARlight for XX collisions where X = p,A. One of the two beams must be electron (positron) in eSTARlight. " << endl;
+	if( _inputParameters->beam1A() == 0 && _inputParameters->beam2A() == 0 ){
+	  printErr << endl << "Only one of the two beams can be electron in eSTARlight"<< endl;
 	  return false;
 	}
 
@@ -151,27 +141,16 @@ e_starlight::init()
 			photonNucleusLuminosity lum(*_inputParameters, *_beamSystem);
 		}
 		break;
-        case PHOTONPOMERONINCOHERENT:  // narrow and wide resonances use
+		/*        case PHOTONPOMERONINCOHERENT:  // narrow and wide resonances use
                 if (!lumTableIsValid) {
                         printInfo << "creating luminosity table for incoherent photon-Pomeron channel" << endl;
                         incoherentPhotonNucleusLuminosity lum(*_inputParameters, *_beamSystem);
-                }
-                break;
-#ifdef ENABLE_PYTHIA6
-	case PHOTONUCLEARSINGLEPAPY:
-		createChannel = false;
-		_eventChannel = new starlightPythia(*_inputParameters, *_beamSystem);
-		std::cout << "CREATING PHOTONUCLEAR/PYTHIA SINGLE" << std::endl;
-		dynamic_cast<starlightPythia*>(_eventChannel)->setSingleMode();
-		dynamic_cast<starlightPythia*>(_eventChannel)->setMinGammaEnergy(_inputParameters->minGammaEnergy());
-		dynamic_cast<starlightPythia*>(_eventChannel)->setMaxGammaEnergy(_inputParameters->maxGammaEnergy());
-		dynamic_cast<starlightPythia*>(_eventChannel)->init(_inputParameters->pythiaParams(), _inputParameters->pythiaFullEventRecord());
-		break;
-#endif
+			}
+			break;*/
 	default:
 		{
 			printWarn << "unknown interaction type '" << _inputParameters->interactionType() << "'."
-			          << " cannot initialize starlight." << endl;
+			          << " cannot initialize eSTARlight." << endl;
 			return false;
 		}
 	}
@@ -194,7 +173,7 @@ e_starlight::produceEvent()
 		printErr << "trying to generate event but Starlight is not initialised. aborting." << endl;
 		exit(-1);
 	}
-	return _eventChannel->produceEvent();
+	return _eventChannel->e_produceEvent();
 }
 
 
