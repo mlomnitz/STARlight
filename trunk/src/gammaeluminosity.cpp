@@ -40,7 +40,6 @@
 #include "beam.h"
 #include "starlightconstants.h"
 #include "nucleus.h"
-#include "electron.h"
 #include "bessel.h"
 #include "gammaeluminosity.h"
 
