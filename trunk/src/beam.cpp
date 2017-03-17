@@ -48,24 +48,9 @@ using namespace starlightConstants;
 beam::beam(const int              Z,
            const int              A,
 	   const int		  productionMode,
-	   const double		  beamLorentzGamma)
-{
-  if( A == 0 )
-    electron(productionMode);
-  else
-    nucleus(Z, A, productionMode);
-  
-  _beamLorentzGamma(beamLorentzGamma)
-}
-
-
-//______________________________________________________________________________
-beam::beam(const int		  productionMode,
-	   const double		  beamLorentzGamma)
-	: electron(productionMode)
-	,_beamLorentzGamma(beamLorentzGamma)
-{
-}
+	   const double		  beamLorentzGamma):
+  nucleus(Z, A, productionMode), _beamLorentzGamma(beamLorentzGamma)
+{ }
 
 
 //______________________________________________________________________________
@@ -85,7 +70,6 @@ double beam::photonDensity(const double impactparameter,
     = (impactparameter * photonEnergy) / (_beamLorentzGamma * starlightConstants::hbarc);
   if (X <= 0) 
 	  printWarn << "X = " << X << endl;
-  
   const double factor1 = (double(Z() * Z()) * starlightConstants::alpha) / (starlightConstants::pi * starlightConstants::pi);  
   const double factor2 = 1. / (photonEnergy * impactparameter * impactparameter);
   const double bessel  = bessel::dbesk1(X);
