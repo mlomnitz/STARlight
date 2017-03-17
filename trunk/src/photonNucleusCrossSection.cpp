@@ -305,7 +305,7 @@ photonNucleusCrossSection::getcsgA_Q2_dep(const double Q2)
 
 //______________________________________________________________________________
 double
-photonNucleusCrossSection::photonFlux(const double Egamma)
+photonNucleusCrossSection::photonFlux(const double Egamma, const int beam)
 {
 	// This routine gives the photon flux as a function of energy Egamma
 	// It works for arbitrary nuclei and gamma; the first time it is
@@ -577,7 +577,33 @@ photonNucleusCrossSection::photonFlux(const double Egamma)
 
 //______________________________________________________________________________
 double 
-photonBeamCrossSection::photonFlux(const double Egamma, const double Q2)
+photonNucleusCrossSection::integrated_Q2_dep(double const Egamma)
+{
+  //Returns the integrated value  g(E_gamma) = \int d(Q2) g(E_gamma,Q2) in notes
+  double Q2_min = std::pow(starlightConstants::mel*Egamma,2.0)/_electronEnergy*(_electronEnergy-Egamma);
+  double Q2_max = 4.*_electronEnergy*(_electronEnergy-Egamma);
+  int const n_steps = 1000;
+  double step  = (Q2_max - Q2_min)/(double)n_steps; //need to check this
+  // Integrate using trapezoidal rule
+  double g_int = 0.5*( g(Egamma,Q2_min) + g(Egamma,Q2_max) ); 
+  for( int ii = 1 ; ii < n_steps ; ++ii)
+    g_int += g(Egamma,Q2_min+double(ii)*step);
+  return step * g_int;
+}
+
+
+//______________________________________________________________________________
+double 
+photonNucleusCrossSection::g(double const Egamma,
+			     double const Q2)
+{
+  return photonFlux(Egamma,Q2)*getcsgA_Q2_dep(Q2);
+}
+
+//______________________________________________________________________________
+double 
+photonNucleusCrossSection::photonFlux(double const Egamma, 
+				      double const Q2)
 {
   //Need to check units later
   //double const hbar = starlightConstants::hbarc / 2.99*pow(10,14); // 6.582 * pow (10,-16) [eVs]
@@ -585,27 +611,9 @@ photonBeamCrossSection::photonFlux(const double Egamma, const double Q2)
   //Do we even need a lookup table for this case? This should return N(E,Q2) from dn = N(E,Q2) dE dQ2
   double const ratio = Egamma/_electronEnergy;
   double const minQ2 = std::pow( starlightConstants::mel*Egamma,2.0) / _electronEnergy*(_electronEnergy - Egamma);
-  double to_ret = alpha/pi *( 1- ratio + ratio*ratio/2. - (1-ratio)( fabs(minQ2/Q2)) );
-  return to_ret/( Egamma*fabs(q2) );
+  double to_ret = alpha/pi *( 1- ratio + ratio*ratio/2. - (1-ratio)*( fabs(minQ2/Q2)) );
+  return to_ret/( Egamma*fabs(Q2) );
 }
-
-
-//______________________________________________________________________________
-double 
-photonNucleusCrossSection::integrated_Q2_dep(double const Egamma)
-{
-  //Returns the integrated value  g(E_gamma) = \int d(Q2) g(E_gamma,Q2) in notes
-  double Q2_min = std::pow(starlightConstants::mel*Egamma,2.0)/_electronEnergy*(_electronEnergy-Egamma);
-  double Q2_max = 4.*_electronEnergy*(_electronEnergy-Egamma);
-  int const n_steps = 1000;
-  double step  = (Q2_max - Q2_min)/(double)n_steps.; //need to check this
-  // Integrate using trapezoidal rule
-  double g_int = 0.5*( g(Egamma,Qmin) + g(Egamma,Qmax) ); 
-  for( int ii = 1 ; ii < n_steps ; ++ii)
-    g_int += g(Egamma,Q2_min+double(ii)*step);
-  return step * g_int;
-}
-
 
 //______________________________________________________________________________
 double

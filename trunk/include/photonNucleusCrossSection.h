@@ -54,7 +54,6 @@ public:
 	double         vmQ2Power       (double Q2) const { return _vmQ2Power_c1 + _vmQ2Power_c2*(_channelMass*_channelMass + Q2);        }
 	double         getDefaultC     () const { return _defaultC;         }
 	double         maxPhotonEnergy () const { return _maxPhotonEnergy;  }  ///< returns max photon energy in lab frame [GeV] (for vectormesons only)
-	double         g(double const Egamma, double const Q2) const { return photonFlux(Egamma,Q2)*getcsgA_Q2_dep(Q2); }
 
 	void crossSectionCalculation(const double bwnormsave);
 	// Use the wide or narrow constructor to calculate sigma
@@ -70,6 +69,7 @@ public:
 	double photonFlux(const double Egamma,
 			  const double Q2);
 	double integrated_Q2_dep(const double Egamma);
+	double g(double const Egamma, double const Q2);
 	// ---
 	double sigmagp(const double Wgp);
 	double sigma_A(const double sig_N, 
