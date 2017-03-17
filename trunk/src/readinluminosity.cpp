@@ -65,6 +65,9 @@ readLuminosity::~readLuminosity()
   if(_Farray) delete [] _Farray;
   if(_Farray1) delete [] _Farray1;
   if(_Farray2) delete [] _Farray2; 
+  // For eSTARLIGHT
+  if(_f_WYarray) delete [] _f_WYarray;
+  if(_g_Earray) delete [] _g_Earray;
 }
 
 
@@ -192,6 +195,82 @@ void readLuminosity::read()
         delete [] finterm;
 
     }
+  wylumfile.close();
+  return;
+}
+
+
+//______________________________________________________________________________
+void readLuminosity::e_read()
+{
+  
+  if(!_Warray) _Warray = new double[_ReadInputnumw];
+  if(!_Yarray) _Yarray = new double[_ReadInputnumy];
+  if(!_f_WYmax) 
+  {
+    _f_WYarray = new double*[_ReadInputnumw];
+    for(int i = 0; i < _ReadInputnumw; i++)
+    {
+      _f_WYarray[i] = new double[_ReadInputnumy];
+    }
+  }
+  if(!_g_Earray) 
+  {
+    _g_Earray = new double*[_ReadInputnumw];
+    for(int i = 0; i < _ReadInputnumw; i++)
+    {
+      _g_Earray[i] = new double[_ReadInputnumy];
+    }
+  }
+
+  double dummy[13]; //number of lines used to read in input parameters saved to lookup table[slight.txt].
+
+
+  std::string wyFileName;
+  wyFileName = _baseFileName +".txt";
+  
+//  cout << "wyFileName being read in" << wyFileName << endl;
+
+  ifstream wylumfile;
+
+  _f_WYmax=0.0;
+  _g_Emax=0.0;
+
+  wylumfile.open(wyFileName.c_str());
+
+  for(int i=0;i < 13;i++){ 
+    wylumfile >> dummy[i];
+  }
+  int A_1 = dummy[1];
+  int A_2 = dummy[3];
+
+  for(int i=0;i<_ReadInputnumw;i++){
+    wylumfile >> _Warray[i];
+  }
+  for(int i=0;i<_ReadInputnumy;i++){
+    wylumfile >> _Yarray[i];
+  }
+
+  if( (A_2 == 0 && A_1 >= 1) || (A_1 ==0 && A_2 >= 1) ){ 
+    for(int i=0;i<_ReadInputnumw;i++){
+      for(int j=0;j<_ReadInputnumy;j++){
+        wylumfile >> _f_WYarray[i][j];
+        if( _f_WYarray[i][j] > _f_WYmax ) _f_WYmax=_f_WYarray[i][j];
+	//
+	wylumfile >> _g_Earray[i][j];
+	if( _g_Earray[i][j] > _g_Emax ) _g_Emax = _g_Earray[i][j];
+      }
+    }
+    //Normalize f_WY array, g does not need to be normalized, it is used for normalization
+    for(int i=0;i<_ReadInputnumw;i++){
+      for(int j=0;j<_ReadInputnumy;j++){
+        _f_WYarray[i][j] = _f_WYarray[i][j]/( _f_WYmax*_g_Emax );
+	//_g_Earray[i][j] = _g_Earray[i][j]/_g_Emax;
+      }
+    }
+  }
+  wylumfile >> _bwnormsave;
+
   wylumfile.close();
   return;
 }
