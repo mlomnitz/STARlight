@@ -46,15 +46,23 @@ class readLuminosity
   ~readLuminosity();
   
   void read();
+  void e_read();
+
   double *_Warray;
   double *_Yarray;
   double **_Farray; 
   double **_Farray1;
   double **_Farray2;
-  
+  // For eSTARlight
+  double **_f_WYarray;
+  double **_g_Earray;
+
   double _f_max;
   double _f_max1;
   double _f_max2;
+  // For eSTARlight
+    double _f_WYmax;
+  double _g_Emax;
 
   double _fptarray[500][500];
 
