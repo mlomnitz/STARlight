@@ -260,6 +260,9 @@ set(SOURCES
   src/inputParser.cpp
   src/incoherentPhotonNucleusLuminosity.cpp
   src/incoherentVMCrossSection.cpp
+# eSTARlight
+  src/e_wideResonanceCrossSection.cpp
+  src/e_narrowResonanceCrossSection.cpp
   )
 if(ENABLE_PYTHIA) 
   set (SOURCES
