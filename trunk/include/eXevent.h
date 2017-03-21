@@ -58,8 +58,8 @@ class eXEvent
       const std::vector<vector3> * getVertices() const { return &_vertices; }
       const std::vector<float> * getGammaEnergies() const { return &_gammaEnergies; }
 
-      upcEvent & operator=(const upcEvent&);
-      upcEvent & operator+(const upcEvent&);
+      eXEvent & operator=(const eXEvent&);
+      eXEvent & operator+(const eXEvent&);
       
       void boost(double rapidity);
    private:
