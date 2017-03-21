@@ -58,6 +58,7 @@ class Gammagammasingle : public eventChannel
   starlightConstants::event produceEvent(int &ievent);
 
   upcEvent produceEvent();
+  eXEvent e_produceEvent();
 
  private:
   double _sigmax[starlightLimits::MAXWBINS][starlightLimits::MAXYBINS];

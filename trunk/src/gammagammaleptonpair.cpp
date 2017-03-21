@@ -855,3 +855,9 @@ double Gammagammaleptonpair::getSpin()
     double leptonspin=0.5;
     return leptonspin;
 }
+eXEvent Gammagammaleptonpair::e_produceEvent()
+{
+  eXEvent event;
+  cout<<" Gamma+Gamma -> l+l- is not implemented in eSTARlight at present. Returning empty event" << endl;
+  return event;
+}

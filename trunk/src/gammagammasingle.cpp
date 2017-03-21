@@ -785,6 +785,11 @@ double Gammagammasingle::getSpin()
   }
   return singlespin;
 }
-
+eXEvent Gammagammasingle::e_produceEvent()
+{
+  eXEvent event;
+  cout<< " Gamma+Gamma -> single particle is not implemente in current eSTARlight build. REturning empty event"<<endl;
+  return event;
+}
 
 
