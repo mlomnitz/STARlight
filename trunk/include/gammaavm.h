@@ -39,13 +39,14 @@
 
 #include "starlightconstants.h"
 #include "readinluminosity.h"
-#include "e_readinluminosity.h"
 #include "beambeamsystem.h"
 #include "randomgenerator.h"
 #include "eventchannel.h"
 #include "upcevent.h"
+#include "eXevent.h"
 #include "nBodyPhaseSpaceGen.h"
-
+//Now here for eSTARlight
+#include "photonNucleusCrossSection.h"
 
 class Gammaavectormeson : public eventChannel
 {
@@ -56,7 +57,7 @@ class Gammaavectormeson : public eventChannel
   starlightConstants::event produceEvent(int &ievent);
   
   upcEvent produceEvent();
-  upcEvent e_produceEvent();
+  eXEvent e_produceEvent();
 
   void pickwy(double &W, double &Y);
   void pickwyq2(double &W, double &Y, double &Q2);
@@ -100,7 +101,8 @@ class Gammaavectormeson : public eventChannel
   double _bslopeVal;
   double _pEnergy;
   nBodyPhaseSpaceGen* _phaseSpaceGen;
-  
+  // eSTARlight
+  photonNucleusCrossSection* _dummy_pncs;
 };
 
 class Gammaanarrowvm : public Gammaavectormeson

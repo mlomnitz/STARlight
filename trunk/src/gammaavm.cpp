@@ -37,7 +37,7 @@
 #include <cmath>
 
 #include "gammaavm.h"
-#include "photonNucleusCrossSection.h"
+//#include "photonNucleusCrossSection.h"
 #include "wideResonanceCrossSection.h"
 #include "narrowResonanceCrossSection.h"
 #include "incoherentVMCrossSection.h"
@@ -70,10 +70,12 @@ Gammaavectormeson::Gammaavectormeson(const inputParameters& inputParametersInsta
         _ProductionMode=inputParametersInstance.productionMode();
 
         N0 = 0; N1 = 0; N2 = 0; 
-	  if (_VMpidtest == starlightConstants::FOURPRONG){
-		// create n-body phase-spage generator
-		_phaseSpaceGen = new nBodyPhaseSpaceGen(_randy);
-         }
+	if (_VMpidtest == starlightConstants::FOURPRONG){
+	  // create n-body phase-spage generator
+	  _phaseSpaceGen = new nBodyPhaseSpaceGen(_randy);
+	}
+	if(_ProductionMode == -1 ) //Need to define later, for full eSTARlight
+	  _dummy_pncs = new photonNucleusCrossSection(inputParametersInstance, bbsystem);
 }
 
 
@@ -82,6 +84,8 @@ Gammaavectormeson::~Gammaavectormeson()
 {
 	if (_phaseSpaceGen)
 		delete _phaseSpaceGen;
+	if (_dummy_pncs)
+	  delete _dummy_pncs;
 }
 
 
@@ -937,7 +941,7 @@ Gammaawidevm::~Gammaawidevm()
 
 
 //______________________________________________________________________________
-Gammaanarrowvm::e_Gammaanarrowvm(const inputParameters& input, beamBeamSystem& bbsystem):Gammaavectormeson(input, bbsystem)
+e_Gammaanarrowvm::e_Gammaanarrowvm(const inputParameters& input, beamBeamSystem& bbsystem):Gammaavectormeson(input, bbsystem)
 {
 	cout<<"Reading in luminosity tables. Gammaanarrowvm()"<<endl;
 	e_read();
@@ -950,12 +954,12 @@ Gammaanarrowvm::e_Gammaanarrowvm(const inputParameters& input, beamBeamSystem& b
 
 
 //______________________________________________________________________________
-Gammaanarrowvm::~e_Gammaanarrowvm()
+e_Gammaanarrowvm::~e_Gammaanarrowvm()
 { }
 
 
 //______________________________________________________________________________
-Gammaawidevm::e_Gammaawidevm(const inputParameters& input, beamBeamSystem& bbsystem):Gammaavectormeson(input, bbsystem)
+e_Gammaawidevm::e_Gammaawidevm(const inputParameters& input, beamBeamSystem& bbsystem):Gammaavectormeson(input, bbsystem)
 {
 	cout<<"Reading in luminosity tables. Gammaawidevm()"<<endl;
 	e_read();
@@ -968,7 +972,7 @@ Gammaawidevm::e_Gammaawidevm(const inputParameters& input, beamBeamSystem& bbsys
 
 
 //______________________________________________________________________________
-Gammaawidevm::~e_Gammaawidevm()
+e_Gammaawidevm::~e_Gammaawidevm()
 { }
 
 
@@ -977,7 +981,7 @@ void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
 {
         double dW, dY, dQ2;
 	double xw,xy, xQ2, xtest, q2test, btest;
-	int  IW,IY,IQ2;
+	int  IW,IY;
   
 	dW = (_VMWmax-_VMWmin)/double(_VMnumw);
 	dY = (_VMYmax-_VMYmin)/double(_VMnumy);
@@ -997,7 +1001,7 @@ void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
 	IY = int((Y-_VMYmin)/dY); 
 	xtest = _randy.Rndom();
 
-	if( xtest > g_Earray[IW][IY]*_f_WYarray[IW][IY] )
+	if( xtest > _g_Earray[IW][IY]*_f_WYarray[IW][IY] )
 		goto L201pwyq2;
 
         N0++; 
@@ -1012,19 +1016,20 @@ void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
 	}
 	btest = _randy.Rndom();
 	//Q2 test
-	xQ2 = _rady.Rndm();
+	xQ2 = _randy.Rndom();
 	Q2 = _VMQ2min + xQ2*(_VMQ2max-_VMQ2min);
-	xtest = _randy.Rndom();
-	if( g(Egamma,xQ2)/g_Earray[IW][IY] > xtest )
+	q2test = _randy.Rndom();
+	
+	if( _dummy_pncs->g(Egamma,xQ2)/_g_Earray[IW][IY] > q2test )
 	  goto L201pwyq2;
 }
 
 
 //______________________________________________________________________________
-upcEvent Gammaavectormeson::e_produceEvent()
+eXEvent Gammaavectormeson::e_produceEvent()
 {
 	// The new event type
-	upcEvent event;
+	eXEvent event;
 
 	int iFbadevent=0;
 	int tcheck=0;
