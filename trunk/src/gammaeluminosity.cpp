@@ -84,7 +84,7 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
   double Egamma,Y;
   double testint;
   // 
-  double f_WY, g_EQ2;
+  double f_WY, g_E;
   double csgA;
   double C;  
   int beam; 
