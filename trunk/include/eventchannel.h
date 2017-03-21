@@ -38,9 +38,11 @@
 
 #include "starlightconstants.h"
 #include "readinluminosity.h"
+#include "e_readinluminosity.h"
 #include "beambeamsystem.h"
 #include "randomgenerator.h"
 #include "upcevent.h"
+#include "eXevent.h"
 #include "inputParameters.h"
 
 
@@ -58,6 +60,7 @@ public:
 	virtual starlightConstants::event produceEvent(int &ievent) = 0;
 
 	virtual upcEvent produceEvent() = 0;
+	virtual eXEvent e_produceEvent() = 0;
  
 	static void transform(const double betax,
 	                      const double betay,
