@@ -261,8 +261,12 @@ set(SOURCES
   src/incoherentPhotonNucleusLuminosity.cpp
   src/incoherentVMCrossSection.cpp
 # eSTARlight
+  src/eXevent.cpp
+  src/gammaeluminosity.cpp	
   src/e_wideResonanceCrossSection.cpp
   src/e_narrowResonanceCrossSection.cpp
+  src/e_starlight.cpp
+  src/e_starlightStandalone.cpp
   )
 if(ENABLE_PYTHIA) 
   set (SOURCES
@@ -313,8 +317,10 @@ endif()
 
 # add starlight executable to the build system
 add_executable(starlight src/main.cpp)
+add_executable(e_starlight src/e_main.cpp)
 #target_link_libraries(starlight Starlib ${PYTHIA8_LIBRARY} ${LHAPDF_LIBRARIES} ${PYTHIA6_LIBRARY} ${DPMJET_LIB} )
 target_link_libraries(starlight Starlib ${optionalLibs})# ${CMAKE_THREAD_LIBS_INIT}) 
+target_link_libraries(e_starlight Starlib ${optionalLibs})# ${CMAKE_THREAD_LIBS_INIT}) 
 
 #make_executable(starlight src/main.cpp ${THIS_LIB})
 
