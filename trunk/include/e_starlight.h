@@ -38,7 +38,7 @@
 
 #include <string>
 
-#include "eXevent.h"
+#include "upcevent.h"
 #include "eventchannel.h"
 
 
@@ -56,7 +56,7 @@ public:
       
 	bool init();
 
-	upcEvent produceEvent();
+	eXEvent produceEvent();
       
         std::string   baseFileName  () const { return _baseFileName;		  }
 	unsigned long nmbAttempts   () const { return _eventChannel->nmbAttempts(); }

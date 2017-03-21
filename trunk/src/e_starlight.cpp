@@ -36,7 +36,7 @@
 #include <fstream>
 #include <cstdlib>
 
-#include "e_starlightconfig.h"
+#include "starlightconfig.h"
 
 #ifdef ENABLE_PYTHIA
 #include "PythiaStarlight.h"
@@ -53,13 +53,14 @@
 #include "reportingUtils.h"
 #include "inputParameters.h"
 #include "eventchannel.h"
-//#include "gammagammaleptonpair.h"
-//#include "gammagammasingle.h"
+#include "gammagammaleptonpair.h"
+#include "gammagammasingle.h"
 #include "gammaavm.h"
-//#include "twophotonluminosity.h"
+#include "twophotonluminosity.h"
 #include "gammaaluminosity.h"
+#include "gammaeluminosity.h"
 #include "incoherentPhotonNucleusLuminosity.h"
-#include "eXevent.h"
+#include "upcevent.h"
 #include "eventfilewriter.h"
 #include "e_starlight.h"
 
@@ -166,7 +167,7 @@ e_starlight::init()
 }
 
 
-upcEvent
+eXEvent
 e_starlight::produceEvent()
 {
 	if (!_isInitialised) {
@@ -211,7 +212,6 @@ e_starlight::luminosityTableIsValid() const
 	      >> maxRapidity >> nmbRapidityBins
 	      >> productionMode
 	      >> beamBreakupMode
-	      >> interferenceEnabled >> interferenceStrength
 	      >> maxPtInterference
 	      >> nmbPtBinsInterference
 	      >> coherentProduction >> incoherentFactor
