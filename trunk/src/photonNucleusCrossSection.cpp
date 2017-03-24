@@ -186,8 +186,8 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 		     <<" GammaAcrosssection"<<endl;
 	}
 
-	_maxPhotonEnergy = 12. * _beamLorentzGamma * hbarc/(_bbs.beam1().nuclearRadius()+_bbs.beam2().nuclearRadius()); 
-	
+	_maxPhotonEnergy = 12. * _beamLorentzGamma * hbarc/(_bbs.beam1().nuclearRadius()+_bbs.beam2().nuclearRadius());
+
 }
 
 
@@ -580,14 +580,15 @@ double
 photonNucleusCrossSection::integrated_Q2_dep(double const Egamma)
 {
   //Returns the integrated value  g(E_gamma) = \int d(Q2) g(E_gamma,Q2) in notes
-  double Q2_min = std::pow(starlightConstants::mel*Egamma,2.0)/_electronEnergy*(_electronEnergy-Egamma);
-  double Q2_max = 4.*_electronEnergy*(_electronEnergy-Egamma);
+  double Q2_min =  -1.*std::pow(starlightConstants::mel*Egamma,2.0)/_electronEnergy*(_electronEnergy-Egamma);
+  double Q2_max =  -1.0*4.*_electronEnergy*(_electronEnergy-Egamma);
   int const n_steps = 1000;
   double step  = (Q2_max - Q2_min)/(double)n_steps; //need to check this
   // Integrate using trapezoidal rule
   double g_int = 0.5*( g(Egamma,Q2_min) + g(Egamma,Q2_max) ); 
   for( int ii = 1 ; ii < n_steps ; ++ii)
     g_int += g(Egamma,Q2_min+double(ii)*step);
+
   return step * g_int;
 }
 
