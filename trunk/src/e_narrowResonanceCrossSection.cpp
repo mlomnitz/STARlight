@@ -52,6 +52,7 @@ e_narrowResonanceCrossSection::e_narrowResonanceCrossSection(const inputParamete
 	_narrowYmin = -1.0*_narrowYmax;
 	_narrowNumY = inputParametersInstance.nmbRapidityBins();
 	_Ep         = inputParametersInstance.protonEnergy();	
+	_electronEnergy = inputParametersInstance.electronEnergy();
 }
 
 
@@ -80,9 +81,12 @@ e_narrowResonanceCrossSection::crossSectionCalculation(const double)  // _bwnorm
 	cout<<" Using Narrow Resonance ..."<<endl;
   
 	W = getChannelMass();
-	Eth=0.5*(((W+protonMass)*(W+protonMass)-
-	          protonMass*protonMass)/(_Ep+sqrt(_Ep*_Ep-protonMass*protonMass)));
-  
+	//Lomnitz old used for XX
+	//Eth=0.5*(((W+protonMass)*(W+protonMass)-
+	//          protonMass*protonMass)/(_Ep+sqrt(_Ep*_Ep-protonMass*protonMass)));
+	// Adapted for eX
+	Eth=0.5*(((W+starlightConstants::mel)*(W +starlightConstants::mel)-
+		  starlightConstants::mel*starlightConstants::mel)/(_electronEnergy+sqrt(_electronEnergy*_electronEnergy-starlightConstants::mel*starlightConstants::mel))); 
 	// cout<<" gamma+nucleon  Threshold: "<<Eth<<endl;
         printf(" gamma+nucleon threshold: %e GeV \n", Eth);
 
@@ -133,7 +137,6 @@ e_narrowResonanceCrossSection::crossSectionCalculation(const double)  // _bwnorm
 		//         >> Second Point                      =====>>>
 		g_Eg2 = integrated_Q2_dep(ega2);
 		csgA2=getcsgA(ega2,W,beam);
-    
 		//>> Sum the contribution for this W,Y. The 2 accounts for the 2 beams
 		dR  = ega1*g_Eg1*csgA1;
 		dR  = dR + 4.*ega12*g_Eg12*csgA12;

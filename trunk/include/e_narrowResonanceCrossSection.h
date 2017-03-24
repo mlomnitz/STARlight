@@ -53,6 +53,7 @@ private:
 	double _narrowYmax;
 	double _narrowYmin;
 	int    _narrowNumY;
+	double _electronEnergy;
 	
 };
 
