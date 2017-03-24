@@ -64,6 +64,7 @@ Gammaavectormeson::Gammaavectormeson(const inputParameters& inputParametersInsta
         _bslopeDef=inputParametersInstance.bslopeDefinition();
 	_bslopeVal=inputParametersInstance.bslopeValue();
 	_pEnergy= inputParametersInstance.protonEnergy();
+	_eEnergy= inputParametersInstance.electronEnergy();
 	_VMpidtest=inputParametersInstance.prodParticleType();
 	_VMptmax=inputParametersInstance.maxPtInterference();
 	_VMdpt=inputParametersInstance.ptBinWidthInterference();
@@ -74,7 +75,7 @@ Gammaavectormeson::Gammaavectormeson(const inputParameters& inputParametersInsta
 	  // create n-body phase-spage generator
 	  _phaseSpaceGen = new nBodyPhaseSpaceGen(_randy);
 	}
-	if(_ProductionMode == -1 ) //Need to define later, for full eSTARlight
+	if(_ProductionMode == 11 || _ProductionMode == 12) //Need to define later, for full eSTARlight
 	  _dummy_pncs = new photonNucleusCrossSection(inputParametersInstance, bbsystem);
 }
 
@@ -943,9 +944,9 @@ Gammaawidevm::~Gammaawidevm()
 //______________________________________________________________________________
 e_Gammaanarrowvm::e_Gammaanarrowvm(const inputParameters& input, beamBeamSystem& bbsystem):Gammaavectormeson(input, bbsystem)
 {
-	cout<<"Reading in luminosity tables. Gammaanarrowvm()"<<endl;
+	cout<<"Reading in luminosity tables. e_Gammaanarrowvm()"<<endl;
 	e_read();
-	cout<<"Creating and calculating crosssection. Gammaanarrowvm()"<<endl;
+	cout<<"Creating and calculating crosssection. e_Gammaanarrowvm()"<<endl;
 	e_narrowResonanceCrossSection sigma(input, bbsystem);
 	sigma.crossSectionCalculation(_bwnormsave);
 	setTotalChannelCrossSection(sigma.getPhotonNucleusSigma());
@@ -961,9 +962,9 @@ e_Gammaanarrowvm::~e_Gammaanarrowvm()
 //______________________________________________________________________________
 e_Gammaawidevm::e_Gammaawidevm(const inputParameters& input, beamBeamSystem& bbsystem):Gammaavectormeson(input, bbsystem)
 {
-	cout<<"Reading in luminosity tables. Gammaawidevm()"<<endl;
+	cout<<"Reading in luminosity tables. e_Gammaawidevm()"<<endl;
 	e_read();
-	cout<<"Creating and calculating crosssection. Gammaawidevm()"<<endl;
+	cout<<"Creating and calculating crosssection. e_Gammaawidevm()"<<endl;
 	e_wideResonanceCrossSection sigma(input, bbsystem);
 	sigma.crossSectionCalculation(_bwnormsave);
 	setTotalChannelCrossSection(sigma.getPhotonNucleusSigma());
@@ -982,10 +983,9 @@ void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
         double dW, dY, dQ2;
 	double xw,xy, xQ2, xtest, q2test, btest;
 	int  IW,IY;
-  
+	
 	dW = (_VMWmax-_VMWmin)/double(_VMnumw);
 	dY = (_VMYmax-_VMYmin)/double(_VMnumy);
-	dQ2 = (_VMQ2max-_VMQ2min)/double(_VMnumQ2);
   
  L201pwyq2:
 
@@ -1003,11 +1003,10 @@ void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
 
 	if( xtest > _g_Earray[IW][IY]*_f_WYarray[IW][IY] )
 		goto L201pwyq2;
-
         N0++; 
 	// Target is always nucleus or proton in eX
 	double Egamma;
-        if( _bbs.beam1().A()==0 && _bbs.beam2().A() != 0){ 
+        if( _bbs.beam2().A()==0 && _bbs.beam1().A() != 0){ 
 	  _TargetBeam = 2;
 	  Egamma = 0.5*W*exp(-Y);
 	} else {
@@ -1016,11 +1015,14 @@ void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
 	}
 	btest = _randy.Rndom();
 	//Q2 test
+	double VMQ2max = -1.0*4.*_eEnergy*(_eEnergy-Egamma);
+	double VMQ2min = -1.0*std::pow(starlightConstants::mel*Egamma,2.0)/_eEnergy*(_eEnergy-Egamma);;
+	int VMnumQ2 = 1000;
+	dQ2 = (VMQ2max-VMQ2min)/double(VMnumQ2);
 	xQ2 = _randy.Rndom();
-	Q2 = _VMQ2min + xQ2*(_VMQ2max-_VMQ2min);
+	Q2 = VMQ2min + xQ2*dQ2;
 	q2test = _randy.Rndom();
-	
-	if( _dummy_pncs->g(Egamma,xQ2)/_g_Earray[IW][IY] > q2test )
+	if( _dummy_pncs->g(Egamma,Q2)/_g_Earray[IW][IY] > q2test )
 	  goto L201pwyq2;
 }
 
@@ -1030,7 +1032,7 @@ eXEvent Gammaavectormeson::e_produceEvent()
 {
 	// The new event type
 	eXEvent event;
-
+	
 	int iFbadevent=0;
 	int tcheck=0;
 	starlightConstants::particleTypeEnum ipid = starlightConstants::UNKNOWN;

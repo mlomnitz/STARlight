@@ -78,7 +78,6 @@ class Gammaavectormeson : public eventChannel
   starlightConstants::particleTypeEnum _VMpidtest;
   int _VMnumw;
   int _VMnumy;
-  int _VMnumQ2;
   int _VMinterferencemode;
   int _ProductionMode;
   int _TargetBeam; 
@@ -91,8 +90,6 @@ class Gammaavectormeson : public eventChannel
   double _VMWmin;
   double _VMYmax;
   double _VMYmin;
-  double _VMQ2max;
-  double _VMQ2min;
   double _mass;
   double _width;
   double _VMptmax;
@@ -100,6 +97,7 @@ class Gammaavectormeson : public eventChannel
   int    _bslopeDef;
   double _bslopeVal;
   double _pEnergy;
+  double _eEnergy;
   nBodyPhaseSpaceGen* _phaseSpaceGen;
   // eSTARlight
   photonNucleusCrossSection* _dummy_pncs;
