@@ -80,7 +80,7 @@ inputParameters::inputParameters()
 	  _nmbPtBinsInterference ("INT_PT_N_BINS",0),
 	  _ptBinWidthInterference("INT_PT_WIDTH",0),
 	  _protonEnergy          ("PROTON_ENERGY",0, NOT_REQUIRED),
-	  _electronEnergy        ("ELECTRON ENERGY",0, NOT_REQUIRED),
+	  _electronEnergy        ("ELECTRON_ENERGY",0, NOT_REQUIRED),
 	  _minGammaEnergy	 ("MIN_GAMMA_ENERGY",6.0, NOT_REQUIRED),
 	  _maxGammaEnergy	 ("MAX_GAMMA_ENERGY",600000.0, NOT_REQUIRED),
 	  _minGammaQ2            ("MIN_GAMMA_Q2",0,NOT_REQUIRED),
@@ -235,6 +235,13 @@ inputParameters::configureFromFile(const std::string &_configFileName)
 //         case 10:
 //                 _interactionType = PHOTONPHOTONKNIEHLMODIFIED;
 //                 break;
+	case 12:
+		_interactionType = E_PHOTONPOMERONNARROW;
+		break;
+	case 13:
+		_interactionType = E_PHOTONPOMERONWIDE;
+		break;
+	  
 	default:
 		printWarn << "unknown production mode '" << _productionMode << "'" << endl;
 		return false;
