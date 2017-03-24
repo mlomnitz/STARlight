@@ -143,8 +143,8 @@ e_starlight::init()
 		}
 		break;		
 	  */
-	case PHOTONPOMERONNARROW:  // narrow and wide resonances use
-	case PHOTONPOMERONWIDE:    // the same luminosity function
+	case E_PHOTONPOMERONNARROW:  // narrow and wide resonances use
+	case E_PHOTONPOMERONWIDE:    // the same luminosity function
 		if (!lumTableIsValid) {
 			printInfo << "creating luminosity table for coherent photon-Pomeron channel" <<endl;
 			photonElectronLuminosity lum(*_inputParameters, *_beamSystem);
@@ -307,8 +307,8 @@ e_starlight::createEventChannel()
 	case UPSILON3S_ee:
 	case UPSILON3S_mumu:
 		{
-			if (_inputParameters->interactionType() == PHOTONPOMERONNARROW) {
-				_eventChannel = new Gammaanarrowvm(*_inputParameters, *_beamSystem);
+			if (_inputParameters->interactionType() == E_PHOTONPOMERONNARROW) {
+				_eventChannel = new e_Gammaanarrowvm(*_inputParameters, *_beamSystem);
 				if (_eventChannel)
 					return true;
 				else {
@@ -317,8 +317,8 @@ e_starlight::createEventChannel()
 				}
 			}
 
-			if (_inputParameters->interactionType() == PHOTONPOMERONWIDE) {
-				_eventChannel = new Gammaawidevm(*_inputParameters, *_beamSystem);
+			if (_inputParameters->interactionType() == E_PHOTONPOMERONWIDE) {
+				_eventChannel = new e_Gammaawidevm(*_inputParameters, *_beamSystem);
 				if (_eventChannel)
 					return true;
 				else {
@@ -327,15 +327,6 @@ e_starlight::createEventChannel()
 				}
 			}
 
-                        if (_inputParameters->interactionType() == PHOTONPOMERONINCOHERENT) {
-                                _eventChannel = new Gammaaincoherentvm(*_inputParameters, *_beamSystem);
-                                if (_eventChannel)
-                                        return true;
-                                else {
-                                        printWarn << "cannot construct Gammaanarrowvm event channel." << endl;
-                                        return false;
-                                }
-                        }
 
 			printWarn << "interaction type '" << _inputParameters->interactionType() << "' "
 			          << "cannot be used with particle type '" << _inputParameters->prodParticleType() << "'. "
