@@ -1015,8 +1015,8 @@ void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
 	}
 	btest = _randy.Rndom();
 	//Q2 test
-	double VMQ2max = -1.0*4.*_eEnergy*(_eEnergy-Egamma);
-	double VMQ2min = -1.0*std::pow(starlightConstants::mel*Egamma,2.0)/_eEnergy*(_eEnergy-Egamma);;
+	double VMQ2max = 4.*_eEnergy*(_eEnergy-Egamma);
+	double VMQ2min = std::pow(starlightConstants::mel*Egamma,2.0)/_eEnergy*(_eEnergy-Egamma);;
 	int VMnumQ2 = 1000;
 	dQ2 = (VMQ2max-VMQ2min)/double(VMnumQ2);
 	xQ2 = _randy.Rndom();
