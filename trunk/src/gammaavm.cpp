@@ -551,6 +551,145 @@ void Gammaavectormeson::momenta(double W,double Y,double &E,double &px,double &p
 
 }
 
+
+//______________________________________________________________________________
+void Gammaavectormeson::momenta(double W,double Y,double Q2,double &E,double &px,double &py,double &pz,int &tcheck)
+{
+	//     This subroutine calculates momentum and energy of vector meson
+	//     given W and Y,   without interference.  Subroutine vmpt handles
+	//     production with interference
+ 
+	double Egam,Epom,tmin,pt1,pt2,phi1,phi2;
+	double px1,py1,px2,py2;
+	double pt,xt,xtest,ytest;
+	double t2;
+	cout<<"Lomnitz ::: testing Q2 "<<Q2<<endl;
+	//Find Egam,Epom in CM frame
+        if( _bbs.beam1().A()==0 && _bbs.beam2().A() >= 1){ 
+          // This is eA
+	  Egam = 0.5*W*exp(Y);
+	  Epom = 0.5*W*exp(-Y);
+        } 
+	else if( _bbs.beam2().A()==0 && _bbs.beam1().A() >= 1 ){
+          // This is Ae
+	  Egam = 0.5*W*exp(-Y);
+	  Epom = 0.5*W*exp(Y);
+	} 
+	else {
+	  std::cout<<"This should be eX, no electron found "<<endl;
+	  return;
+	}
+
+	//        } else if( _ProductionMode == 2 || _ProductionMode==3){
+	//	  Egam = 0.5*W*exp(-Y);
+	//	  Epom = 0.5*W*exp(Y);
+	//        } else { 
+	//          Egam = 0.5*W*exp(Y);
+	//	  Epom = 0.5*W*exp(-Y);
+	//	 }
+
+        pt1 = pTgamma(Egam);  
+	phi1 = 2.*starlightConstants::pi*_randy.Rndom();
+
+	if( (_bbs.beam1().A()==1 || _bbs.beam2().A()==1) || 
+            (_ProductionMode == 4) ) {
+	    if( (_VMpidtest == starlightConstants::RHO) || (_VMpidtest == starlightConstants::RHOZEUS) || (_VMpidtest == starlightConstants::OMEGA)){
+	      // Use dipole form factor for light VM
+	      L613vm:
+	      xtest = 2.0*_randy.Rndom();
+              double ttest = xtest*xtest; 
+              ytest = _randy.Rndom();
+              double t0 = 1./2.23; 
+              double yprob = xtest*_bbs.beam1().dipoleFormFactor(ttest,t0)*_bbs.beam1().dipoleFormFactor(ttest,t0); 
+              if( ytest > yprob ) goto L613vm; 
+              t2 = ttest; 
+              pt2 = xtest;              
+	    }else{
+		//Use dsig/dt= exp(-_VMbslope*t) for heavy VM
+                double bslope_tdist = _VMbslope; 
+		double Wgammap = 0.0; 
+                switch(_bslopeDef){
+		  case 0:
+		    //This is the default, as before
+		    bslope_tdist = _VMbslope;
+		    break;
+		  case 1:
+		    //User defined value of bslope. BSLOPE_VALUE default is 4.0 if not set. 
+                    bslope_tdist = _bslopeVal;
+		    if( N0 <= 1 )cout<<" ATTENTION: Using user defined value of bslope = "<<_bslopeVal<<endl;
+                    break; 
+		  case 2:
+                    //This is Wgammap dependence of b from H1 (Eur. Phys. J. C 46 (2006) 585)
+		    Wgammap = sqrt(4.*Egam*_pEnergy); 
+		    bslope_tdist = 4.63 + 4.*0.164*log(Wgammap/90.0);
+		    if( N0 <= 1 )cout<<" ATTENTION: Using energy dependent value of bslope!"<<endl; 
+		    break;
+		  default:
+		    cout<<" Undefined setting for BSLOPE_DEFINITION "<<endl;
+		}
+
+	        xtest = _randy.Rndom(); 
+		// t2 = (-1./_VMbslope)*log(xtest);
+		t2 = (-1./bslope_tdist)*log(xtest);
+		pt2 = sqrt(1.*t2);
+	    }
+	} else {
+	    // >> Check tmin
+	    tmin = ((Epom/_VMgamma_em)*(Epom/_VMgamma_em));
+	
+	    if(tmin > 0.5){
+		cout<<" WARNING: tmin= "<<tmin<<endl;
+                cout<< " Y = "<<Y<<" W = "<<W<<" Epom = "<<Epom<<" gamma = "<<_VMgamma_em<<endl; 
+		cout<<" Will pick a new W,Y "<<endl;
+		tcheck = 1;
+		return;
+	    }
+ L663vm:
+	    xt = _randy.Rndom(); 
+            if( _bbs.beam1().A()==0 && _bbs.beam2().A() != 1){ 
+	      pt2 = 8.*xt*starlightConstants::hbarc/_bbs.beam2().nuclearRadius();
+	    } 
+	    else if( _bbs.beam2().A()==0 && _bbs.beam1().A() != 1 ){
+                pt2 = 8.*xt*starlightConstants::hbarc/_bbs.beam1().nuclearRadius();  
+              }
+	    else{
+	      std::cout<<"Can't find the electron for eX"<<std::endl;
+	    }  
+
+	    xtest = _randy.Rndom();
+	    t2 = tmin + pt2*pt2;
+
+	    double comp=0.0; 
+            if( _bbs.beam1().A()==0 && _bbs.beam2().A() != 1){ 
+	      comp = _bbs.beam2().formFactor(t2)*_bbs.beam2().formFactor(t2)*pt2;
+	    }
+	    else if( _bbs.beam2().A()==0 && _bbs.beam1().A() != 1 ){
+	      comp = _bbs.beam1().formFactor(t2)*_bbs.beam1().formFactor(t2)*pt2;
+            }       
+	    else 
+	      std::cout<<"Can't find the electron for eX"<<std::endl;
+            if( xtest > comp ) goto L663vm;
+       		
+	}//else end from pp
+	cout<<" Lomnitz ::: pT (default) p1 "<<pt1<<" p2 "<<pt2<<endl;
+	phi2 = 2.*starlightConstants::pi*_randy.Rndom();
+
+	px1 = pt1*cos(phi1);
+	py1 = pt1*sin(phi1);
+	px2 = pt2*cos(phi2);
+	py2 = pt2*sin(phi2);
+        
+	// Compute vector sum Pt = Pt1 + Pt2 to find pt for the vector meson
+	px = px1 + px2;
+	py = py1 + py2;
+	pt = sqrt( px*px + py*py );
+       
+	E  = sqrt(W*W+pt*pt)*cosh(Y);
+	pz = sqrt(W*W+pt*pt)*sinh(Y);
+
+}
+
+
 //______________________________________________________________________________
 double Gammaavectormeson::pTgamma(double E)
 {
@@ -1048,7 +1187,7 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	bool accepted = false;
 	do{
 	  pickwyq2(comenergy,rapidity,Q2);	  
-	  momenta(comenergy,rapidity,E,momx,momy,momz,tcheck);
+	  momenta(comenergy,rapidity,Q2,E,momx,momy,momz,tcheck);
 			
 	  _nmbAttempts++;
 	  
