@@ -185,7 +185,9 @@ inputParameters::configureFromFile(const std::string &_configFileName)
 	std::cout << "Rapidity beam 1: " << rap1 << ", rapidity beam 2: " << rap2 << ", rapidity CMS system: " << (rap1+rap2)/2 << ", beam gamma in CMS: " << _beamLorentzGamma<< std::endl;
 	_ptBinWidthInterference = maxPtInterference() / nmbPtBinsInterference();
 	_protonEnergy           = _beamLorentzGamma * protonMass;
-	_electronEnergy         = _beamLorentzGamma * starlightConstants::mel;
+	//Storing electron energy in Lab frame
+	//_electronEnergy         = _beamLorentzGamma * starlightConstants::mel;
+	_electronEnergy         = beam1LorentzGamma() * starlightConstants::mel;
 
 	// check for deuteron or tritium - these must be the second beam
 	if((beam1Z()==1) && (beam1A()==2)){
