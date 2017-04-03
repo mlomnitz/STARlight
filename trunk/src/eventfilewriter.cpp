@@ -138,6 +138,13 @@ int eventFileWriter::writeEvent(eXEvent &event, int eventnumber)
       if(event.getGammaEnergies()->size()) _fileStream<< std::endl;
       _fileStream <<"VERTEX: "<<0.<<" "<<0.<<" "<<0.<<" "<<0.<<" "<<1<<" "<<0<<" "<<0<<" "<<numberoftracks<<std::endl;
 
+      for( uint iel = 0 ; iel < event.getSources()->size(); ++iel){
+	std::cout<<"here "<<event.getSources()->size()<<" "<<event.getPhotonMasses()->size()<<std::endl;
+	lorentzVector el = event.getSources()->at(iel);      
+	_fileStream <<"GAMMA MASS: "<<event.getPhotonMasses()->at(iel)<<std::endl;
+	_fileStream <<"RECOIL ELECTRON: "<<el.GetPx()<<" "<<el.GetPy()<<" "<<el.GetPz()<<" "<<el.GetE()<<std::endl;
+      }
+
       int ipart = 0;
       std::vector<starlightParticle>::const_iterator part = (event.getParticles())->begin();
       
