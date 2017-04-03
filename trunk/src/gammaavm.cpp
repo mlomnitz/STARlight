@@ -553,7 +553,9 @@ void Gammaavectormeson::momenta(double W,double Y,double &E,double &px,double &p
 
 
 //______________________________________________________________________________
-void Gammaavectormeson::momenta(double W,double Y,double Q2,double &E,double &px,double &py,double &pz,int &tcheck)
+void Gammaavectormeson::momenta(double W,double Y,double Q2,
+				double &E,double &px,double &py,double &pz,
+				double& e_E, double& e_theta, double &e_phi,int &tcheck)
 {
 	//     This subroutine calculates momentum and energy of vector meson
 	//     given W and Y,   without interference.  Subroutine vmpt handles
@@ -563,7 +565,6 @@ void Gammaavectormeson::momenta(double W,double Y,double Q2,double &E,double &px
 	double px1,py1,px2,py2;
 	double pt,xt,xtest,ytest;
 	double t2;
-	cout<<"Lomnitz ::: testing Q2 "<<Q2<<endl;
 	//Find Egam,Epom in CM frame
         if( _bbs.beam1().A()==0 && _bbs.beam2().A() >= 1){ 
           // This is eA
@@ -579,7 +580,6 @@ void Gammaavectormeson::momenta(double W,double Y,double Q2,double &E,double &px
 	  std::cout<<"This should be eX, no electron found "<<endl;
 	  return;
 	}
-
 	//        } else if( _ProductionMode == 2 || _ProductionMode==3){
 	//	  Egam = 0.5*W*exp(-Y);
 	//	  Epom = 0.5*W*exp(Y);
@@ -587,15 +587,16 @@ void Gammaavectormeson::momenta(double W,double Y,double Q2,double &E,double &px
 	//          Egam = 0.5*W*exp(Y);
 	//	  Epom = 0.5*W*exp(-Y);
 	//	 }
-
-        pt1 = pTgamma(Egam);  
+	e_E = _eEnergy - Egam;
+	e_theta = std::acos(1 - Q2/(2.*_eEnergy*e_E));
+        pt1 = e_E*sin(e_theta);
 	phi1 = 2.*starlightConstants::pi*_randy.Rndom();
-
+	e_phi = starlightConstants::pi+phi1;
 	if( (_bbs.beam1().A()==1 || _bbs.beam2().A()==1) || 
             (_ProductionMode == 4) ) {
 	    if( (_VMpidtest == starlightConstants::RHO) || (_VMpidtest == starlightConstants::RHOZEUS) || (_VMpidtest == starlightConstants::OMEGA)){
 	      // Use dipole form factor for light VM
-	      L613vm:
+	    L613vm:
 	      xtest = 2.0*_randy.Rndom();
               double ttest = xtest*xtest; 
               ytest = _randy.Rndom();
@@ -636,7 +637,7 @@ void Gammaavectormeson::momenta(double W,double Y,double Q2,double &E,double &px
 	} else {
 	    // >> Check tmin
 	    tmin = ((Epom/_VMgamma_em)*(Epom/_VMgamma_em));
-	
+
 	    if(tmin > 0.5){
 		cout<<" WARNING: tmin= "<<tmin<<endl;
                 cout<< " Y = "<<Y<<" W = "<<W<<" Epom = "<<Epom<<" gamma = "<<_VMgamma_em<<endl; 
@@ -671,7 +672,6 @@ void Gammaavectormeson::momenta(double W,double Y,double Q2,double &E,double &px
             if( xtest > comp ) goto L663vm;
        		
 	}//else end from pp
-	cout<<" Lomnitz ::: pT (default) p1 "<<pt1<<" p2 "<<pt2<<endl;
 	phi2 = 2.*starlightConstants::pi*_randy.Rndom();
 
 	px1 = pt1*cos(phi1);
@@ -1119,7 +1119,7 @@ e_Gammaawidevm::~e_Gammaawidevm()
 //______________________________________________________________________________
 void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
 {
-        double dW, dY, dQ2;
+        double dW, dY;
 	double xw,xy, xQ2, xtest, q2test, btest;
 	int  IW,IY;
 	
@@ -1146,20 +1146,18 @@ void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
 	// Target is always nucleus or proton in eX
 	double Egamma;
         if( _bbs.beam2().A()==0 && _bbs.beam1().A() != 0){ 
-	  _TargetBeam = 2;
+	  _TargetBeam = 1;
 	  Egamma = 0.5*W*exp(-Y);
 	} else {
-	  _TargetBeam = 1;
+	  _TargetBeam = 2;
 	  Egamma = 0.5*W*exp(Y);
 	}
 	btest = _randy.Rndom();
 	//Q2 test
 	double VMQ2max = 4.*_eEnergy*(_eEnergy-Egamma);
 	double VMQ2min = std::pow(starlightConstants::mel*Egamma,2.0)/_eEnergy*(_eEnergy-Egamma);;
-	int VMnumQ2 = 1000;
-	dQ2 = (VMQ2max-VMQ2min)/double(VMnumQ2);
 	xQ2 = _randy.Rndom();
-	Q2 = VMQ2min + xQ2*dQ2;
+	Q2 = VMQ2min + xQ2*(VMQ2max-VMQ2min);
 	q2test = _randy.Rndom();
 	if( _dummy_pncs->g(Egamma,Q2)/_g_Earray[IW][IY] > q2test )
 	  goto L201pwyq2;
@@ -1182,13 +1180,20 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	double Q2 = 0;
 	double E = 0.;
 	double momx=0.,momy=0.,momz=0.;
-	
+	double Egamma = 0;
 	double px2=0.,px1=0.,py2=0.,py1=0.,pz2=0.,pz1=0.;
+	double e_E=0., e_theta=0., e_phi=0;
 	bool accepted = false;
 	do{
 	  pickwyq2(comenergy,rapidity,Q2);	  
-	  momenta(comenergy,rapidity,Q2,E,momx,momy,momz,tcheck);
-			
+	  momenta(comenergy,rapidity,Q2,E,momx,momy,momz,
+		  e_E, e_theta, e_phi,tcheck);
+	  //
+	  if( _bbs.beam2().A()==0 && _bbs.beam1().A() != 0){ 
+	    Egamma = 0.5*comenergy*exp(-rapidity);
+	  } else {
+	    Egamma = 0.5*comenergy*exp(rapidity);
+	  }
 	  _nmbAttempts++;
 	  
 	  vmpid = ipid; 
@@ -1244,7 +1249,13 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	    ipid1 = q1*ipid;
 	    ipid2 = q2*ipid;
 	  }
-	  
+	  // - Outgoing electron
+	  double e_px = e_E*sin(e_theta)*cos(e_phi);
+	  double e_py = e_E*sin(e_theta)*sin(e_phi);
+	  double e_pz = e_E*cos(e_theta);
+	  lorentzVector electron(e_px, e_py, e_pz, e_E);
+	  event.addSourceElectron(electron, Q2);
+
 	  double md = getDaughterMass(vmpid); 
 	  double Ed1 = sqrt(md*md+px1*px1+py1*py1+pz1*pz1); 
 	  starlightParticle particle1(px1, py1, pz1, Ed1, starlightConstants::UNKNOWN, ipid1, q1);
