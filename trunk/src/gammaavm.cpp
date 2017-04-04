@@ -1249,12 +1249,15 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	    ipid1 = q1*ipid;
 	    ipid2 = q2*ipid;
 	  }
+	  // - Generated photon
+	  event.addGamma(Egamma, Q2);
+
 	  // - Outgoing electron
 	  double e_px = e_E*sin(e_theta)*cos(e_phi);
 	  double e_py = e_E*sin(e_theta)*sin(e_phi);
 	  double e_pz = e_E*cos(e_theta);
 	  lorentzVector electron(e_px, e_py, e_pz, e_E);
-	  event.addSourceElectron(electron, Q2);
+	  event.addSourceElectron(electron);
 
 	  double md = getDaughterMass(vmpid); 
 	  double Ed1 = sqrt(md*md+px1*px1+py1*py1+pz1*pz1); 

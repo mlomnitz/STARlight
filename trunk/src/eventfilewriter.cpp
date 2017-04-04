@@ -130,19 +130,16 @@ int eventFileWriter::writeEvent(eXEvent &event, int eventnumber)
       eventnumber++;
       
       _fileStream << "EVENT: " << eventnumber << " " << numberoftracks << " " << 1 << std::endl;
-      if(event.getGammaEnergies()->size()) _fileStream << "GAMMAENERGIES:";
-      for(unsigned int n = 0; n < event.getGammaEnergies()->size(); n++)
-      {
-	_fileStream << " " << event.getGammaEnergies()->at(n);
-      }
-      if(event.getGammaEnergies()->size()) _fileStream<< std::endl;
+
       _fileStream <<"VERTEX: "<<0.<<" "<<0.<<" "<<0.<<" "<<0.<<" "<<1<<" "<<0<<" "<<0<<" "<<numberoftracks<<std::endl;
 
+      for( uint igam = 0 ; igam < event.getGammaEnergies()->size(); ++igam){
+	_fileStream <<"GAMMA: "<<event.getGammaEnergies()->at(igam)<<" "<<event.getGammaMasses()->at(igam)<<std::endl;
+      }
+
       for( uint iel = 0 ; iel < event.getSources()->size(); ++iel){
-	std::cout<<"here "<<event.getSources()->size()<<" "<<event.getPhotonMasses()->size()<<std::endl;
-	lorentzVector el = event.getSources()->at(iel);      
-	_fileStream <<"GAMMA MASS: "<<event.getPhotonMasses()->at(iel)<<std::endl;
-	_fileStream <<"RECOIL ELECTRON: "<<el.GetPx()<<" "<<el.GetPy()<<" "<<el.GetPz()<<" "<<el.GetE()<<std::endl;
+	lorentzVector el = event.getSources()->at(iel); 
+	_fileStream <<"SOURCE: "<<el.GetPx()<<" "<<el.GetPy()<<" "<<el.GetPz()<<" "<<el.GetE()<<std::endl;
       }
 
       int ipart = 0;
@@ -154,7 +151,7 @@ int eventFileWriter::writeEvent(eXEvent &event, int eventnumber)
           {
               if((*part).getStatus() < 0) continue;
           }
-	  _fileStream << "TRACK: " << " " << starlightParticleCodes::jetsetToGeant((*part).getPdgCode()) <<" "<< (*part).GetPx() << " " << (*part).GetPy()
+	  _fileStream << "TRACK: " << " "<< starlightParticleCodes::jetsetToGeant((*part).getPdgCode()) <<" "<< (*part).GetPx() << " " << (*part).GetPy()
 		      << " "<< (*part).GetPz() << " " << eventnumber << " " << ipart << " " << 0 << " "
 		      << (*part).getPdgCode();
 		      
