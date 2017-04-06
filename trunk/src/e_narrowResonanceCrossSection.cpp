@@ -82,11 +82,11 @@ e_narrowResonanceCrossSection::crossSectionCalculation(const double)  // _bwnorm
   
 	W = getChannelMass();
 	//Lomnitz old used for XX
-	//Eth=0.5*(((W+protonMass)*(W+protonMass)-
-	//          protonMass*protonMass)/(_Ep+sqrt(_Ep*_Ep-protonMass*protonMass)));
+	Eth=0.5*(((W+protonMass)*(W+protonMass)-
+	          protonMass*protonMass)/(_Ep+sqrt(_Ep*_Ep-protonMass*protonMass)));
 	// Adapted for eX
-	Eth=0.5*(((W+starlightConstants::mel)*(W +starlightConstants::mel)-
-		  starlightConstants::mel*starlightConstants::mel)/(_electronEnergy+sqrt(_electronEnergy*_electronEnergy-starlightConstants::mel*starlightConstants::mel))); 
+	//Eth=0.5*(((W+starlightConstants::mel)*(W +starlightConstants::mel)-
+	//	  starlightConstants::mel*starlightConstants::mel)/(_electronEnergy+sqrt(_electronEnergy*_electronEnergy-starlightConstants::mel*starlightConstants::mel))); 
 	// cout<<" gamma+nucleon  Threshold: "<<Eth<<endl;
         printf(" gamma+nucleon threshold: %e GeV \n", Eth);
 

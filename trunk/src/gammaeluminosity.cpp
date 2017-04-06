@@ -133,7 +133,9 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
     wylumfile << Y << endl;
   }
     
-  Eth=0.5*(((_wMin+starlightConstants::mel)*(_wMin +starlightConstants::mel)-starlightConstants::mel*starlightConstants::mel)/(_electronEnergy+sqrt(_electronEnergy*_electronEnergy-starlightConstants::mel*starlightConstants::mel))); 
+  //Eth=0.5*(((_wMin+starlightConstants::mel)*(_wMin +starlightConstants::mel)-starlightConstants::mel*starlightConstants::mel)/(_electronEnergy+sqrt(_electronEnergy*_electronEnergy-starlightConstants::mel*starlightConstants::mel))); 
+  Eth=0.5*(((W+protonMass)*(W+protonMass)-
+	    protonMass*protonMass)/(_protonEnergy+sqrt(_protonEnergy*_protonEnergy-protonMass*protonMass)));
 
   int A_1 = getbbs().beam1().A(); 
   int A_2 = getbbs().beam2().A();
