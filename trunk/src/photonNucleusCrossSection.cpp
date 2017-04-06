@@ -232,7 +232,7 @@ photonNucleusCrossSection::getcsgA(const double Egamma,
 	//Used for A-A
 	tmin = (W * W / (4. * Egamma * _beamLorentzGamma)) * (W * W / (4. * Egamma * _beamLorentzGamma));
   
-	if ((_bbs.beam1().A() == 1) && (_bbs.beam2().A() == 1)){
+	if ((_bbs.beam1().A() <= 1) && (_bbs.beam2().A() <= 1)){
 	   // proton-proton, no scaling needed
 	   csgA = sigmagp(Wgp);
 	} else {
