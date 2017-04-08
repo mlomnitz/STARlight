@@ -3,8 +3,8 @@
 # To use, rename this file slight.in
 
 baseFileName = slight	#suite of output files will be saved with this base name
-BEAM_1_Z = 82    #Z of projectile
-BEAM_1_A = 208   #A of projectile
+BEAM_1_Z = 1    #Z of projectile
+BEAM_1_A = 0   #A of projectile
 BEAM_2_Z = 82   #Z of target
 BEAM_2_A = 208   #A of target
 BEAM_1_GAMMA = 1470.0 #Gamma of the colliding ion 1
