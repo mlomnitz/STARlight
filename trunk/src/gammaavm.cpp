@@ -589,7 +589,9 @@ void Gammaavectormeson::momenta(double W,double Y,double Q2,
 	//	 }
 	e_E = _eEnergy - Egam;
 	e_theta = std::acos(1 - Q2/(2.*_eEnergy*e_E));
-        pt1 = e_E*sin(e_theta);
+	//	cout<<" Lomnitz ::: E_e "<<_eEnergy<<" Q2 "<<Q2<<" W "<<W<<" Y "<<Y<<" Egam "<<Egam<<endl;
+	//	cout<<" Lomnitz ::: E_e' "<<e_E<<" theta "<<180.*e_theta/starlightConstants::pi<<" sinTheta "<<std::sin(e_theta)<<" pT "<<e_E*std::sin(e_theta)<<endl;
+        pt1 = starlightConstants::mel*sin(e_theta);
 	phi1 = 2.*starlightConstants::pi*_randy.Rndom();
 	e_phi = starlightConstants::pi+phi1;
 	if( (_bbs.beam1().A()==1 || _bbs.beam2().A()==1) || 
@@ -1122,12 +1124,15 @@ void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
         double dW, dY;
 	double xw,xy, xQ2, xtest, q2test, btest;
 	int  IW,IY;
-	
+	// ---------
+	int ndraws = 0 ;
+	float _root_finding = 0.;
+	// ---------
 	dW = (_VMWmax-_VMWmin)/double(_VMnumw);
 	dY = (_VMYmax-_VMYmin)/double(_VMnumy);
-  
+	//std::chrono::steady_clock::time_point begin_evt = std::chrono::steady_clock::now();
  L201pwyq2:
-
+	ndraws+=1;
 	xw = _randy.Rndom();
 	W = _VMWmin + xw*(_VMWmax-_VMWmin);
 
@@ -1159,8 +1164,54 @@ void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
 	xQ2 = _randy.Rndom();
 	Q2 = VMQ2min + xQ2*(VMQ2max-VMQ2min);
 	q2test = _randy.Rndom();
-	if( _dummy_pncs->g(Egamma,Q2)/_g_Earray[IW][IY] > q2test )
+
+	// Lomnitz minimazion
+	/// --------------------------
+	int int_step = 1000000;
+	float step = (VMQ2max - VMQ2min)/(float)int_step;
+	//cout<<"Running now energy "<<Egamma<<endl;
+	int ii = 0;
+	double g_p1 = 1E6;
+	//Timing test
+	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+	double to_stop = 1E-6;
+	if( _g_Earray[IW][IY]*1E-6 > 1E-6 )
+	  to_stop = _g_Earray[IW][IY]*1E-6 ;
+	while( g_p1 > to_stop ){ 	  
+	  double p1 = VMQ2min+ii*step;
+	  g_p1 = _dummy_pncs->g(Egamma,p1);
+	  ii++;
+	  //cout<<"Curious "<<g_p1<<endl;
+	}
+	double VMrootQ2max = VMQ2min+ii*step;
+	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+	double rootQ2 = VMQ2min+pow(_randy.Rndom(),8.0)*( VMrootQ2max-VMQ2min );
+	_root_finding+=std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+	/*cout<<" Lomnitz :: testing "<<VMQ2min+_randy.Rndom()*( VMrootQ2max-VMQ2min )<<" "
+	  <<rootQ2<<" "<<VMQ2min+VMrootQ2max*(1-exp(-1.0*_randy.Rndom()))<<endl;*/
+	/// --------------------------
+	//double VMexpQ2max = std::exp(-VMrootQ2max);
+	//double VMexpQ2min = std::exp(-VMQ2min);
+	//double expQ2 = -std::log( VMexpQ2min+_randy.Rndom()*(VMexpQ2max-VMexpQ2min) );
+	
+	//double expQ2 = -std::log(-rootQ2+1);
+	//cout<<rootQ2<<" "<<std::log(rootQ2)<<" "<<pow(-std::log(rootQ2),1.5)<<" "<<pow(-std::log(-rootQ2),-1.5)<<endl;
+	/*cout<<_dummy_pncs->g(Egamma,rootQ2*rootQ2)/_g_Earray[IW][IY]<<" ";
+	  cout<<" vs "<<q2test<<endl;*/
+	if( _dummy_pncs->g(Egamma,rootQ2)/_g_Earray[IW][IY] < q2test )
+	//if( _dummy_pncs->g(Egamma,expQ2)/_g_Earray[IW][IY] < q2test )
 	  goto L201pwyq2;
+	/*	
+	std::chrono::steady_clock::time_point end_evt = std::chrono::steady_clock::now();
+	float draw_time = chrono::duration_cast<std::chrono::microseconds>(end_evt - begin_evt).count();
+	cout<<" **************** Event accepted "<<draw_time*1E-6<<"s ****************"<<endl;;
+	cout<<" **  (W,Y,Eg,Q2) = ("<<W<<","<<Y<<","<<Egamma<<","<<expQ2<<")  **"<<endl;
+	cout<<" ** Event gen statistics :: ndraws "<<ndraws<<" "<< draw_time <<" micros ("<<draw_time/float(ndraws)<<" micros/draw "<<endl;
+	cout<<" ** Time spent root finding "<<_root_finding<<" micros ("<<_root_finding/float(ndraws)*100.0<<"%)"<<endl;
+	cout<<" ************************************************ "<<endl;;
+	*/
+	Q2 = rootQ2 ;
+	//Q2 = expQ2 ;
 }
 
 
