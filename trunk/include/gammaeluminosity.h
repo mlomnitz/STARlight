@@ -48,7 +48,8 @@ class photonElectronLuminosity : public photonNucleusCrossSection
   
  private:
   void photonNucleusDifferentialLuminosity();
-
+  std::string gammaTableParse(int ii, int jj);
+  
   const double _protonEnergy;
   const double _electronEnergy;
   const double _beamLorentzGamma;

@@ -95,11 +95,20 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
   ofstream wylumfile;
   wylumfile.precision(15);
   
+  std::string EQ2FileName;
+  EQ2FileName = "e_"+_baseFileName +".txt";
+
+  ofstream EQ2lumfile;
+  EQ2lumfile.precision(15);
+
   double  bwnorm,Eth;
 
   dW = (_wMax-_wMin)/_nWbins;
   dY  = (_yMax-(-1.0)*_yMax)/_nYbins;
     
+  // Write values for Q2 at constant Egamma slices
+  EQ2lumfile.open(EQ2FileName.c_str());
+
   // Write the values of W used in the calculation to slight.txt.  
   wylumfile.open(wyFileName.c_str());
   wylumfile << getbbs().beam1().Z() <<endl;
@@ -143,6 +152,7 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
   // Do this first for the case when the first beam is the photon emitter 
   // Treat pA separately with defined beams 
   // The variable beam (=1,2) defines which nucleus is the target 
+  //  std::vector <int>
   for(unsigned int i = 0; i <= _nWbins - 1; ++i) {
 
     W = _wMin + double(i)*dW + 0.5*dW;
@@ -166,24 +176,48 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
 
       f_WY = 0.; 
       g_E = 0;
-
       if( Egamma > Eth && Egamma < maxPhotonEnergy() ){
 
 	csgA=getcsgA(Egamma,W,beam);
         f_WY = Egamma*csgA*breitWigner(W,bwnorm);
+	
+	std::pair< double, double >* this_energy = Q2arraylimits(Egamma);
+	
 	g_E = integrated_Q2_dep(Egamma);
+	
+	
+	//
+	EQ2lumfile << gammaTableParse(i,j) <<endl;
+	EQ2lumfile << this_energy->first << endl;
+	EQ2lumfile << this_energy->second << endl;
+	//cout<<Q2array.size()<<endl;
+	//cout<<gammaTableParse(i,j)<<" "<<g_E<<endl;
+	double Q2min = this_energy->first;
+	double Q2max = this_energy->second;
+	for( int iQ2 =0 ;iQ2<100; ++iQ2){
+	  double Q2 = std::exp( std::log(Q2min)+iQ2*std::log(Q2max/Q2min)/100 );
+	  EQ2lumfile<< Q2*g(Egamma,Q2) <<endl;
+	}
       }
-
       wylumfile << f_WY << endl;
       wylumfile << g_E << endl;
-
+      //std::vector<float
+      
     }
   }
+  
+  EQ2lumfile.close();
 
   wylumfile << bwnorm << endl;
   wylumfile.close();
    
 }
-
-
+string photonElectronLuminosity::gammaTableParse(int ii, int jj)
+{
+  ostringstream tag1, tag2;
+  tag1<<ii;
+  tag2<<jj;
+  string to_ret = tag1.str()+","+tag2.str();
+  return to_ret;
+}
 
