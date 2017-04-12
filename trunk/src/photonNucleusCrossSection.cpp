@@ -580,17 +580,51 @@ photonNucleusCrossSection::photonFlux(const double Egamma, const int beam)
 double 
 photonNucleusCrossSection::integrated_Q2_dep(double const Egamma)
 {
-  //Returns the integrated value  g(E_gamma) = \int d(Q2) g(E_gamma,Q2) in notes
-  double Q2_min =  std::pow(starlightConstants::mel*Egamma,2.0)/_electronEnergy*(_electronEnergy-Egamma);
-  double Q2_max =  4.*_electronEnergy*(_electronEnergy-Egamma);
-  int const n_steps = 1000;
-  double step  = (Q2_max - Q2_min)/(double)n_steps; //need to check this
-  // Integrate using trapezoidal rule
-  double g_int = 0.5*( g(Egamma,Q2_min) + g(Egamma,Q2_max) ); 
-  for( int ii = 1 ; ii < n_steps ; ++ii)
-    g_int += g(Egamma,Q2_min+double(ii)*step);
+  std::pair<double , double>* limits = Q2arraylimits(Egamma);
+  double Q2_min =  limits->first;
+  double Q2_max = limits->second;
+  int const nstep = 10000;
+  double ln_min = std::log(Q2_min);
+  double ratio = std::log(Q2_max/Q2_min)/nstep;
+  //
+  g_int = 0 ;
+  for ( int ii = 0 ; ii< nstep; ++ii){
+    double x1 =  std::exp(ln_min+ii*ratio);
+    double x2 =  std::exp(ln_min+(ii+1)*ratio);
+    g_int += (x2-x1)*( g(Egamma,x2)+g(Egamma,x1) );
+  }
+  return g_int/2.;
+}
 
-  return step * g_int;
+
+//______________________________________________________________________________
+pair< double, double >*photonNucleusCrossSection::Q2arraylimits(double const Egamma)
+{
+  //Lomnitz
+  double Q2max= 4.*_electronEnergy*(_electronEnergy-Egamma);
+  double Q2min= std::pow(starlightConstants::mel*Egamma,2.0)/_electronEnergy*(_electronEnergy-Egamma);;
+  int Nstep = 1000;
+  //
+  double ratio = std::log(Q2max/Q2min)/(double)Nstep;
+  double ln_min = std::log(Q2min);
+  // -- - -
+  const double limit = 1E-9;
+  std::vector<double>Q2_array;
+  int iNstep = 0;
+  double g_step = 1.;
+  while( g_step>limit ){
+    double Q2 = std::exp(ln_min+iNstep*ratio);
+    if(Q2>Q2max) 
+      break;
+    g_step = g(Egamma,Q2);
+    Q2_array.push_back(g_step);
+    iNstep++;
+  }
+  if( std::exp(ln_min+iNstep*ratio) < Q2max)
+    Q2max = std::exp(ln_min+iNstep*ratio);
+  std::pair<double, double>* to_ret = new std::pair<double, double>(Q2min,Q2max);
+
+  return to_ret;
 }
 
 

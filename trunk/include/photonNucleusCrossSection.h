@@ -69,6 +69,7 @@ public:
 	double photonFlux(const double Egamma,
 			  const double Q2);
 	double integrated_Q2_dep(const double Egamma);
+	std::pair<double,double>* Q2arraylimits(double const Egamma);
 	double g(double const Egamma, double const Q2);
 	// ---
 	double sigmagp(const double Wgp);
