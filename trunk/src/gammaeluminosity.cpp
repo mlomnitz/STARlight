@@ -88,7 +88,9 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
   double csgA;
   double C;  
   int beam; 
-
+  //
+  int nQ2steps =100;
+  
   std::string wyFileName;
   wyFileName = _baseFileName +".txt";
 
@@ -108,7 +110,7 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
     
   // Write values for Q2 at constant Egamma slices
   EQ2lumfile.open(EQ2FileName.c_str());
-
+  EQ2lumfile << nQ2steps <<endl;
   // Write the values of W used in the calculation to slight.txt.  
   wylumfile.open(wyFileName.c_str());
   wylumfile << getbbs().beam1().Z() <<endl;
@@ -179,19 +181,14 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
       if( Egamma > Eth && Egamma < maxPhotonEnergy() ){
 
 	csgA=getcsgA(Egamma,W,beam);
-        f_WY = Egamma*csgA*breitWigner(W,bwnorm);
-	
-	std::pair< double, double >* this_energy = Q2arraylimits(Egamma);
-	
 	g_E = integrated_Q2_dep(Egamma);
-	
+	f_WY = g_E*Egamma*csgA*breitWigner(W,bwnorm);
+	std::pair< double, double >* this_energy = Q2arraylimits(Egamma);
 	
 	//
 	EQ2lumfile << gammaTableParse(i,j) <<endl;
 	EQ2lumfile << this_energy->first << endl;
 	EQ2lumfile << this_energy->second << endl;
-	//cout<<Q2array.size()<<endl;
-	//cout<<gammaTableParse(i,j)<<" "<<g_E<<endl;
 	double Q2min = this_energy->first;
 	double Q2max = this_energy->second;
 	for( int iQ2 =0 ;iQ2<100; ++iQ2){
@@ -201,7 +198,6 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
       }
       wylumfile << f_WY << endl;
       wylumfile << g_E << endl;
-      //std::vector<float
       
     }
   }
