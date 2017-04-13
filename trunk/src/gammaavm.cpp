@@ -1134,7 +1134,7 @@ void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
 
 	xw = _randy.Rndom();
 	W = _VMWmin + xw*(_VMWmax-_VMWmin);
-	w_draws+=1;
+	//w_draws+=1;
 	if (W < 2 * starlightConstants::pionChargedMass)
 		goto L201pwyq2;
   
@@ -1143,7 +1143,7 @@ void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
 	Y = _VMYmin + xy*(_VMYmax-_VMYmin);
 	IY = int((Y-_VMYmin)/dY); 
 	xtest = _randy.Rndom();
-	y_draws++;
+	//y_draws++;
 	if( xtest > _f_WYarray[IW][IY] )
 		goto L201pwyq2;
         N0++; 
@@ -1177,7 +1177,7 @@ void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
 	double c = y_1-m*x_1;
 	double y = m*Q2+c;
 	q2test = _randy.Rndom();
-	q2_draws++;
+	//q2_draws++;
 	if( y < q2test )
 	  goto L201pwyq2;
 	//Used for debug. can be removed later
