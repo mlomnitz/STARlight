@@ -38,7 +38,6 @@
 
 #include "starlightconstants.h"
 #include "readinluminosity.h"
-#include "e_readinluminosity.h"
 #include "beambeamsystem.h"
 #include "randomgenerator.h"
 #include "upcevent.h"
