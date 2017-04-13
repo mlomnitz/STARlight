@@ -1123,19 +1123,18 @@ void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
 {
         double dW, dY;
 	double xw,xy, xQ2, xtest, q2test, btest;
-	int  IW,IY;
+	int  IW,IY, IQ2;
 	// ---------
-	int ndraws = 0 ;
-	float _root_finding = 0.;
+	//int y_draws = 0, w_draws =0, q2_draws =0 ;
 	// ---------
 	dW = (_VMWmax-_VMWmin)/double(_VMnumw);
 	dY = (_VMYmax-_VMYmin)/double(_VMnumy);
 	//std::chrono::steady_clock::time_point begin_evt = std::chrono::steady_clock::now();
  L201pwyq2:
-	ndraws+=1;
+
 	xw = _randy.Rndom();
 	W = _VMWmin + xw*(_VMWmax-_VMWmin);
-
+	w_draws+=1;
 	if (W < 2 * starlightConstants::pionChargedMass)
 		goto L201pwyq2;
   
@@ -1144,8 +1143,8 @@ void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
 	Y = _VMYmin + xy*(_VMYmax-_VMYmin);
 	IY = int((Y-_VMYmin)/dY); 
 	xtest = _randy.Rndom();
-
-	if( xtest > _g_Earray[IW][IY]*_f_WYarray[IW][IY] )
+	y_draws++;
+	if( xtest > _f_WYarray[IW][IY] )
 		goto L201pwyq2;
         N0++; 
 	// Target is always nucleus or proton in eX
@@ -1158,60 +1157,39 @@ void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
 	  Egamma = 0.5*W*exp(Y);
 	}
 	btest = _randy.Rndom();
-	//Q2 test
-	double VMQ2max = 4.*_eEnergy*(_eEnergy-Egamma);
-	double VMQ2min = std::pow(starlightConstants::mel*Egamma,2.0)/_eEnergy*(_eEnergy-Egamma);;
-	xQ2 = _randy.Rndom();
-	Q2 = VMQ2min + xQ2*(VMQ2max-VMQ2min);
-	q2test = _randy.Rndom();
-
-	// Lomnitz minimazion
-	/// --------------------------
-	int int_step = 1000000;
-	float step = (VMQ2max - VMQ2min)/(float)int_step;
-	//cout<<"Running now energy "<<Egamma<<endl;
-	int ii = 0;
-	double g_p1 = 1E6;
-	//Timing test
-	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-	double to_stop = 1E-6;
-	if( _g_Earray[IW][IY]*1E-6 > 1E-6 )
-	  to_stop = _g_Earray[IW][IY]*1E-6 ;
-	while( g_p1 > to_stop ){ 	  
-	  double p1 = VMQ2min+ii*step;
-	  g_p1 = _dummy_pncs->g(Egamma,p1);
-	  ii++;
-	  //cout<<"Curious "<<g_p1<<endl;
-	}
-	double VMrootQ2max = VMQ2min+ii*step;
-	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-	double rootQ2 = VMQ2min+pow(_randy.Rndom(),8.0)*( VMrootQ2max-VMQ2min );
-	_root_finding+=std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
-	/*cout<<" Lomnitz :: testing "<<VMQ2min+_randy.Rndom()*( VMrootQ2max-VMQ2min )<<" "
-	  <<rootQ2<<" "<<VMQ2min+VMrootQ2max*(1-exp(-1.0*_randy.Rndom()))<<endl;*/
-	/// --------------------------
-	//double VMexpQ2max = std::exp(-VMrootQ2max);
-	//double VMexpQ2min = std::exp(-VMQ2min);
-	//double expQ2 = -std::log( VMexpQ2min+_randy.Rndom()*(VMexpQ2max-VMexpQ2min) );
 	
-	//double expQ2 = -std::log(-rootQ2+1);
-	//cout<<rootQ2<<" "<<std::log(rootQ2)<<" "<<pow(-std::log(rootQ2),1.5)<<" "<<pow(-std::log(-rootQ2),-1.5)<<endl;
-	/*cout<<_dummy_pncs->g(Egamma,rootQ2*rootQ2)/_g_Earray[IW][IY]<<" ";
-	  cout<<" vs "<<q2test<<endl;*/
-	if( _dummy_pncs->g(Egamma,rootQ2)/_g_Earray[IW][IY] < q2test )
-	//if( _dummy_pncs->g(Egamma,expQ2)/_g_Earray[IW][IY] < q2test )
+	string Egamma_tag = gammaTableParse(IW,IY);
+	std::vector<double> photon_flux = _g_EQ2array->operator[](Egamma_tag);
+	double VMQ2min = photon_flux[0];
+	double VMQ2max = photon_flux[1];
+	double ratio = std::log(VMQ2max/VMQ2min);
+	double ln_min = std::log(VMQ2min);
+
+	xQ2 = _randy.Rndom();
+	Q2 = std::exp(ln_min+xQ2*ratio);
+	IQ2 = int(100*xQ2);	
+	// Load from look-up table. Use linear interpolation to evaluate at Q2
+	double y_1 = photon_flux[IQ2+2];
+	double y_2 = photon_flux[IQ2+3];
+	double x_1 = std::exp(ln_min+IQ2*ratio/100);
+	double x_2 = std::exp(ln_min+(1+IQ2)*ratio/100);
+	double m = (y_2 - y_1)/(x_2 - x_1);
+	double c = y_1-m*x_1;
+	double y = m*Q2+c;
+	q2test = _randy.Rndom();
+	q2_draws++;
+	if( y < q2test )
 	  goto L201pwyq2;
-	/*	
-	std::chrono::steady_clock::time_point end_evt = std::chrono::steady_clock::now();
+	//Used for debug. can be removed later
+	/*std::chrono::steady_clock::time_point end_evt = std::chrono::steady_clock::now();
 	float draw_time = chrono::duration_cast<std::chrono::microseconds>(end_evt - begin_evt).count();
+	double ndraws = w_draws+y_draws+q2_draws;
 	cout<<" **************** Event accepted "<<draw_time*1E-6<<"s ****************"<<endl;;
-	cout<<" **  (W,Y,Eg,Q2) = ("<<W<<","<<Y<<","<<Egamma<<","<<expQ2<<")  **"<<endl;
+	cout<<" **  (W,Y,Eg,Q2) = ("<<W<<","<<Y<<","<<Egamma<<","<<Q2<<")  **"<<endl;
 	cout<<" ** Event gen statistics :: ndraws "<<ndraws<<" "<< draw_time <<" micros ("<<draw_time/float(ndraws)<<" micros/draw "<<endl;
-	cout<<" ** Time spent root finding "<<_root_finding<<" micros ("<<_root_finding/float(ndraws)*100.0<<"%)"<<endl;
-	cout<<" ************************************************ "<<endl;;
-	*/
-	Q2 = rootQ2 ;
-	//Q2 = expQ2 ;
+	cout<<" ** Draw breakdown (W,Y,Q2) = ("<<w_draws<<","<<y_draws<<","<<q2_draws<<")"<<endl;
+	//cout<<" ** Time spent root finding "<<_root_finding<<" micros ("<<_root_finding/float(ndraws)*100.0<<"%)"<<endl;
+	cout<<" ************************************************ "<<endl;*/
 }
 
 
@@ -1323,4 +1301,12 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	}
 	return event;
 
+}
+string Gammaavectormeson::gammaTableParse(int ii, int jj)
+{
+  ostringstream tag1, tag2;
+  tag1<<ii;
+  tag2<<jj;
+  string to_ret = tag1.str()+","+tag2.str();
+  return to_ret;
 }

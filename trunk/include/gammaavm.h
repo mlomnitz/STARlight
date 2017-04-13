@@ -77,6 +77,7 @@ class Gammaavectormeson : public eventChannel
   double pseudoRapidity(double px, double py, double pz);
   
  private:
+  std::string gammaTableParse(int ii, int jj);
   starlightConstants::particleTypeEnum _VMpidtest;
   int _VMnumw;
   int _VMnumy;
