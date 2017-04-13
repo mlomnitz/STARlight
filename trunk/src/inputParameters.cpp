@@ -186,9 +186,8 @@ inputParameters::configureFromFile(const std::string &_configFileName)
 	_ptBinWidthInterference = maxPtInterference() / nmbPtBinsInterference();
 	_protonEnergy           = _beamLorentzGamma * protonMass;
 	//Storing electron energy in Lab frame
-	//_electronEnergy         = _beamLorentzGamma * starlightConstants::mel;
-	_electronEnergy         = beam1LorentzGamma() * starlightConstants::mel;
-
+	_electronEnergy         = _beamLorentzGamma * starlightConstants::mel;
+	//_electronEnergy         = beam1LorentzGamma() * starlightConstants::mel;
 	// check for deuteron or tritium - these must be the second beam
 	if((beam1Z()==1) && (beam1A()==2)){
 		if((beam2Z()==1) && (beam2A()==2)){
