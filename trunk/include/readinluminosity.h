@@ -53,16 +53,18 @@ class readLuminosity
   double **_Farray; 
   double **_Farray1;
   double **_Farray2;
-  // For eSTARlight
+  //For eSTARlight
   double **_f_WYarray;
   double **_g_Earray;
+  std::map<std::string,std::vector<double> >* _g_EQ2array;//Will store Q2 Qmin, Qmax, and g(Egamma,Q2)
 
   double _f_max;
   double _f_max1;
   double _f_max2;
   // For eSTARlight
-    double _f_WYmax;
+  double _f_WYmax;
   double _g_Emax;
+  double _g_EQ2max;
 
   double _fptarray[500][500];
 
