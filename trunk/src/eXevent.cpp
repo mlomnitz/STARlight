@@ -71,6 +71,7 @@ eXEvent& eXEvent::operator=(const eXEvent& rhs)
     this->_particles = rhs._particles;
     this->_vertices = rhs._vertices;
     this->_gammaEnergies = rhs._gammaEnergies;
+    this->_sources = rhs._sources;
   }
   return *this;
 }
@@ -89,6 +90,9 @@ eXEvent& eXEvent::operator+(const eXEvent& ev)
   {
     this->_gammaEnergies.push_back(ev._gammaEnergies.at(n));
   }
+ for(unsigned int n = 0; n<ev._sources.size(); ++n){
+   this->_sources.push_back(ev._sources.at(n));
+ }
   return *this;
 }
 
@@ -100,5 +104,9 @@ void eXEvent::boost(double rapidity)
     for (part = _particles.begin(); part != _particles.end(); part++)
     {
       (*part).Boost(boostVector);
+    }
+    std::vector<lorentzVector>::iterator ele = _sources.begin();
+    for( ele = _sources.begin(); ele != _sources.end(); ++ele){
+      (*ele).Boost(boostVector);
     }
 }
