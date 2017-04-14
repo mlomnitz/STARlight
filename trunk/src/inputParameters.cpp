@@ -181,12 +181,14 @@ inputParameters::configureFromFile(const std::string &_configFileName)
  	double rap1 = acosh(beam1LorentzGamma());
 	double rap2 = -acosh(beam2LorentzGamma());
 	_beamLorentzGamma = cosh((rap1-rap2)/2);
+	_targetLorentzGamma = cosh(rap1-rap2);
 	
 	std::cout << "Rapidity beam 1: " << rap1 << ", rapidity beam 2: " << rap2 << ", rapidity CMS system: " << (rap1+rap2)/2 << ", beam gamma in CMS: " << _beamLorentzGamma<< std::endl;
+	std::cout << "Rapidity beam 1 in beam 2 frame: " << rap1-rap2 << ", beam 1 gamma in beam 2 frame: " << _targetLorentzGamma<< std::endl;
 	_ptBinWidthInterference = maxPtInterference() / nmbPtBinsInterference();
 	_protonEnergy           = _beamLorentzGamma * protonMass;
-	//Storing electron energy in Lab frame
-	_electronEnergy         = _beamLorentzGamma * starlightConstants::mel;
+	//Storing electron energy in target frame
+	_electronEnergy         = _targetLorentzGamma * starlightConstants::mel;
 	//_electronEnergy         = beam1LorentzGamma() * starlightConstants::mel;
 	// check for deuteron or tritium - these must be the second beam
 	if((beam1Z()==1) && (beam1A()==2)){
