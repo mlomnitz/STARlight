@@ -82,6 +82,7 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
 {
   double W,dW,dY;
   double Egamma,Y;
+  //
   double testint;
   // 
   double f_WY, g_E;
@@ -160,30 +161,35 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
     W = _wMin + double(i)*dW + 0.5*dW;
     
     for(unsigned int j = 0; j <= _nYbins - 1; ++j) { 
-
+      // Used for calculation of g(Egamma) which must be done ion target frame
+      double target_Egamma = 0 ;
       Y = -1.0*_yMax + double(j)*dY + 0.5*dY;
 
       if( A_2 == 0 && A_1 != 0 ){
         // eA, first beam is the nucleus and is in this case the target  
         Egamma = 0.5*W*exp(-Y); 
+	target_Egamma = Egamma*exp(-Y);
         beam = 1; 
       } else if( A_1 ==0 && A_2 != 0){
         // pA, second beam is the nucleus and is in this case the target 
         Egamma = 0.5*W*exp(Y); 
+	target_Egamma = Egamma*exp(Y);
         beam = 2; 
       } else {
         Egamma = 0.5*W*exp(Y);        
+	target_Egamma = Egamma*exp(Y);
         beam = 2; 
       }
 
       f_WY = 0.; 
       g_E = 0;
-      if( Egamma > Eth && Egamma < maxPhotonEnergy() ){
+      // Photon energy limits are determnined in target frame
+      if( target_Egamma > Eth && target_Egamma < maxPhotonEnergy() ){
 
 	csgA=getcsgA(Egamma,W,beam);
-	g_E = integrated_Q2_dep(Egamma);
+	g_E = integrated_Q2_dep(target_Egamma);
 	f_WY = g_E*Egamma*csgA*breitWigner(W,bwnorm);
-	std::pair< double, double >* this_energy = Q2arraylimits(Egamma);
+	std::pair< double, double >* this_energy = Q2arraylimits(target_Egamma);
 	
 	//
 	EQ2lumfile << gammaTableParse(i,j) <<endl;
@@ -193,7 +199,7 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
 	double Q2max = this_energy->second;
 	for( int iQ2 =0 ;iQ2<100; ++iQ2){
 	  double Q2 = std::exp( std::log(Q2min)+iQ2*std::log(Q2max/Q2min)/100 );
-	  EQ2lumfile<< Q2*g(Egamma,Q2) <<endl;
+	  EQ2lumfile<< Q2*g(target_Egamma,Q2) <<endl;
 	}
       }
       wylumfile << f_WY << endl;
