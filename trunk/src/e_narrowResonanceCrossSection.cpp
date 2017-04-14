@@ -103,39 +103,51 @@ e_narrowResonanceCrossSection::crossSectionCalculation(const double)  // _bwnorm
 		y1  = _narrowYmin + double(J)*dY;
 		y2  = _narrowYmin + double(J+1)*dY;
 		y12 = 0.5*(y1+y2);
-    
+		double target_ega1, target_ega2, target_ega12;
                 if( A_2 == 0 && A_1 >= 1 ){
                   // pA, first beam is the nucleus and is in this case the target  
                   ega1  = 0.5*W*exp(-y1);
                   ega2  = 0.5*W*exp(-y2);
                   ega12 = 0.5*W*exp(-y12);
+		  // photon energy in Target frame 
+		  target_ega1 = ega1*exp(-y1);
+		  target_ega2 = ega2*exp(-y2);
+		  target_ega12 = ega12*exp(-y12);
                   beam = 1; 
                 } else if( A_1 ==0 && A_2 >= 1){
                   // pA, second beam is the nucleus and is in this case the target 
                   ega1  = 0.5*W*exp(y1);
                   ega2  = 0.5*W*exp(y2);
                   ega12 = 0.5*W*exp(y12);
+		  // photon energy in Target frame
+		  target_ega1 = ega1*exp(y1);
+		  target_ega2 = ega2*exp(y2);
+		  target_ega12 = ega12*exp(y12);
                   beam = 2; 
                 } else {
                   ega1  = 0.5*W*exp(y1);
                   ega2  = 0.5*W*exp(y2);
                   ega12 = 0.5*W*exp(y12);
+		  // photon energy in Target frame
+		  target_ega1 = ega1*exp(y1);
+		  target_ega2 = ega2*exp(y2);
+		  target_ega12 = ega12*exp(y12);
                   beam = 2; 
                 }
     
-		if(ega1 < Eth || ega2 < Eth)   
+		if(target_ega1 < Eth || target_ega2 < Eth)   
 			continue;
-		if(ega2 > maxPhotonEnergy() || ega1 > maxPhotonEnergy() ) 
+		if(target_ega2 > maxPhotonEnergy() || target_ega1 > maxPhotonEnergy() ) 
 			continue;
 
 		//			
-		g_Eg1 = integrated_Q2_dep(ega1);
+		g_Eg1 = integrated_Q2_dep(target_ega1);
 		csgA1=getcsgA(ega1,W,beam);
 		//         >> Middle Point                      =====>>>
-		g_Eg12 = integrated_Q2_dep(ega12);
+		g_Eg12 = integrated_Q2_dep(target_ega12);
 		csgA12=getcsgA(ega12,W,beam);         
 		//         >> Second Point                      =====>>>
-		g_Eg2 = integrated_Q2_dep(ega2);
+		g_Eg2 = integrated_Q2_dep(target_ega2);
 		csgA2=getcsgA(ega2,W,beam);
 		//>> Sum the contribution for this W,Y. The 2 accounts for the 2 beams
 		dR  = ega1*g_Eg1*csgA1;
