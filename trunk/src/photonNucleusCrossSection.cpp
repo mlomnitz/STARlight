@@ -58,7 +58,10 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	  _particleType      (inputParametersInstance.prodParticleType()  ),
 	  _beamBreakupMode   (inputParametersInstance.beamBreakupMode()   ),
           _productionMode    (inputParametersInstance.productionMode()    ),
-	  _sigmaNucleus      (_bbs.beam2().A()          )
+	  _sigmaNucleus      (_bbs.beam2().A()          ),
+	  _fixedQ2range      (inputParametersInstance.fixedQ2Range()      ),
+	  _minQ2             (inputParametersInstance.minGammaQ2()        ),
+	  _maxQ2             (inputParametersInstance.maxGammaQ2()        )
 {
 	switch(_particleType) {
 	case RHO:
@@ -600,6 +603,11 @@ photonNucleusCrossSection::integrated_Q2_dep(double const Egamma)
 //______________________________________________________________________________
 pair< double, double >*photonNucleusCrossSection::Q2arraylimits(double const Egamma)
 {
+  if( _fixedQ2range == true){
+    std::pair<double,double>* to_ret = new std::pair<double, double>(_minQ2,_maxQ2);
+    return to_ret;
+  }
+
   //Lomnitz
   double Q2max= 4.*_electronEnergy*(_electronEnergy-Egamma);
   double Q2min= std::pow(starlightConstants::mel*Egamma,2.0)/_electronEnergy*(_electronEnergy-Egamma);;
