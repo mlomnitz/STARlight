@@ -182,7 +182,8 @@ inputParameters::configureFromFile(const std::string &_configFileName)
 	double rap2 = -acosh(beam2LorentzGamma());
 	_beamLorentzGamma = cosh((rap1-rap2)/2);
 	_targetLorentzGamma = cosh(rap1-rap2);
-	
+	_fixedQ2Range = false;
+
 	std::cout << "Rapidity beam 1: " << rap1 << ", rapidity beam 2: " << rap2 << ", rapidity CMS system: " << (rap1+rap2)/2 << ", beam gamma in CMS: " << _beamLorentzGamma<< std::endl;
 	std::cout << "Rapidity beam 1 in beam 2 frame: " << rap1-rap2 << ", beam 1 gamma in beam 2 frame: " << _targetLorentzGamma<< std::endl;
 	_ptBinWidthInterference = maxPtInterference() / nmbPtBinsInterference();
@@ -571,6 +572,15 @@ inputParameters::configureFromFile(const std::string &_configFileName)
 		return false;
 	}
 
+	//
+	if( _minGammaQ2.value() != 0 || _maxGammaQ2.value() != 0){
+	  if( _minGammaQ2.value() <=0 || _maxGammaQ2.value() <=_minGammaQ2.value() )
+	    printWarn << "Input values for min and max Q2 are inconsistent: "<<_minGammaQ2.value()<<","<<_maxGammaQ2.value()
+		      <<". Continuing with default "<<endl;
+	  else
+	    _fixedQ2Range = true;
+	}
+
 	printInfo << "using the following " << *this;
 	
 	return true;
@@ -616,8 +626,12 @@ inputParameters::print(ostream& out) const
 		else {
 	 	  out  << "    coherent scattering off nucleus ........ yes" << endl;
 		}
-	}
-	return out;
+    }
+    if (_fixedQ2Range == true ){
+      out << "    fixed photon Q2 range .................. " << _minGammaQ2.value() << " < Q2 < "
+	  <<_maxGammaQ2.value() << " GeV/c^2 "<<endl;
+    }
+    return out;
 }
 
 
@@ -652,7 +666,11 @@ inputParameters::write(ostream& out) const
 	    << "IF_STRENGTH"   << interferenceStrength () <<endl
 	    << "INT_PT_MAX"    << maxPtInterference    () <<endl
 	    << "INT_PT_N_BINS" << nmbPtBinsInterference() <<endl;
-
+	out<< "USING FIXED RANGE"<<_fixedQ2Range<<endl;
+	if( _fixedQ2Range == true ){
+	  out << "Q2_MIN"      << minGammaQ2           () <<endl
+	      << "Q2_MAX"      << maxGammaQ2           () <<endl;
+	}
 	return out;
 }
 

@@ -211,6 +211,7 @@ public:
 	double       maxGammaEnergy        () const { return _maxGammaEnergy.value();         }  ///< returns maximum gamma energy in case of photo nuclear processes [GeV]
 	double       minGammaQ2            () const { return _minGammaQ2.value();             }  ///< return minimum gamma virtuality 
 	double       maxGammaQ2            () const { return _maxGammaQ2.value();             }  ///< return maximum gamma virtuality 
+	bool         fixedQ2Range          () const { return _fixedQ2Range;                   }  ///< return state of Q2 range
 	unsigned int nmbGammaQ2Bins        () const { return _nmbGammaQ2Bins.value();         }  ///< return number of gamma q2 bins
 	std::string  pythiaParams          () const { return _pythiaParams.value();           }  ///< returns parameters to be passed to pythia
 	bool         pythiaFullEventRecord () const { return _pythiaFullEventRecord.value();  }  ///< returns if the full pythia event record should be printed
@@ -257,6 +258,8 @@ public:
 	void setPtBinWidthInterference(double v)  {  _ptBinWidthInterference = v; }  ///< sets width of p_T bins for voiderference calculation [GeV/c]
 	void setMinGammaEnergy        (double v)  {  _minGammaEnergy = v;         }  ///< sets minimum gamma energy in case of photo nuclear processes [GeV]
 	void setMaxGammaEnergy        (double v)  {  _maxGammaEnergy = v;         }  ///< sets maximum gamma energy in case of photo nuclear processes [GeV]
+	void setMinGammaQ2            (double v)  {  _minGammaQ2 = v;             }  ///< sets minimum gamma virtuality in case of photo nuclear processes [GeV]
+	void setMaxGammaQ2            (double v)  {  _maxGammaQ2 = v;         }  ///< sets maximum gamma virtuality in case of photo nuclear processes [GeV]
 	void setPythiaParams          (std::string v)  {  _pythiaParams = v;      }  ///< sets parameters to be passed to pythia
 	void setPythiaFullEventRecord (bool v)  {  _pythiaFullEventRecord = v;    }  ///< sets if the full pythia event record should be prvoided
 	void setXsecCalcMethod        (int v)  {  _xsecCalcMethod = v;            }  ///< sets the method used for the x-sec calculation
@@ -353,7 +356,8 @@ private:
 	double                         _targetLorentzGamma;       ///< Lorentz gamma factor of the source in target frame, not an input parameter
 	double                         _beamLorentzGamma;         ///< Lorentz gamma factor of the beams in CMS frame, not an input parameter
 	double                         _inputBranchingRatio;      ///< Branching ratio defined for each channel
-	
+	bool                           _fixedQ2Range;
+
 	inputParser _ip;
 	
 };
