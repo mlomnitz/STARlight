@@ -64,7 +64,8 @@ Gammaavectormeson::Gammaavectormeson(const inputParameters& inputParametersInsta
         _bslopeDef=inputParametersInstance.bslopeDefinition();
 	_bslopeVal=inputParametersInstance.bslopeValue();
 	_pEnergy= inputParametersInstance.protonEnergy();
-	_eEnergy= inputParametersInstance.electronEnergy();
+	// electron energy in CMS frame
+	_eEnergy= inputParametersInstance.beamLorentzGamma()*starlightConstants::mel;
 	_VMpidtest=inputParametersInstance.prodParticleType();
 	_VMptmax=inputParametersInstance.maxPtInterference();
 	_VMdpt=inputParametersInstance.ptBinWidthInterference();
@@ -587,11 +588,12 @@ void Gammaavectormeson::momenta(double W,double Y,double Q2,
 	//          Egam = 0.5*W*exp(Y);
 	//	  Epom = 0.5*W*exp(-Y);
 	//	 }
+	// Calculations done in CMS frame (need to recalculate electron energy)
 	e_E = _eEnergy - Egam;
 	e_theta = std::acos(1 - Q2/(2.*_eEnergy*e_E));
 	//	cout<<" Lomnitz ::: E_e "<<_eEnergy<<" Q2 "<<Q2<<" W "<<W<<" Y "<<Y<<" Egam "<<Egam<<endl;
 	//	cout<<" Lomnitz ::: E_e' "<<e_E<<" theta "<<180.*e_theta/starlightConstants::pi<<" sinTheta "<<std::sin(e_theta)<<" pT "<<e_E*std::sin(e_theta)<<endl;
-        pt1 = starlightConstants::mel*sin(e_theta);
+        pt1 = e_E*sin(e_theta);
 	phi1 = 2.*starlightConstants::pi*_randy.Rndom();
 	e_phi = starlightConstants::pi+phi1;
 	if( (_bbs.beam1().A()==1 || _bbs.beam2().A()==1) || 
