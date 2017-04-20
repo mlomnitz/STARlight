@@ -184,22 +184,25 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
       f_WY = 0.; 
       g_E = 0;
       // Photon energy limits are determnined in target frame
-      if( target_Egamma > Eth && target_Egamma < maxPhotonEnergy() ){
-
+      //if( target_Egamma > Eth && target_Egamma < maxPhotonEnergy() ){
+      if( Egamma > Eth && Egamma < maxPhotonEnergy() ){
 	csgA=getcsgA(Egamma,W,beam);
 	g_E = integrated_Q2_dep(target_Egamma);
 	f_WY = g_E*Egamma*csgA*breitWigner(W,bwnorm);
+	//
 	std::pair< double, double >* this_energy = Q2arraylimits(target_Egamma);
-	
+	double Q2min = this_energy->first;
+	double Q2max = this_energy->second;
+	if( Q2min > Q2max)
+	  continue;
 	//
 	EQ2lumfile << gammaTableParse(i,j) <<endl;
 	EQ2lumfile << this_energy->first << endl;
 	EQ2lumfile << this_energy->second << endl;
-	double Q2min = this_energy->first;
-	double Q2max = this_energy->second;
-	for( int iQ2 =0 ;iQ2<100; ++iQ2){
+	for( int iQ2 =0 ;iQ2<=100; ++iQ2){
 	  double Q2 = std::exp( std::log(Q2min)+iQ2*std::log(Q2max/Q2min)/100 );
-	  EQ2lumfile<< Q2*g(target_Egamma,Q2) <<endl;
+	  //EQ2lumfile<< Q2*g(target_Egamma,Q2) <<endl;
+	  EQ2lumfile<< g(target_Egamma,Q2) <<endl;
 	}
       }
       wylumfile << f_WY << endl;
