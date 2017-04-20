@@ -591,8 +591,8 @@ void Gammaavectormeson::momenta(double W,double Y,double Q2,
 	// Calculations done in CMS frame (need to recalculate electron energy)
 	e_E = _eEnergy - Egam;
 	e_theta = std::acos(1 - Q2/(2.*_eEnergy*e_E));
-	//	cout<<" Lomnitz ::: E_e "<<_eEnergy<<" Q2 "<<Q2<<" W "<<W<<" Y "<<Y<<" Egam "<<Egam<<endl;
-	//	cout<<" Lomnitz ::: E_e' "<<e_E<<" theta "<<180.*e_theta/starlightConstants::pi<<" sinTheta "<<std::sin(e_theta)<<" pT "<<e_E*std::sin(e_theta)<<endl;
+	//cout<<" Lomnitz ::: E_e "<<_eEnergy<<" Q2 "<<Q2<<" W "<<W<<" Y "<<Y<<" Egam "<<Egam<<endl;
+	//cout<<" Lomnitz ::: E_e' "<<e_E<<" theta "<<180.*e_theta/starlightConstants::pi<<" sinTheta "<<std::sin(e_theta)<<" pT "<<e_E*std::sin(e_theta)<<endl;
         pt1 = e_E*sin(e_theta);
 	phi1 = 2.*starlightConstants::pi*_randy.Rndom();
 	e_phi = starlightConstants::pi+phi1;
@@ -1139,7 +1139,6 @@ void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
 	//w_draws+=1;
 	if (W < 2 * starlightConstants::pionChargedMass)
 		goto L201pwyq2;
-  
 	IW = int((W-_VMWmin)/dW);
 	xy = _randy.Rndom();
 	Y = _VMYmin + xy*(_VMYmax-_VMYmin);
@@ -1161,6 +1160,9 @@ void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
 	btest = _randy.Rndom();
 	
 	string Egamma_tag = gammaTableParse(IW,IY);
+	if( _g_EQ2array->find(Egamma_tag) == _g_EQ2array->end() ){
+	  goto L201pwyq2;
+	}
 	std::vector<double> photon_flux = _g_EQ2array->operator[](Egamma_tag);
 	double VMQ2min = photon_flux[0];
 	double VMQ2max = photon_flux[1];
@@ -1215,6 +1217,7 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	double px2=0.,px1=0.,py2=0.,py1=0.,pz2=0.,pz1=0.;
 	double e_E=0., e_theta=0., e_phi=0;
 	bool accepted = false;
+	double target_Egamma;
 	do{
 	  pickwyq2(comenergy,rapidity,Q2);	  
 	  momenta(comenergy,rapidity,Q2,E,momx,momy,momz,
@@ -1222,9 +1225,13 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	  //
 	  if( _bbs.beam2().A()==0 && _bbs.beam1().A() != 0){ 
 	    Egamma = 0.5*comenergy*exp(-rapidity);
+	    target_Egamma = Egamma*exp(-rapidity);
 	  } else {
 	    Egamma = 0.5*comenergy*exp(rapidity);
+	    target_Egamma = Egamma*exp(rapidity);
 	  }
+	  //cout<<"(W,Y,Q2) = ("<<comenergy<<","<<rapidity<<","<<Q2<<")"<<endl;
+	  //cout<<" CMS energy "<<Egamma<<" vs target Egamma "<<target_Egamma<<endl;
 	  _nmbAttempts++;
 	  
 	  vmpid = ipid; 

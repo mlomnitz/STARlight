@@ -189,9 +189,10 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 		     <<" GammaAcrosssection"<<endl;
 	}
 
-	//Changed by Lomnitz for e case. Limit is now E_e - 10m_e
+	//Changed by Lomnitz for e case. Limit is now E_e - 100m_e
 	//_maxPhotonEnergy = 12. * _beamLorentzGamma * hbarc/(_bbs.beam1().nuclearRadius()+_bbs.beam2().nuclearRadius());
-	_maxPhotonEnergy = _electronEnergy - 10.*starlightConstants::mel;
+	//_maxPhotonEnergy = _electronEnergy - 10.*starlightConstants::mel;
+	_maxPhotonEnergy = _beamLorentzGamma*starlightConstants::mel - 100.*starlightConstants::mel;
 }
 
 
@@ -583,9 +584,9 @@ photonNucleusCrossSection::photonFlux(const double Egamma, const int beam)
 double 
 photonNucleusCrossSection::integrated_Q2_dep(double const Egamma)
 {
-  std::pair<double , double>* limits = Q2arraylimits(Egamma);
-  double Q2_min =  limits->first;
-  double Q2_max = limits->second;
+  //std::pair<double , double>* limits = Q2arraylimits(Egamma);
+  double Q2_min =  std::pow(starlightConstants::mel*Egamma,2.0)/_electronEnergy*(_electronEnergy-Egamma);
+  double Q2_max = 4.*_electronEnergy*(_electronEnergy-Egamma);
   int const nstep = 10000;
   double ln_min = std::log(Q2_min);
   double ratio = std::log(Q2_max/Q2_min)/nstep;
@@ -603,14 +604,16 @@ photonNucleusCrossSection::integrated_Q2_dep(double const Egamma)
 //______________________________________________________________________________
 pair< double, double >*photonNucleusCrossSection::Q2arraylimits(double const Egamma)
 {
+  double Q2max= 4.*_electronEnergy*(_electronEnergy-Egamma);
+  double Q2min= std::pow(starlightConstants::mel*Egamma,2.0)/_electronEnergy*(_electronEnergy-Egamma);
   if( _fixedQ2range == true){
-    std::pair<double,double>* to_ret = new std::pair<double, double>(_minQ2,_maxQ2);
+    if( Q2min < _minQ2 )
+      Q2min = _minQ2;
+    if( Q2max > _maxQ2 )
+      Q2max = _maxQ2;
+    std::pair<double,double>* to_ret = new std::pair<double, double>(Q2min,Q2max);
     return to_ret;
   }
-
-  //Lomnitz
-  double Q2max= 4.*_electronEnergy*(_electronEnergy-Egamma);
-  double Q2min= std::pow(starlightConstants::mel*Egamma,2.0)/_electronEnergy*(_electronEnergy-Egamma);;
   int Nstep = 1000;
   //
   double ratio = std::log(Q2max/Q2min)/(double)Nstep;
