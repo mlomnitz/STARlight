@@ -574,7 +574,7 @@ inputParameters::configureFromFile(const std::string &_configFileName)
 
 	//
 	if( _minGammaQ2.value() != 0 || _maxGammaQ2.value() != 0){
-	  if( _minGammaQ2.value() <=0 || _maxGammaQ2.value() <=_minGammaQ2.value() )
+	  if( _minGammaQ2.value() <0 || _maxGammaQ2.value() <=_minGammaQ2.value() )
 	    printWarn << "Input values for min and max Q2 are inconsistent: "<<_minGammaQ2.value()<<","<<_maxGammaQ2.value()
 		      <<". Continuing with default "<<endl;
 	  else
