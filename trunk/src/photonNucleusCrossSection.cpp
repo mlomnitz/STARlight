@@ -68,7 +68,7 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 		_slopeParameter = 11.0;  // [(GeV/c)^{-2}]
 		_vmPhotonCoupling = 2.02;
 		_vmQ2Power_c1 = 2.09;
-		_vmQ2Power_c2 = 73.; // [ GeV^{-2}]
+		_vmQ2Power_c2 = 0.0073; // [ GeV^{-2}]
 		_ANORM       = -2.75;
 		_BNORM       = 0.0;
 		_defaultC    = 1.0;
@@ -79,7 +79,7 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 		_slopeParameter =11.0;
 		_vmPhotonCoupling=2.02;
 		_vmQ2Power_c1 = 2.09;
-		_vmQ2Power_c2 = 73.; // [GeV^{-2}]
+		_vmQ2Power_c2 = 0.0073; // [GeV^{-2}]
 		_ANORM=-2.75;
 		_BNORM=1.84;
 		_defaultC=1.0;
@@ -90,7 +90,7 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 		_slopeParameter      = 11.0;
 		_vmPhotonCoupling      = 2.02;
 		_vmQ2Power_c1 = 2.09;
-		_vmQ2Power_c2 = 73.; // [GeV^{-2}]
+		_vmQ2Power_c2 = 0.0073; // [GeV^{-2}]
 		_ANORM       = -2.75;
 		_BNORM       = 0;  
 		_defaultC    = 11.0;
@@ -101,7 +101,7 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 		_slopeParameter=10.0;
 		_vmPhotonCoupling=23.13;
 		_vmQ2Power_c1 = 2.09;
-		_vmQ2Power_c2 = 73.; // [GeV^{-2}]
+		_vmQ2Power_c2 = 0.0073; // [GeV^{-2}]
 		_ANORM=-2.75;
 		_BNORM=0.0;
 		_defaultC=1.0;
@@ -112,7 +112,7 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 		_slopeParameter=7.0;
 		_vmPhotonCoupling=13.71;
 		_vmQ2Power_c1 = 2.15;
-		_vmQ2Power_c2 = 74.; // [GeV^{-2}]
+		_vmQ2Power_c2 = 0.0074; // [GeV^{-2}]
 		_ANORM=-2.75;
 		_BNORM=0.0;
 		_defaultC=1.0;
@@ -125,7 +125,7 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 		_slopeParameter=4.0;
 		_vmPhotonCoupling=10.45;
 		_vmQ2Power_c1 = 2.15;
-		_vmQ2Power_c2 = 74.; // [GeV^{-2}]
+		_vmQ2Power_c2 = 0.0074; // [GeV^{-2}]
 		_ANORM=-2.75; 
 		_BNORM=0.0;
 		_defaultC=1.0;
@@ -138,7 +138,7 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 		_slopeParameter=4.3;
 		_vmPhotonCoupling=26.39;
 		_vmQ2Power_c1 = 2.09;
-		_vmQ2Power_c2 = 73.; // [GeV^{-2}]
+		_vmQ2Power_c2 = 0.0073; // [GeV^{-2}]
 		_ANORM=-2.75; 
 		_BNORM=0.0;
 		_defaultC=1.0;
@@ -151,7 +151,7 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 		_slopeParameter=4.0;
 		_vmPhotonCoupling=125.37;
 		_vmQ2Power_c1 = 2.09;
-		_vmQ2Power_c2 = 73.; // [GeV^{-2}]
+		_vmQ2Power_c2 = 0.0073; // [GeV^{-2}]
 		_ANORM=-2.75; 
 		_BNORM=0.0;
 		_defaultC=1.0;
@@ -164,7 +164,7 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 		_slopeParameter=4.0;
 		_vmPhotonCoupling=290.84;
 		_vmQ2Power_c1 = 2.09;
-		_vmQ2Power_c2 = 73.; // [GeV^{-2}]
+		_vmQ2Power_c2 = 0.0073; // [GeV^{-2}]
 		_ANORM=-2.75;
 		_BNORM=0.0;
 		_defaultC=1.0;
@@ -177,7 +177,7 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 		_slopeParameter=4.0;
 		_vmPhotonCoupling=415.10;
 		_vmQ2Power_c1 = 2.09;
-		_vmQ2Power_c2 = 73.; // [GeV^{-2}]
+		_vmQ2Power_c2 = 0.0073; // [GeV^{-2}]
 		_ANORM=-2.75;
 		_BNORM=0.0;
 		_defaultC=1.0;
@@ -192,7 +192,11 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	//Changed by Lomnitz for e case. Limit is now E_e - 100m_e
 	//_maxPhotonEnergy = 12. * _beamLorentzGamma * hbarc/(_bbs.beam1().nuclearRadius()+_bbs.beam2().nuclearRadius());
 	//_maxPhotonEnergy = _electronEnergy - 10.*starlightConstants::mel;
-	_maxPhotonEnergy = _beamLorentzGamma*starlightConstants::mel - 100.*starlightConstants::mel;
+	_maxPhotonEnergy = _beamLorentzGamma*starlightConstants::mel - 10.*starlightConstants::mel;
+	cout<<" Lomnitz:: max energy in target frame "<< _electronEnergy - 10.*starlightConstants::mel<<endl
+	    <<"           max energy in cms frame    "<<_maxPhotonEnergy<<endl;
+	
+	  
 }
 
 
