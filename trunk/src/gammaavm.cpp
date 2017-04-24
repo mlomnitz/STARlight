@@ -1217,7 +1217,7 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	double px2=0.,px1=0.,py2=0.,py1=0.,pz2=0.,pz1=0.;
 	double e_E=0., e_theta=0., e_phi=0;
 	bool accepted = false;
-	double target_Egamma;
+	//double target_Egamma;
 	do{
 	  pickwyq2(comenergy,rapidity,Q2);	  
 	  momenta(comenergy,rapidity,Q2,E,momx,momy,momz,
@@ -1225,13 +1225,9 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	  //
 	  if( _bbs.beam2().A()==0 && _bbs.beam1().A() != 0){ 
 	    Egamma = 0.5*comenergy*exp(-rapidity);
-	    target_Egamma = Egamma*exp(-rapidity);
 	  } else {
 	    Egamma = 0.5*comenergy*exp(rapidity);
-	    target_Egamma = Egamma*exp(rapidity);
 	  }
-	  //cout<<"(W,Y,Q2) = ("<<comenergy<<","<<rapidity<<","<<Q2<<")"<<endl;
-	  //cout<<" CMS energy "<<Egamma<<" vs target Egamma "<<target_Egamma<<endl;
 	  _nmbAttempts++;
 	  
 	  vmpid = ipid; 
