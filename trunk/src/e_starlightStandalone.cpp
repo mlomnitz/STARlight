@@ -125,16 +125,29 @@ e_starlightStandalone::run()
 
 	printInfo << "generating events:" << endl;
 	unsigned int nmbEvents = 0;
+	//float running_total = 0;
+	std::chrono::steady_clock::time_point begin= std::chrono::steady_clock::now();
 	while (nmbEvents < _nmbEventsTot) {
 		for (unsigned int iEvent = 0; (iEvent < _nmbEventsPerFile) && (nmbEvents < _nmbEventsTot);
-		     ++iEvent, ++nmbEvents) {
+		     ++iEvent, ++nmbEvents) {	  
 			progressIndicator(iEvent, _nmbEventsTot, true, 4);
+			/*if(iEvent%10 == 0 ){
+			  std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
+			  float this_loop = 1E-3*std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+			  running_total+=this_loop;
+			  cout<<this_loop<<" s "<<endl;			  
+			  begin= std::chrono::steady_clock::now();
+			  }*/
 			eXEvent event = _starlight->produceEvent();
 			// Boost event from CMS system to lab system
 			boostEvent(event);
 			fileWriter.writeEvent(event, iEvent);
 		}
 	}
+	std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();                                   
+	float running_total = 1E-3*std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+	//cout<<1E-3*std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()<<" s "<<endl;
+	cout<<"Total time "<<running_total<<" s ("<<1E3*running_total/nmbEvents<<" ms/ev)"<<endl;
 	fileWriter.close();
 
 	if( _starlight->nmbAttempts() == 0 )return true; 
@@ -167,7 +180,6 @@ void e_starlightStandalone::boostEvent(eXEvent &event)
    double rap1 = acosh(_inputParameters->beam1LorentzGamma());
    double rap2 = -acosh(_inputParameters->beam2LorentzGamma());
    double boost = (rap1+rap2)/2.;
-
    event.boost(boost);
 }
 
