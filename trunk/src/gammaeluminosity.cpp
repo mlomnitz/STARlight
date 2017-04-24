@@ -148,14 +148,15 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
   //Eth=0.5*(((_wMin+starlightConstants::mel)*(_wMin +starlightConstants::mel)-starlightConstants::mel*starlightConstants::mel)/(_electronEnergy+sqrt(_electronEnergy*_electronEnergy-starlightConstants::mel*starlightConstants::mel))); 
   Eth=0.5*(((W+protonMass)*(W+protonMass)-
 	    protonMass*protonMass)/(_protonEnergy+sqrt(_protonEnergy*_protonEnergy-protonMass*protonMass)));
-
+  
   int A_1 = getbbs().beam1().A(); 
   int A_2 = getbbs().beam2().A();
-
+  
   // Do this first for the case when the first beam is the photon emitter 
   // Treat pA separately with defined beams 
   // The variable beam (=1,2) defines which nucleus is the target 
-  //  std::vector <int>
+  // Lomnitz
+  double target_cm = -acosh(_beamLorentzGamma);
   for(unsigned int i = 0; i <= _nWbins - 1; ++i) {
 
     W = _wMin + double(i)*dW + 0.5*dW;
@@ -168,19 +169,20 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
       if( A_2 == 0 && A_1 != 0 ){
         // eA, first beam is the nucleus and is in this case the target  
         Egamma = 0.5*W*exp(-Y); 
-	target_Egamma = Egamma*exp(-Y);
+	target_Egamma = Egamma*exp(-target_cm);
         beam = 1; 
       } else if( A_1 ==0 && A_2 != 0){
         // pA, second beam is the nucleus and is in this case the target 
         Egamma = 0.5*W*exp(Y); 
-	target_Egamma = Egamma*exp(Y);
+	target_Egamma = Egamma*exp(-target_cm);
         beam = 2; 
       } else {
         Egamma = 0.5*W*exp(Y);        
-	target_Egamma = Egamma*exp(Y);
+	target_Egamma = Egamma*exp(-target_cm);
         beam = 2; 
       }
-
+      // Lomnitz
+      //target_Egamma=Egamma;
       f_WY = 0.; 
       g_E = 0;
       // Photon energy limits are determnined in target frame
@@ -201,8 +203,8 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
 	EQ2lumfile << this_energy->second << endl;
 	for( int iQ2 =0 ;iQ2<=100; ++iQ2){
 	  double Q2 = std::exp( std::log(Q2min)+iQ2*std::log(Q2max/Q2min)/100 );
-	  //EQ2lumfile<< Q2*g(target_Egamma,Q2) <<endl;
-	  EQ2lumfile<< g(target_Egamma,Q2) <<endl;
+	  EQ2lumfile<< Q2*g(target_Egamma,Q2) <<endl;
+	  //EQ2lumfile<< g(target_Egamma,Q2) <<endl;
 	}
       }
       wylumfile << f_WY << endl;
