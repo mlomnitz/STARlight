@@ -98,6 +98,10 @@ e_narrowResonanceCrossSection::crossSectionCalculation(const double)  // _bwnorm
         // Do this first for the case when the first beam is the photon emitter 
         // Treat pA separately with defined beams 
         // The variable beam (=1,2) defines which nucleus is the target 
+	// Rapidity of CMS frame relative to target frame for photon energy transformation
+	double target_cm = -acosh(_beamLorentzGamma);
+	double exp_target_cm = exp(-target_cm);
+	///
 	for(J=0;J<=(NY-1);J++){
     
 		y1  = _narrowYmin + double(J)*dY;
@@ -110,9 +114,9 @@ e_narrowResonanceCrossSection::crossSectionCalculation(const double)  // _bwnorm
                   ega2  = 0.5*W*exp(-y2);
                   ega12 = 0.5*W*exp(-y12);
 		  // photon energy in Target frame 
-		  target_ega1 = ega1*exp(-y1);
-		  target_ega2 = ega2*exp(-y2);
-		  target_ega12 = ega12*exp(-y12);
+		  target_ega1 = ega1*exp_target_cm;
+		  target_ega2 = ega2*exp_target_cm;
+		  target_ega12 = ega12*exp_target_cm;
                   beam = 1; 
                 } else if( A_1 ==0 && A_2 >= 1){
                   // pA, second beam is the nucleus and is in this case the target 
@@ -120,24 +124,24 @@ e_narrowResonanceCrossSection::crossSectionCalculation(const double)  // _bwnorm
                   ega2  = 0.5*W*exp(y2);
                   ega12 = 0.5*W*exp(y12);
 		  // photon energy in Target frame
-		  target_ega1 = ega1*exp(y1);
-		  target_ega2 = ega2*exp(y2);
-		  target_ega12 = ega12*exp(y12);
+		  target_ega1 = ega1*exp_target_cm;
+		  target_ega2 = ega2*exp_target_cm;
+		  target_ega12 = ega12*exp_target_cm;
                   beam = 2; 
                 } else {
                   ega1  = 0.5*W*exp(y1);
                   ega2  = 0.5*W*exp(y2);
                   ega12 = 0.5*W*exp(y12);
 		  // photon energy in Target frame
-		  target_ega1 = ega1*exp(y1);
-		  target_ega2 = ega2*exp(y2);
-		  target_ega12 = ega12*exp(y12);
+		  target_ega1 = ega1*exp_target_cm;
+		  target_ega2 = ega2*exp_target_cm;
+		  target_ega12 = ega12*exp_target_cm;
                   beam = 2; 
                 }
     
-		if(target_ega1 < Eth || target_ega2 < Eth)   
+		if(ega1 < Eth || ega2 < Eth)   
 			continue;
-		if(target_ega2 > maxPhotonEnergy() || target_ega1 > maxPhotonEnergy() ) 
+		if(ega2 > maxPhotonEnergy() || ega1 > maxPhotonEnergy() ) 
 			continue;
 
 		//			
