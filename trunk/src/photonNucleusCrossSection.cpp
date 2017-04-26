@@ -597,7 +597,7 @@ photonNucleusCrossSection::integrated_Q2_dep(double const Egamma)
   int nstep = 10000;
   double ln_min = std::log(Q2_min);
   double ratio = std::log(Q2_max/Q2_min)/nstep;
-
+  double g_int = 0;
   for ( int ii = 0 ; ii< nstep; ++ii){
     double x1 =  std::exp(ln_min+ii*ratio);
     double x3 =  std::exp(ln_min+(ii+1)*ratio);
