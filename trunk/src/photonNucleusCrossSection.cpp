@@ -588,20 +588,23 @@ photonNucleusCrossSection::photonFlux(const double Egamma, const int beam)
 double 
 photonNucleusCrossSection::integrated_Q2_dep(double const Egamma)
 {
-  //std::pair<double , double>* limits = Q2arraylimits(Egamma);
+  //Integration over full limits gives more accurate result
   double Q2_min =  std::pow(starlightConstants::mel*Egamma,2.0)/_electronEnergy*(_electronEnergy-Egamma);
   double Q2_max = 4.*_electronEnergy*(_electronEnergy-Egamma);
-  int const nstep = 10000;
+
+  // Simpsons rule in using exponential step size and 10000 steps. Tested trapeve rule, linear steps and
+  // nstep = 100000 & 100000000
+  int nstep = 10000;
   double ln_min = std::log(Q2_min);
   double ratio = std::log(Q2_max/Q2_min)/nstep;
-  //
-  double g_int = 0 ;
+
   for ( int ii = 0 ; ii< nstep; ++ii){
     double x1 =  std::exp(ln_min+ii*ratio);
-    double x2 =  std::exp(ln_min+(ii+1)*ratio);
-    g_int += (x2-x1)*( g(Egamma,x2)+g(Egamma,x1) );
+    double x3 =  std::exp(ln_min+(ii+1)*ratio);
+    double x2 =  (x3+x1)/2.;
+    g_int += (x3-x1)*( g(Egamma,x3)+g(Egamma,x1) +4.*g(Egamma,x2));
   }
-  return g_int/2.;
+  return g_int/6.; 
 }
 
 
