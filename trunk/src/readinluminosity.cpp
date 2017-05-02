@@ -280,12 +280,11 @@ void readLuminosity::e_read()
   EQlumfile.open(EQ2FileName.c_str());
   int n_steps;
   EQlumfile >> n_steps;
-
   _g_EQ2array = new map<string,std::vector<double> >();
   while( !EQlumfile.eof() ){
+    _g_EQ2max = 0 ;
     std::string tag;
     std::vector<double> p;
-    _g_EQ2max = 0 ;
     for( int iQ2 = 0 ; iQ2 <= n_steps+3 ; ++iQ2){      
       if(iQ2 == 0 ){
 	EQlumfile >> tag;
@@ -302,10 +301,11 @@ void readLuminosity::e_read()
     }
     for( uint iQ2=2; iQ2 < p.size(); ++iQ2)
       p[iQ2] = p[iQ2]/_g_EQ2max;
+    
     _g_EQ2array->insert(std::pair< string,std::vector<double> >(tag,p));
   }
-  /*normalize
-  for(  std::map<string,std::vector<double> >::iterator it =_g_EQ2array->begin() ; it != _g_EQ2array->end(); ++it){
+  //normalize
+  /*for(  std::map<string,std::vector<double> >::iterator it =_g_EQ2array->begin() ; it != _g_EQ2array->end(); ++it){
     std::string key = it->first;
     if(key=="")
       continue;

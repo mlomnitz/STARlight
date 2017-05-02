@@ -195,22 +195,28 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
 	std::pair< double, double >* this_energy = Q2arraylimits(target_Egamma);
 	double Q2min = this_energy->first;
 	double Q2max = this_energy->second;
+	//double Q2max= 4.*_electronEnergy*(_electronEnergy-Egamma);
+	//double Q2min= std::pow(starlightConstants::mel*Egamma,2.0)/_electronEnergy*(_electronEnergy-Egamma);
 	if( Q2min > Q2max)
 	  continue;
 	//
 	EQ2lumfile << gammaTableParse(i,j) <<endl;
-	EQ2lumfile << this_energy->first << endl;
-	EQ2lumfile << this_energy->second << endl;
+	EQ2lumfile << Q2min << endl;
+	EQ2lumfile << Q2max << endl;
 	for( int iQ2 =0 ;iQ2<=100; ++iQ2){
 	  double Q2 = std::exp( std::log(Q2min)+iQ2*std::log(Q2max/Q2min)/100 );
+	  //Lomnitz test
+	  //multiply by Q2 to speed up generation
 	  EQ2lumfile<< Q2*g(target_Egamma,Q2) <<endl;
-	  //EQ2lumfile<< g(target_Egamma,Q2) <<endl;
+	  //cout<<"Lomnitz "<<g_by_parts(target_Egamma,Q2)<<" vs" <<g(target_Egamma,Q2)<<endl;
+	  //EQ2lumfile<< Q2*g_by_parts(target_Egamma,Q2) <<endl;
 	}
       }
       wylumfile << f_WY << endl;
       wylumfile << g_E << endl;
       
     }
+    cout<<" Done "<<i << " out of "<<_nWbins<<endl;
   }
   
   EQ2lumfile.close();
