@@ -109,10 +109,12 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 		_width        = starlightConstants::OmegaWidth;
 		break;
 	case PHI:
-		_slopeParameter=7.0;
+	        _slopeParameter=7.0;
 		_vmPhotonCoupling=13.71;
 		_vmQ2Power_c1 = 2.15;
 		_vmQ2Power_c2 = 0.0074; // [GeV^{-2}]
+		//_vmQ2Power_c1 = 2.45;
+		//_vmQ2Power_c2 = 0.0011; // [GeV^{-2}]
 		_ANORM=-2.75;
 		_BNORM=0.0;
 		_defaultC=1.0;
@@ -192,9 +194,10 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	//Changed by Lomnitz for e case. Limit is now E_e - 100m_e
 	//_maxPhotonEnergy = 12. * _beamLorentzGamma * hbarc/(_bbs.beam1().nuclearRadius()+_bbs.beam2().nuclearRadius());
 	//_maxPhotonEnergy = _electronEnergy - 10.*starlightConstants::mel;
-	_maxPhotonEnergy = _beamLorentzGamma*starlightConstants::mel - 10.*starlightConstants::mel;
-	cout<<" Lomnitz:: max energy in target frame "<< _electronEnergy - 10.*starlightConstants::mel<<endl
-	    <<"           max energy in cms frame    "<<_maxPhotonEnergy<<endl;
+	_maxPhotonEnergy = _beamLorentzGamma*starlightConstants::mel - 1000.*starlightConstants::mel;
+	cout<<" Lomnitz:: max energy in target frame "<< _electronEnergy - 1000.*starlightConstants::mel<<" vs electron energy "<<_electronEnergy<<endl
+	    <<"           max energy in cms frame    "<<_maxPhotonEnergy<<"  vs electron energy "<<_beamLorentzGamma*starlightConstants::mel<<endl;
+	cout<<" testing original limit "<< 12. * _beamLorentzGamma * hbarc/(2.*_bbs.beam2().nuclearRadius())<<endl;
 	
 	  
 }
@@ -308,7 +311,7 @@ photonNucleusCrossSection::getcsgA_Q2_dep(const double Q2)
 {
   double const mv2 = getChannelMass()*getChannelMass();
   double const n = vmQ2Power(Q2);
-  return std::pow(mv2/(mv2+Q2),n);
+  return 0.25*std::pow(mv2/(mv2+Q2),n);
 }
 
 
@@ -586,25 +589,71 @@ photonNucleusCrossSection::photonFlux(const double Egamma, const int beam)
 
 //______________________________________________________________________________
 double 
-photonNucleusCrossSection::integrated_Q2_dep(double const Egamma)
+photonNucleusCrossSection::integrated_Q2_dep(double const Egamma, double const _min, double const _max)
 {
   //Integration over full limits gives more accurate result
-  double Q2_min =  std::pow(starlightConstants::mel*Egamma,2.0)/_electronEnergy*(_electronEnergy-Egamma);
+  double Q2_min =  std::pow(starlightConstants::mel*Egamma,2.0)/(_electronEnergy*(_electronEnergy-Egamma));
   double Q2_max = 4.*_electronEnergy*(_electronEnergy-Egamma);
-
+  if( _min != 0 || _max !=0){
+    if( _min > Q2_min )
+      Q2_min = _min;
+    if( _max < Q2_max )
+      Q2_max = _max;
+  }
   // Simpsons rule in using exponential step size and 10000 steps. Tested trapeve rule, linear steps and
-  // nstep = 100000 & 100000000
-  int nstep = 10000;
+  // nstep = 10,000 100,000 & 10,000,0000
+  int nstep = 1000;
   double ln_min = std::log(Q2_min);
   double ratio = std::log(Q2_max/Q2_min)/nstep;
   double g_int = 0;
+  double g_int2 = 0 ;
+  double g_int3 = 0;
+  //cout<<"*** Lomnitz **** Energy "<<Egamma<<" limits "<<Q2_min*1E9<<" x 1E-9 -  "<<Q2_max<<endl;
   for ( int ii = 0 ; ii< nstep; ++ii){
-    double x1 =  std::exp(ln_min+ii*ratio);
-    double x3 =  std::exp(ln_min+(ii+1)*ratio);
+    double x1 =  std::exp(ln_min+(double)ii*ratio);
+    double x3 =  std::exp(ln_min+(double)(ii+1)*ratio);
     double x2 =  (x3+x1)/2.;
+    //cout<<"ii : "<<x1<<" "<<x2<<" "<<x3<<endl;
     g_int += (x3-x1)*( g(Egamma,x3)+g(Egamma,x1) +4.*g(Egamma,x2));
+    g_int2 += (x3-x1)*( photonFlux(Egamma,x3)+photonFlux(Egamma,x1) +4.*photonFlux(Egamma,x2));
+    g_int3 += (x3-x1)*( getcsgA_Q2_dep(x3)+getcsgA_Q2_dep(x1) +4.*getcsgA_Q2_dep(x2));
   }
-  return g_int/6.; 
+  //return g_int2*g_int3/36.; 
+  //return g_int2/6.;
+  return g_int/6.;
+}
+
+
+//______________________________________________________________________________
+double 
+photonNucleusCrossSection::integrated_x_section(double const Egamma, double const _min, double const _max)
+{
+  //Integration over full limits gives more accurate result
+  double Q2_min =  std::pow(starlightConstants::mel*Egamma,2.0)/(_electronEnergy*(_electronEnergy-Egamma));
+  double Q2_max = 4.*_electronEnergy*(_electronEnergy-Egamma);
+  // Fixed ranges for plot
+  if( _min != 0 || _max!=0){
+    if( _min > Q2_min)
+      Q2_min = _min;
+    if( _max < Q2_max)
+      Q2_max = _max;
+  }
+  // Simpsons rule in using exponential step size and 10000 steps. Tested trapeve rule, linear steps and
+  // nstep = 10,000 100,000 & 10,000,0000
+  int nstep = 1000;
+  double ln_min = std::log(Q2_min);
+  double ratio = std::log(Q2_max/Q2_min)/nstep;
+  double g_int = 0;
+
+  for ( int ii = 0 ; ii< nstep; ++ii){
+    double x1 =  std::exp(ln_min+(double)ii*ratio);
+    double x3 =  std::exp(ln_min+(double)(ii+1)*ratio);
+    double x2 =  (x3+x1)/2.;
+    //g_int += (x3-x1)*( g(Egamma,x3)+g(Egamma,x1) +4.*g(Egamma,x2));
+    g_int += (x3-x1)*( getcsgA_Q2_dep(x3)+getcsgA_Q2_dep(x1) +4.*getcsgA_Q2_dep(x2));
+  }
+  //return g_int2*g_int3/36.; 
+  return g_int/6.;
 }
 
 
@@ -612,7 +661,7 @@ photonNucleusCrossSection::integrated_Q2_dep(double const Egamma)
 pair< double, double >*photonNucleusCrossSection::Q2arraylimits(double const Egamma)
 {
   double Q2max= 4.*_electronEnergy*(_electronEnergy-Egamma);
-  double Q2min= std::pow(starlightConstants::mel*Egamma,2.0)/_electronEnergy*(_electronEnergy-Egamma);
+  double Q2min= std::pow(starlightConstants::mel*Egamma,2.0)/(_electronEnergy*(_electronEnergy-Egamma));
   if( _fixedQ2range == true){
     if( Q2min < _minQ2 )
       Q2min = _minQ2;
@@ -664,9 +713,15 @@ photonNucleusCrossSection::photonFlux(double const Egamma,
   //double omega = Egamma/ hbar;
   //Do we even need a lookup table for this case? This should return N(E,Q2) from dn = N(E,Q2) dE dQ2
   double const ratio = Egamma/_electronEnergy;
-  double const minQ2 = std::pow( starlightConstants::mel*Egamma,2.0) / _electronEnergy*(_electronEnergy - Egamma);
+  double const minQ2 = std::pow( starlightConstants::mel*Egamma,2.0) / (_electronEnergy*(_electronEnergy - Egamma));
   double to_ret = alpha/pi *( 1- ratio + ratio*ratio/2. - (1-ratio)*( fabs(minQ2/Q2)) );
+  //Comparisons:
+  //  double temp = pow(2.*_electronEnergy-Egamma,2.)/(Egamma*Egamma + Q2) + 1. - 4.*starlightConstants::mel*starlightConstants::mel/Q2;
+  //temp = alpha*temp*Egamma/(4.*Q2*pi*_electronEnergy*_electronEnergy);
+  //  cout<<" *** Lomnitz *** Testing photon flux approximation for electron energy "<<_electronEnergy<<" gamma "<<Egamma<<" Q2 "<<Q2*1E6<<" 1E-6 "<<endl;
+  //cout<<" Full expression "<<temp*1E6<<" vs. apporioximation "<<to_ret/( Egamma*fabs(Q2) )*1E6<<" --- ratio "<<temp/(to_ret/( Egamma*fabs(Q2) ))<<endl;
   return to_ret/( Egamma*fabs(Q2) );
+  //return temp;
 }
 
 //______________________________________________________________________________

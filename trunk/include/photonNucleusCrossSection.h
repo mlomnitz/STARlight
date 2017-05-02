@@ -51,7 +51,7 @@ public:
 	double         getBNORM        () const { return _BNORM;            }
 	beamBeamSystem getbbs          () const { return _bbs;              }  ///< returns beamBeamSystem
 	double         vmPhotonCoupling() const { return _vmPhotonCoupling; }  ///< vectormeson-photon coupling constant f_v / 4 pi (cf. Eq. 10 in KN PRC 60 (1999) 014903)
-	double         vmQ2Power       (double Q2) const { return _vmQ2Power_c1 + _vmQ2Power_c2*(_channelMass*_channelMass + Q2);        }
+	double         vmQ2Power       (double Q2) const { return _vmQ2Power_c1+ _vmQ2Power_c2*(_channelMass*_channelMass + Q2);        }
 	double         getDefaultC     () const { return _defaultC;         }
 	double         maxPhotonEnergy () const { return _maxPhotonEnergy;  }  ///< returns max photon energy in lab frame [GeV] (for vectormesons only)
 
@@ -68,9 +68,12 @@ public:
 	// --- Added for electron 
 	double photonFlux(const double Egamma,
 			  const double Q2);
-	double integrated_Q2_dep(const double Egamma);
+	double integrated_Q2_dep(const double Egamma, const double _min = 0 , const double _max = 0);
+	double integrated_x_section(const double Egamma, const double _min, const double _max);
 	std::pair<double,double>* Q2arraylimits(double const Egamma);
 	double g(double const Egamma, double const Q2);
+	//std::pair<double, double> two_factor_integral(double const Egamma);
+	//double g_by_parts(double const Egamma, double const Q2);
 	// ---
 	double sigmagp(const double Wgp);
 	double sigma_A(const double sig_N, 
