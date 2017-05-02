@@ -46,6 +46,7 @@ public:
 	~e_narrowResonanceCrossSection();
 
 	void crossSectionCalculation(const double bwnormsave);
+	void makeGammaPQ2dependence();
 
 private:
 	
@@ -54,6 +55,7 @@ private:
 	double _narrowYmin;
 	int    _narrowNumY;
 	double _electronEnergy;
+	double _target_beamLorentz;
 	
 };
 
