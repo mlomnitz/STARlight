@@ -311,7 +311,7 @@ photonNucleusCrossSection::getcsgA_Q2_dep(const double Q2)
 {
   double const mv2 = getChannelMass()*getChannelMass();
   double const n = vmQ2Power(Q2);
-  return 0.25*std::pow(mv2/(mv2+Q2),n);
+  return (0.15)*std::pow(mv2/(mv2+Q2),n);
 }
 
 
@@ -618,9 +618,9 @@ photonNucleusCrossSection::integrated_Q2_dep(double const Egamma, double const _
     g_int2 += (x3-x1)*( photonFlux(Egamma,x3)+photonFlux(Egamma,x1) +4.*photonFlux(Egamma,x2));
     g_int3 += (x3-x1)*( getcsgA_Q2_dep(x3)+getcsgA_Q2_dep(x1) +4.*getcsgA_Q2_dep(x2));
   }
-  //return g_int2*g_int3/36.; 
+  return g_int2*g_int3/36.; 
   //return g_int2/6.;
-  return g_int/6.;
+  //return g_int/6.;
 }
 
 
@@ -644,12 +644,12 @@ photonNucleusCrossSection::integrated_x_section(double const Egamma, double cons
   double ln_min = std::log(Q2_min);
   double ratio = std::log(Q2_max/Q2_min)/nstep;
   double g_int = 0;
-
   for ( int ii = 0 ; ii< nstep; ++ii){
     double x1 =  std::exp(ln_min+(double)ii*ratio);
     double x3 =  std::exp(ln_min+(double)(ii+1)*ratio);
     double x2 =  (x3+x1)/2.;
-    //g_int += (x3-x1)*( g(Egamma,x3)+g(Egamma,x1) +4.*g(Egamma,x2));
+    //Tests from HERA https://arxiv.org/pdf/hep-ex/9601009.pdf
+    //    g_int += (x3-x1)*( getcsgA_Q2_dep(x3)+getcsgA_Q2_dep(x1) +4.*getcsgA_Q2_dep(x2));
     g_int += (x3-x1)*( getcsgA_Q2_dep(x3)+getcsgA_Q2_dep(x1) +4.*getcsgA_Q2_dep(x2));
   }
   //return g_int2*g_int3/36.; 

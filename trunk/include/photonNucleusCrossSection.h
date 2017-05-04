@@ -69,7 +69,7 @@ public:
 	double photonFlux(const double Egamma,
 			  const double Q2);
 	double integrated_Q2_dep(const double Egamma, const double _min = 0 , const double _max = 0);
-	double integrated_x_section(const double Egamma, const double _min, const double _max);
+	double integrated_x_section(const double Egamma, const double _min = 0 , const double _max = 0);
 	std::pair<double,double>* Q2arraylimits(double const Egamma);
 	double g(double const Egamma, double const Q2);
 	//std::pair<double, double> two_factor_integral(double const Egamma);
