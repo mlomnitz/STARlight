@@ -206,6 +206,7 @@ e_narrowResonanceCrossSection::makeGammaPQ2dependence()
 	double y1,y2,y12,ega1,ega2,ega12;
 	double q2_cor1, q2_cor12, q2_cor2;
 	double csgA1,csgA2,csgA12,int_r,dR;
+	double dR2;
 	double Eth;
 	int    J,NY,beam;
   
@@ -237,8 +238,10 @@ e_narrowResonanceCrossSection::makeGammaPQ2dependence()
 	double target_cm = acosh(_target_beamLorentz);
 	// another - sign from subraction in addition rule
 	double exp_target_cm = exp(-target_cm);
+	double int_r2;
 	for( int iQ2 = 0 ; iQ2 < nQ2bins; ++iQ2){
 	  int_r=0.;
+	  int_r2=0.;
 	  for(J=0;J<=(NY-1);J++){
 	    
 	    y1  = _narrowYmin + double(J)*dY;
@@ -276,10 +279,13 @@ e_narrowResonanceCrossSection::makeGammaPQ2dependence()
 	    //cout<<"Nortmalizations "<<integrated_x_section(ega1,0,50)<<endl;
 	    //		
 	    csgA1=getcsgA(ega1,W,beam);
+	    double full_range_1 = integrated_x_section(target_ega1);
 	    //         >> Middle Point                      =====>>>
 	    csgA12=getcsgA(ega12,W,beam);         
+	    double full_range_12 = integrated_x_section(target_ega12);
 	    //         >> Second Point                      =====>>>
 	    csgA2=getcsgA(ega2,W,beam);
+	    double full_range_2 = integrated_x_section(target_ega2);
 	    //
 		
 	    
@@ -294,6 +300,11 @@ e_narrowResonanceCrossSection::makeGammaPQ2dependence()
 	    dR  = dR + 4.*csgA12*q2_cor12;
 	    dR  = dR + csgA2*q2_cor2;
 	    dR  = dR*(dY/6.);
+	    //
+	    dR2  = csgA1*full_range_1;
+	    dR2  = dR2 + 4.*csgA12*full_range_12;
+	    dR2  = dR2 + csgA2*full_range_2;
+	    dR2  = dR2*(dY/6.);
 	    //>> Sum the contribution for this W,Y. The 2 accounts for the 2 beams
 	    //dR  = ega1*g_Eg1*csgA1;
 	    //dR  = dR + 4.*ega12*g_Eg12*csgA12;
@@ -303,8 +314,11 @@ e_narrowResonanceCrossSection::makeGammaPQ2dependence()
 	    // cout<<" y: "<<y12<<" egamma: "<<ega12<<" flux: "<<photonFlux(ega12,beam)<<" sigma_gA: "<<10000000.*csgA12<<" dsig/dy (microb): "<<10000.*dR/dY<<endl;
 	    
 	    int_r = int_r+dR;
+	    int_r2 = int_r2 +dR2; 
 	  }
 	  //cout<<(q2Edge[iQ2+1]+q2Edge[iQ2])/2.+W*W<<" ,  "<<10000000.*int_r/(q2Edge[iQ2+1]-q2Edge[iQ2])<<endl;
+	  if( iQ2 ==0 )
+	    cout<<"Full range "<<int_r2*10000000<<endl;
 	  cout<<(q2Edge[iQ2+1]+q2Edge[iQ2])/2.+W*W<<" ,  "<<10000000.*int_r<<endl;
 	}
 }
