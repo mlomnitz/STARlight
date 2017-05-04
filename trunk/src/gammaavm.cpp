@@ -1132,58 +1132,62 @@ void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
 	dW = (_VMWmax-_VMWmin)/double(_VMnumw);
 	dY = (_VMYmax-_VMYmin)/double(_VMnumy);
 	//std::chrono::steady_clock::time_point begin_evt = std::chrono::steady_clock::now();
- L201pwyq2:
+	bool pick_state = false;
+	while( pick_state == false ){
 
-	xw = _randy.Rndom();
-	W = _VMWmin + xw*(_VMWmax-_VMWmin);
-	//w_draws+=1;
-	if (W < 2 * starlightConstants::pionChargedMass)
-		goto L201pwyq2;
-	IW = int((W-_VMWmin)/dW);
-	xy = _randy.Rndom();
-	Y = _VMYmin + xy*(_VMYmax-_VMYmin);
-	IY = int((Y-_VMYmin)/dY); 
-	xtest = _randy.Rndom();
-	//y_draws++;
-	if( xtest > _f_WYarray[IW][IY] )
-		goto L201pwyq2;
-        N0++; 
-	// Target is always nucleus or proton in eX
-	double Egamma;
-        if( _bbs.beam2().A()==0 && _bbs.beam1().A() != 0){ 
-	  _TargetBeam = 1;
-	  Egamma = 0.5*W*exp(-Y);
-	} else {
-	  _TargetBeam = 2;
-	  Egamma = 0.5*W*exp(Y);
+	  xw = _randy.Rndom();
+	  W = _VMWmin + xw*(_VMWmax-_VMWmin);
+	  //w_draws+=1;
+	  if (W < 2 * starlightConstants::pionChargedMass)
+	    continue;
+	  IW = int((W-_VMWmin)/dW);
+	  xy = _randy.Rndom();
+	  Y = _VMYmin + xy*(_VMYmax-_VMYmin);
+	  IY = int((Y-_VMYmin)/dY); 
+	  xtest = _randy.Rndom();
+	  //y_draws++;
+	  if( xtest > _f_WYarray[IW][IY] )
+	    continue;
+	      N0++; 
+	  // Target is always nucleus or proton in eX
+	  double Egamma;
+	  if( _bbs.beam2().A()==0 && _bbs.beam1().A() != 0){ 
+	    _TargetBeam = 1;
+	    Egamma = 0.5*W*exp(-Y);
+	  } else {
+	    _TargetBeam = 2;
+	    Egamma = 0.5*W*exp(Y);
+	  }
+	  btest = _randy.Rndom();
+	  
+	  string Egamma_tag = gammaTableParse(IW,IY);
+	  if( _g_EQ2array->find(Egamma_tag) == _g_EQ2array->end() ){
+	    continue;
+	  }
+	  std::vector<double> photon_flux = _g_EQ2array->operator[](Egamma_tag);
+	  double VMQ2min = photon_flux[0];
+	  double VMQ2max = photon_flux[1];
+	  double ratio = std::log(VMQ2max/VMQ2min);
+	  double ln_min = std::log(VMQ2min);
+	  
+	  xQ2 = _randy.Rndom();
+	  Q2 = std::exp(ln_min+xQ2*ratio);
+	  IQ2 = int(100*xQ2);	
+	  // Load from look-up table. Use linear interpolation to evaluate at Q2
+	  double y_1 = photon_flux[IQ2+2];
+	  double y_2 = photon_flux[IQ2+3];
+	  double x_1 = std::exp(ln_min+IQ2*ratio/100);
+	  double x_2 = std::exp(ln_min+(1+IQ2)*ratio/100);
+	  double m = (y_2 - y_1)/(x_2 - x_1);
+	  double c = y_1-m*x_1;
+	  double y = m*Q2+c;
+	  q2test = _randy.Rndom();
+	  //q2_draws++;
+	  if( y < q2test )
+	    continue;
+	  pick_state = true;
 	}
-	btest = _randy.Rndom();
-	
-	string Egamma_tag = gammaTableParse(IW,IY);
-	if( _g_EQ2array->find(Egamma_tag) == _g_EQ2array->end() ){
-	  goto L201pwyq2;
-	}
-	std::vector<double> photon_flux = _g_EQ2array->operator[](Egamma_tag);
-	double VMQ2min = photon_flux[0];
-	double VMQ2max = photon_flux[1];
-	double ratio = std::log(VMQ2max/VMQ2min);
-	double ln_min = std::log(VMQ2min);
-
-	xQ2 = _randy.Rndom();
-	Q2 = std::exp(ln_min+xQ2*ratio);
-	IQ2 = int(100*xQ2);	
-	// Load from look-up table. Use linear interpolation to evaluate at Q2
-	double y_1 = photon_flux[IQ2+2];
-	double y_2 = photon_flux[IQ2+3];
-	double x_1 = std::exp(ln_min+IQ2*ratio/100);
-	double x_2 = std::exp(ln_min+(1+IQ2)*ratio/100);
-	double m = (y_2 - y_1)/(x_2 - x_1);
-	double c = y_1-m*x_1;
-	double y = m*Q2+c;
-	q2test = _randy.Rndom();
-	//q2_draws++;
-	if( y < q2test )
-	  goto L201pwyq2;
+	return;
 	//Used for debug. can be removed later
 	/*std::chrono::steady_clock::time_point end_evt = std::chrono::steady_clock::now();
 	float draw_time = chrono::duration_cast<std::chrono::microseconds>(end_evt - begin_evt).count();
