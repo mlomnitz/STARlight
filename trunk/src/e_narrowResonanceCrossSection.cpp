@@ -55,6 +55,9 @@ e_narrowResonanceCrossSection::e_narrowResonanceCrossSection(const inputParamete
 	_electronEnergy = inputParametersInstance.electronEnergy();
 	//_target_beamLorentz = inputParametersInstance.beam2LorentzGamma();
 	_target_beamLorentz = inputParametersInstance.beamLorentzGamma();
+	_boost = std::acosh(inputParametersInstance.beam1LorentzGamma())
+	  -std::acosh(inputParametersInstance.beam2LorentzGamma());
+	_boost = _boost/2;
 }
 
 
@@ -204,17 +207,25 @@ e_narrowResonanceCrossSection::makeGammaPQ2dependence()
 
 	double W,dY;
 	double y1,y2,y12,ega1,ega2,ega12;
-	double q2_cor1, q2_cor12, q2_cor2;
+	double q2_cor;
+	double g_Eg12;
 	double csgA1,csgA2,csgA12,int_r,dR;
 	double dR2;
 	double Eth;
 	int    J,NY,beam;
-  
+
+	ofstream  w_file, y_file, q2_file;
+	//
+	w_file.open("estarlight_gammap_vs_w.csv");
+	y_file.open("estarlight_gammap_vs_y.csv");
+	q2_file.open("estarlight_gammap_vs_q2.csv");
+	//
+	
 	NY   =  _narrowNumY;
 	dY   = (_narrowYmax-_narrowYmin)/double(NY);
   
 	cout<<" Using Narrow Resonance ..."<<endl;
-  
+	cout<<" from "<<_narrowYmin<<" - "<<_narrowYmax<<" in "<<NY<<" steps"<<endl;
 	W = getChannelMass();
 	//Lomnitz old used for XX
 	Eth=0.5*(((W+protonMass)*(W+protonMass)-
@@ -228,16 +239,17 @@ e_narrowResonanceCrossSection::makeGammaPQ2dependence()
         int A_1 = getbbs().beam1().A(); 
         int A_2 = getbbs().beam2().A();
   
-
         // Do this first for the case when the first beam is the photon emitter 
         // The variable beam (=1,2) defines which nucleus is the target 
 	// Target beam ==2 so repidity is negative. Can generalize later
 	///
 	cout<<" Lomnitz debug :: sigma_gamma_p --> VM_p "<<endl;
 	cout<<" Q2+MV2 \t \t"<<" sigma_gamma_p --> VM_p (nanob)"<<endl;
-	double target_cm = acosh(_target_beamLorentz);
+	double target_cm = -acosh(_target_beamLorentz);
 	// another - sign from subraction in addition rule
 	double exp_target_cm = exp(-target_cm);
+	cout<<" Target CM = "<<exp_target_cm<<endl;
+	cout<<" To boost = "<<_boost<<endl;
 	double int_r2;
 	for( int iQ2 = 0 ; iQ2 < nQ2bins; ++iQ2){
 	  int_r=0.;
@@ -287,39 +299,35 @@ e_narrowResonanceCrossSection::makeGammaPQ2dependence()
 	    csgA2=getcsgA(ega2,W,beam);
 	    double full_range_2 = integrated_x_section(target_ega2);
 	    //
-		
-	    
-	    //q2_cor1 = integrated_x_section(ega1,q2Edge[iQ2],q2Edge[iQ2+1]);
-	    //q2_cor12 = integrated_x_section(ega12,q2Edge[iQ2],q2Edge[iQ2+1]);
-	    //q2_cor2 = integrated_x_section(ega2,q2Edge[iQ2],q2Edge[iQ2+1]);
-	    q2_cor1 = getcsgA_Q2_dep( (q2Edge[iQ2+1] + q2Edge[iQ2])/2. );
-	    q2_cor12 = q2_cor1;
-	    q2_cor2 = q2_cor1;
+	    q2_cor = getcsgA_Q2_dep( (q2Edge[iQ2+1] + q2Edge[iQ2])/2. );
 	    //testing - should be correct
-	    dR  = csgA1*q2_cor1;
-	    dR  = dR + 4.*csgA12*q2_cor12;
-	    dR  = dR + csgA2*q2_cor2;
+	    dR  = csgA1*q2_cor;
+	    dR  = dR + 4.*csgA12*q2_cor;
+	    dR  = dR + csgA2*q2_cor;
 	    dR  = dR*(dY/6.);
 	    //
 	    dR2  = csgA1*full_range_1;
 	    dR2  = dR2 + 4.*csgA12*full_range_12;
 	    dR2  = dR2 + csgA2*full_range_2;
 	    dR2  = dR2*(dY/6.);
-	    //>> Sum the contribution for this W,Y. The 2 accounts for the 2 beams
-	    //dR  = ega1*g_Eg1*csgA1;
-	    //dR  = dR + 4.*ega12*g_Eg12*csgA12;
-	    //dR  = dR + ega2*g_Eg2*csgA2;
-	    //dR  = dR*(dY/6.);
-	    
+	    //
+	    if( iQ2 ==0){
+	      g_Eg12 = integrated_Q2_dep(target_ega12);
+	      y_file<<y12+_boost<<","<<target_ega12*g_Eg12*csgA12*1E7<<endl;
+	    }
 	    // cout<<" y: "<<y12<<" egamma: "<<ega12<<" flux: "<<photonFlux(ega12,beam)<<" sigma_gA: "<<10000000.*csgA12<<" dsig/dy (microb): "<<10000.*dR/dY<<endl;
-	    
+ 
 	    int_r = int_r+dR;
-	    int_r2 = int_r2 +dR2; 
+	    int_r2 = int_r2+dR2; 
+	    
 	  }
 	  //cout<<(q2Edge[iQ2+1]+q2Edge[iQ2])/2.+W*W<<" ,  "<<10000000.*int_r/(q2Edge[iQ2+1]-q2Edge[iQ2])<<endl;
 	  if( iQ2 ==0 )
 	    cout<<"Full range "<<int_r2*10000000<<endl;
-	  cout<<(q2Edge[iQ2+1]+q2Edge[iQ2])/2.+W*W<<" ,  "<<10000000.*int_r<<endl;
+	  q2_file<<(q2Edge[iQ2+1]+q2Edge[iQ2])/2.+W*W<<" ,  "<<10000000.*int_r<<endl;
 	}
+	y_file.close();
+	w_file.close();
+	q2_file.close();
 }
 
