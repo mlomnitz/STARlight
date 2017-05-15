@@ -56,6 +56,7 @@ private:
 	int    _narrowNumY;
 	double _electronEnergy;
 	double _target_beamLorentz;
+	double _boost;
 	
 };
 
