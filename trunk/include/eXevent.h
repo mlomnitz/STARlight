@@ -52,7 +52,7 @@ class eXEvent
 
       void addParticle(starlightParticle &part) { _particles.push_back(part); }
       void addVertex(vector3 &vertex) { _vertices.push_back(vertex); }
-      void addGamma(float egamma, float Q2) { _gammaEnergies.push_back(egamma); _gammaMasses.push_back(Q2); }
+      void addGamma(lorentzVector gamma,float egamma, float Q2) { _gamma.push_back(gamma); _gammaEnergies.push_back(egamma); _gammaMasses.push_back(Q2); }
       void addSourceElectron(lorentzVector &el){ _sources.push_back(el); }
 
       const std::vector<starlightParticle> * getParticles() const { return &_particles; }
@@ -60,6 +60,7 @@ class eXEvent
       const std::vector<float> * getGammaEnergies() const { return &_gammaEnergies; }
       const std::vector<lorentzVector> * getSources() const { return &_sources;}
       const std::vector<float> * getGammaMasses() const {return &_gammaMasses; }
+      const std::vector<lorentzVector> * getGamma() const { return &_gamma; }
 
       eXEvent & operator=(const eXEvent&);
       eXEvent & operator+(const eXEvent&);
@@ -72,6 +73,7 @@ class eXEvent
       std::vector<lorentzVector> _sources;
       std::vector<float> _gammaMasses;
       std::vector<float> _gammaEnergies;
+      std::vector<lorentzVector> _gamma;
 };
 
 
