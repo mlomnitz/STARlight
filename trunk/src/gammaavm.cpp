@@ -78,6 +78,26 @@ Gammaavectormeson::Gammaavectormeson(const inputParameters& inputParametersInsta
 	}
 	if(_ProductionMode == 11 || _ProductionMode == 12) //Need to define later, for full eSTARlight
 	  _dummy_pncs = new photonNucleusCrossSection(inputParametersInstance, bbsystem);
+	//
+	const double r_04_00 = 0.674;
+	const double cos_delta = 0.925;
+	for( int ii = 0; ii < 100; ++ii){ //epsilon 0-1
+	  double epsilon = 0.01*ii;
+	  const double R = (1./epsilon)*r_04_00/(1.-r_04_00);
+	  for(int jj = 0; jj < 200; ++jj){ //psi 0 - 2pi
+	    double psi = jj*starlightConstants::pi/100.;
+	    double max_bin;
+	    for( int kk = 0; kk < 200; ++kk){ //temp
+	      double theta = kk*starlightConstants::pi/100.;
+	      // Fin max
+	      double this_test = std::pow(std::sin(theta),2.)*(1+epsilon*cos(2.*psi)) + 2.*epsilon*R*std::pow(std::cos(theta),2.)
+		+std::sqrt(2.*epsilon*(1+epsilon))*cos_delta*std::sin(2.*theta)*std::cos(psi);
+	      if(this_test >  max_bin)
+		max_bin = this_test;
+	    }
+	    _angular_max[ii][jj] = max_bin;
+	  }
+	}
 }
 
 
@@ -181,6 +201,73 @@ void Gammaavectormeson::twoBodyDecay(starlightConstants::particleTypeEnum &ipid,
 	//  the beamline, in the frame of the two photons
 
 	theta=getTheta(ipid);
+ 
+	//  compute unboosted momenta
+	px1 = sin(theta)*cos(phi)*pmag;
+	py1 = sin(theta)*sin(phi)*pmag;
+	pz1 = cos(theta)*pmag;
+	px2 = -px1;
+	py2 = -py1;
+	pz2 = -pz1;
+
+	Ecm = sqrt(W*W+px0*px0+py0*py0+pz0*pz0);
+	E1 = sqrt(mdec*mdec+px1*px1+py1*py1+pz1*pz1);
+	E2 = sqrt(mdec*mdec+px2*px2+py2*py2+pz2*pz2);
+
+	betax = -(px0/Ecm);
+	betay = -(py0/Ecm);
+	betaz = -(pz0/Ecm);
+
+	transform (betax,betay,betaz,E1,px1,py1,pz1,iFbadevent);
+	transform (betax,betay,betaz,E2,px2,py2,pz2,iFbadevent);
+
+	if(iFbadevent == 1)
+	   return;
+
+}
+
+
+//______________________________________________________________________________                                               
+void Gammaavectormeson::twoBodyDecay(starlightConstants::particleTypeEnum &ipid,
+                                     double  W,
+                                     double  px0, double  py0, double  pz0,
+				     double  e_phi, double polarization,
+                                     double& px1, double& py1, double& pz1,
+                                     double& px2, double& py2, double& pz2,
+                                     int&    iFbadevent)
+{
+	// This routine decays a particle into two particles of mass mdec,
+	// taking spin into account
+
+	double pmag;
+	double phi,theta,Ecm;
+	double betax,betay,betaz;
+	double mdec=0.0;
+	double E1=0.0,E2=0.0;
+
+	//    set the mass of the daughter particles
+	mdec=getDaughterMass(ipid);
+
+	//  calculate the magnitude of the momenta
+	if(W < 2*mdec){
+		cout<<" ERROR: W="<<W<<endl;
+		iFbadevent = 1;
+		return;
+	}
+	pmag = sqrt(W*W/4. - mdec*mdec);
+  
+	//  pick an orientation, based on the spin
+	//  phi has a flat distribution in 2*pi
+	pair<double,double>* angles = getThetaPsi(e_phi,polarization);
+	theta = angles->first;
+	phi = angles->second;
+	//cout<<" :Lomnitz: got following angles theta"<<theta<<" psi "<<phi<<endl;
+	//phi = _randy.Rndom()*2.*starlightConstants::pi;
+                                                                                                                
+	//  find theta, the angle between one of the outgoing particles and
+	//  the beamline, in the frame of the two photons
+
+	//theta=getTheta(ipid);
  
 	//  compute unboosted momenta
 	px1 = sin(theta)*cos(phi)*pmag;
@@ -359,6 +446,45 @@ double Gammaavectormeson::getTheta(starlightConstants::particleTypeEnum ipid)
 	return theta;
   
 }
+
+
+//______________________________________________________________________________
+pair<double,double>* Gammaavectormeson::getThetaPsi(double const e_plane_angle, double const epsilon)
+{
+  int i_plane[2] = { floor(epsilon*100.) , ceil(epsilon*100.) }; 
+  // constants
+  //using r_{1-1}^1 = 0.122, r_{00}^{04}=0.674 and cos(delta) = 0.925 from HERA arXiv:hep-ex/9902019
+  const double r_1_1_1 = 0.122;
+  const double r_04_00 = 0.674;
+  const double R = (1./epsilon)*r_04_00/(1.-r_04_00);
+  const double cos_delta = 0.925;
+  //sample intgrated function for psi
+  double theta, psi;
+  double xtest = 999.;
+  double this_test = 0;
+  //
+  while( xtest > this_test){
+    psi = 2.*starlightConstants::pi*_randy.Rndom();
+    this_test = (1.+2.*epsilon*r_1_1_1*std::cos(2.*psi))/(2.*starlightConstants::pi);
+    xtest = _randy.Rndom();
+    if( xtest > this_test )
+      continue;
+    int i_psi[2] = { floor( psi*100./starlightConstants::pi ), ceil( psi*100./starlightConstants::pi ) }; 
+    // Got good psi, now sample for costheta
+    theta = 2.*starlightConstants::pi*_randy.Rndom();
+    //quick test
+    this_test = std::pow(std::sin(theta),2.)*(1+epsilon*cos(2.*psi)) + 2.*epsilon*R*std::pow(std::cos(theta),2.)
+      +std::sqrt(2.*epsilon*(1+epsilon))*cos_delta*std::sin(2.*theta)*std::cos(psi);
+    this_test = this_test /_angular_max[ i_plane[0] ][ i_psi[0] ];
+
+    xtest = _randy.Rndom();
+    /*if( xtest < this_test)
+      break;*/
+  }
+  std::pair<double,double>* to_ret = new std::pair<double,double>(theta, psi-e_plane_angle);
+  return to_ret;
+}
+
 
 
 //______________________________________________________________________________
@@ -591,11 +717,11 @@ void Gammaavectormeson::momenta(double W,double Y,double Q2,
 	// Calculations done in CMS frame (need to recalculate electron energy)
 	e_E = _eEnergy - Egam;
 	e_theta = std::acos(1 - Q2/(2.*_eEnergy*e_E));
-	//cout<<" Lomnitz ::: E_e "<<_eEnergy<<" Q2 "<<Q2<<" W "<<W<<" Y "<<Y<<" Egam "<<Egam<<endl;
-	//cout<<" Lomnitz ::: E_e' "<<e_E<<" theta "<<180.*e_theta/starlightConstants::pi<<" sinTheta "<<std::sin(e_theta)<<" pT "<<e_E*std::sin(e_theta)<<endl;
         pt1 = e_E*sin(e_theta);
 	phi1 = 2.*starlightConstants::pi*_randy.Rndom();
 	e_phi = starlightConstants::pi+phi1;
+	while( e_phi > 2.*starlightConstants::pi ) e_phi-= 2.*starlightConstants::pi;
+	//
 	if( (_bbs.beam1().A()==1 || _bbs.beam2().A()==1) || 
             (_ProductionMode == 4) ) {
 	    if( (_VMpidtest == starlightConstants::RHO) || (_VMpidtest == starlightConstants::RHOZEUS) || (_VMpidtest == starlightConstants::OMEGA)){
@@ -690,6 +816,14 @@ void Gammaavectormeson::momenta(double W,double Y,double Q2,
        
 	E  = sqrt(W*W+pt*pt)*cosh(Y);
 	pz = sqrt(W*W+pt*pt)*sinh(Y);
+	cout<<"** Lomnitz :: testing conservation Q2 "<<Q2<<endl;
+	cout<<"** Photon   (E,px,py,pz) = ("<<Egam<<","<<px1<<","<<py1<<",?)"<<endl;
+	cout<<"** Pommeron (E,px,py,pz) = ("<<Epom<<","<<px2<<","<<py2<<",?) "<<"mass"<<-Epom*Epom+pt2*pt2<<endl;
+	cout<<"** VM       (E,px,py,pz) = ("<<E<<","<<px<<","<<py<<","<<pz<<")"<<endl;
+	cout<<"** Diff.    (E,px,py,pz) = ("<<E-Egam-Epom<<","<<px-px1-px2<<","
+	    <<py-py1-py2<<",?)"<<endl;
+	cout<<"** test "<<(E-Egam-Epom)/Q2<<endl;
+	  
 
 }
 
@@ -1232,10 +1366,15 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	  } else {
 	    Egamma = 0.5*comenergy*exp(rapidity);
 	  }
+	  // inelasticity: used for angular distribution
+	  double col_y = 1. - (e_E/_eEnergy)*std::pow(std::cos(e_theta/2.),2.);
+	  double col_polarization = (1 - col_y)/(1-col_y+col_y*col_y/2.);
 	  _nmbAttempts++;
 	  
 	  vmpid = ipid; 
-	  twoBodyDecay(ipid,comenergy,momx,momy,momz,px1,py1,pz1,px2,py2,pz2,iFbadevent);
+	  //twoBodyDecay(ipid,comenergy,momx,momy,momz,px1,py1,pz1,px2,py2,pz2,iFbadevent);
+	  twoBodyDecay(ipid,comenergy,momx,momy,momz,e_phi,col_polarization,
+		       px1,py1,pz1,px2,py2,pz2,iFbadevent);
 	  double pt1chk = sqrt(px1*px1+py1*py1);
 	  double pt2chk = sqrt(px2*px2+py2*py2);
 	  double eta1 = pseudoRapidity(px1, py1, pz1);
@@ -1287,8 +1426,6 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	    ipid1 = q1*ipid;
 	    ipid2 = q2*ipid;
 	  }
-	  // - Generated photon
-	  event.addGamma(Egamma, Q2);
 
 	  // - Outgoing electron
 	  double e_px = e_E*sin(e_theta)*cos(e_phi);
@@ -1296,6 +1433,11 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	  double e_pz = e_E*cos(e_theta);
 	  lorentzVector electron(e_px, e_py, e_pz, e_E);
 	  event.addSourceElectron(electron);
+
+	  // - Generated photon (x, and y simply electron diff)
+	  double g_pz = _eEnergy - e_pz;
+	  lorentzVector gamma(-e_px,-e_py,g_pz,Egamma);
+	  event.addGamma(gamma, Egamma, Q2);
 
 	  double md = getDaughterMass(vmpid); 
 	  double Ed1 = sqrt(md*md+px1*px1+py1*py1+pz1*pz1); 

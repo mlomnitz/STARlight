@@ -61,16 +61,20 @@ class Gammaavectormeson : public eventChannel
 
   void pickwy(double &W, double &Y);
   void pickwyq2(double &W, double &Y, double &Q2);
+  void pickwyq2(double &W, double &Y, double &Egam, double &Q2);
   void momenta(double W,double Y,double &E,double &px,double &py,double &pz,int &tcheck);
   void momenta(double W,double Y,double Q2,double &E,double &px,double &py,double &pz,
 	       double& e_E, double& e_theta, double &e_phi,int &tcheck);
   double pTgamma(double E); 
   void vmpt(double W,double Y,double &E,double &px,double &py, double &pz,int &tcheck);
   void twoBodyDecay(starlightConstants::particleTypeEnum &ipid,double W,double px0,double py0,double pz0,double &px1,double &py1,double&pz1,double &px2,double &py2,double &pz2,int &iFbadevent);
+  void twoBodyDecay(starlightConstants::particleTypeEnum &ipid,double W,double px0,double py0,double pz0,double e_phi, double polarization,
+		    double &px1,double &py1,double&pz1,double &px2,double &py2,double &pz2,int &iFbadevent);
   bool fourBodyDecay(starlightConstants::particleTypeEnum& ipid, const double E, const double W, const double* p, lorentzVector* decayMoms, int& iFbadevent);
   double getMass();
   double getWidth();
   virtual double getTheta(starlightConstants::particleTypeEnum ipid);
+  std::pair<double, double>* getThetaPsi(const double e_plane_angle, const double epsilon);
   double getSpin();
   double _VMbslope;
   virtual double getDaughterMass(starlightConstants::particleTypeEnum &ipid);                
@@ -104,6 +108,7 @@ class Gammaavectormeson : public eventChannel
   nBodyPhaseSpaceGen* _phaseSpaceGen;
   // eSTARlight
   photonNucleusCrossSection* _dummy_pncs;
+  double _angular_max[100][200];
 };
 
 class Gammaanarrowvm : public Gammaavectormeson
