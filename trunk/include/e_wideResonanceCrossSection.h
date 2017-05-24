@@ -46,7 +46,7 @@ public:
 	~e_wideResonanceCrossSection();
 
 	void crossSectionCalculation(const double bwnormsave);
-
+	void makeGammaPQ2dependence(const double bwnormsave);
 private:
 
 	double _Ep;  // Proton Energy
@@ -54,6 +54,8 @@ private:
 	double _wideWmin;
 	double _wideYmax;
 	double _wideYmin;		
+	double _electronEnergy;
+	double _target_beamLorentz;
 
 };
 
