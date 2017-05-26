@@ -119,12 +119,12 @@ private:
 	double _ANORM;
 	double _BNORM;
 	double _defaultC;
-	double _maxPhotonEnergy;  ///< max photon energy in lab frame [GeV] (for vectormesons only)
 	double _width;            ///< width of the produced system  [GeV/c^2]
 	double _channelMass;      ///< mass of the produced system  [GeV/c^2]
 	double _fixedQ2range;     ///< loads state of Q2 range
 	double _minQ2;            ///< min Q2 range in case it is fixed
 	double _maxQ2;            ///< max Q3 range in case it is fixed
+	double _maxPhotonEnergy;  ///< max photon energy in lab frame [GeV] (for vectormesons only)
 	
 };
 

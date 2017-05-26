@@ -61,7 +61,8 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	  _sigmaNucleus      (_bbs.beam2().A()          ),
 	  _fixedQ2range      (inputParametersInstance.fixedQ2Range()      ),
 	  _minQ2             (inputParametersInstance.minGammaQ2()        ),
-	  _maxQ2             (inputParametersInstance.maxGammaQ2()        )
+	  _maxQ2             (inputParametersInstance.maxGammaQ2()        ),
+	  _maxPhotonEnergy   (inputParametersInstance.maxPhotonEnergy()   )
 {
 	switch(_particleType) {
 	case RHO:
@@ -194,7 +195,6 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	//Changed by Lomnitz for e case. Limit is now E_e - 100m_e
 	//_maxPhotonEnergy = 12. * _beamLorentzGamma * hbarc/(_bbs.beam1().nuclearRadius()+_bbs.beam2().nuclearRadius());
 	//_maxPhotonEnergy = _electronEnergy - 10.*starlightConstants::mel;
-	_maxPhotonEnergy = _beamLorentzGamma*starlightConstants::mel - 1000.*starlightConstants::mel;
 	cout<<" Lomnitz:: max energy in target frame "<< _electronEnergy - 1000.*starlightConstants::mel<<" vs electron energy "<<_electronEnergy<<endl
 	    <<"           max energy in cms frame    "<<_maxPhotonEnergy<<"  vs electron energy "<<_beamLorentzGamma*starlightConstants::mel<<endl;
 	cout<<" testing original limit "<< 12. * _beamLorentzGamma * hbarc/(2.*_bbs.beam2().nuclearRadius())<<endl;
