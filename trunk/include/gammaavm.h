@@ -60,11 +60,13 @@ class Gammaavectormeson : public eventChannel
   eXEvent e_produceEvent();
 
   void pickwy(double &W, double &Y);
-  void pickwyq2(double &W, double &Y, double &Q2);
-  void pickwyq2(double &W, double &Y, double &Egam, double &Q2);
+  void pickwEgamq2(double &W, double &cmsEgamma, double &targetEgamma, 
+		double &Q2, double &gamma_pz, double & gamma_pt, 
+		double &E_prime, double &cos_theta_e);
   void momenta(double W,double Y,double &E,double &px,double &py,double &pz,int &tcheck);
-  void momenta(double W,double Y,double Q2,double &E,double &px,double &py,double &pz,
-	       double& e_E, double& e_theta, double &e_phi,int &tcheck);
+  void momenta(double W,double Egam,double Q2, double gamma_pz, double gamma_pt,
+	       double &rapidity, double &E,double &px,double &py,double &pz,
+	       double &e_phi,int &tcheck);
   double pTgamma(double E); 
   void vmpt(double W,double Y,double &E,double &px,double &py, double &pz,int &tcheck);
   void twoBodyDecay(starlightConstants::particleTypeEnum &ipid,double W,double px0,double py0,double pz0,double &px1,double &py1,double&pz1,double &px2,double &py2,double &pz2,int &iFbadevent);
@@ -85,8 +87,14 @@ class Gammaavectormeson : public eventChannel
   starlightConstants::particleTypeEnum _VMpidtest;
   int _VMnumw;
   int _VMnumy;
+  int _VMnumega;
   int _VMinterferencemode;
   int _ProductionMode;
+  double _targetMaxPhotonEnergy;
+  double _targetMinPhotonEnergy;
+  double _cmsMaxPhotonEnergy;
+  double _cmsMinPhotonEnergy;
+  double _beamLorentzGamma;
   int _TargetBeam; 
   int N0;
   int N1;

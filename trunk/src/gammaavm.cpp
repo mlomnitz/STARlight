@@ -58,6 +58,7 @@ Gammaavectormeson::Gammaavectormeson(const inputParameters& inputParametersInsta
 	_VMYmin=-1.*_VMYmax;
 	_VMnumw=inputParametersInstance.nmbWBins();
 	_VMnumy=inputParametersInstance.nmbRapidityBins();
+	_VMnumega=inputParametersInstance.nmbEnergyBins();
 	_VMgamma_em=inputParametersInstance.beamLorentzGamma();
 	_VMinterferencemode=inputParametersInstance.interferenceEnabled();
 	_VMbslope=0.;//Will define in wide/narrow constructor
@@ -65,12 +66,17 @@ Gammaavectormeson::Gammaavectormeson(const inputParameters& inputParametersInsta
 	_bslopeVal=inputParametersInstance.bslopeValue();
 	_pEnergy= inputParametersInstance.protonEnergy();
 	// electron energy in CMS frame
-	_eEnergy= inputParametersInstance.beamLorentzGamma()*starlightConstants::mel;
+	_eEnergy= inputParametersInstance.electronEnergy();
 	_VMpidtest=inputParametersInstance.prodParticleType();
 	_VMptmax=inputParametersInstance.maxPtInterference();
 	_VMdpt=inputParametersInstance.ptBinWidthInterference();
         _ProductionMode=inputParametersInstance.productionMode();
-
+	_targetMaxPhotonEnergy=inputParametersInstance.targetMaxPhotonEnergy();
+	_targetMinPhotonEnergy=inputParametersInstance.targetMinPhotonEnergy();
+	// Now saving the photon energy limits
+	_cmsMaxPhotonEnergy=inputParametersInstance.cmsMaxPhotonEnergy();
+	_cmsMinPhotonEnergy=inputParametersInstance.cmsMinPhotonEnergy();
+	_beamLorentzGamma = inputParametersInstance.beamLorentzGamma();
         N0 = 0; N1 = 0; N2 = 0; 
 	if (_VMpidtest == starlightConstants::FOURPRONG){
 	  // create n-body phase-spage generator
@@ -261,7 +267,7 @@ void Gammaavectormeson::twoBodyDecay(starlightConstants::particleTypeEnum &ipid,
 	pair<double,double>* angles = getThetaPsi(e_phi,polarization);
 	theta = angles->first;
 	phi = angles->second;
-	//cout<<" :Lomnitz: got following angles theta"<<theta<<" psi "<<phi<<endl;
+
 	//phi = _randy.Rndom()*2.*starlightConstants::pi;
                                                                                                                 
 	//  find theta, the angle between one of the outgoing particles and
@@ -680,46 +686,25 @@ void Gammaavectormeson::momenta(double W,double Y,double &E,double &px,double &p
 
 
 //______________________________________________________________________________
-void Gammaavectormeson::momenta(double W,double Y,double Q2,
-				double &E,double &px,double &py,double &pz,
-				double& e_E, double& e_theta, double &e_phi,int &tcheck)
+void Gammaavectormeson::momenta(double W,double Egam,double Q2, double gamma_pz, double gamma_pt,
+				double &Y,double &E,double &px,double &py,double &pz,
+				double &e_phi,int &tcheck)
 {
 	//     This subroutine calculates momentum and energy of vector meson
 	//     given W and Y,   without interference.  Subroutine vmpt handles
 	//     production with interference
  
-	double Egam,Epom,tmin,pt1,pt2,phi1,phi2;
+	double Epom,tmin,pt2,phi1,phi2;
 	double px1,py1,px2,py2;
 	double pt,xt,xtest,ytest;
 	double t2;
-	//Find Egam,Epom in CM frame
-        if( _bbs.beam1().A()==0 && _bbs.beam2().A() >= 1){ 
-          // This is eA
-	  Egam = 0.5*W*exp(Y);
-	  Epom = 0.5*W*exp(-Y);
-        } 
-	else if( _bbs.beam2().A()==0 && _bbs.beam1().A() >= 1 ){
-          // This is Ae
-	  Egam = 0.5*W*exp(-Y);
-	  Epom = 0.5*W*exp(Y);
-	} 
-	else {
-	  std::cout<<"This should be eX, no electron found "<<endl;
-	  return;
-	}
-	//        } else if( _ProductionMode == 2 || _ProductionMode==3){
-	//	  Egam = 0.5*W*exp(-Y);
-	//	  Epom = 0.5*W*exp(Y);
-	//        } else { 
-	//          Egam = 0.5*W*exp(Y);
-	//	  Epom = 0.5*W*exp(-Y);
-	//	 }
+      
 	// Calculations done in CMS frame (need to recalculate electron energy)
-	e_E = _eEnergy - Egam;
-	e_theta = std::acos(1 - Q2/(2.*_eEnergy*e_E));
-        pt1 = e_E*sin(e_theta);
 	phi1 = 2.*starlightConstants::pi*_randy.Rndom();
 	e_phi = starlightConstants::pi+phi1;
+	// Pomeron energy now included photon virtuality and finite transverse momenta
+	Epom = 0.5*(W*W+Q2)/(Egam + std::sqrt(Egam*Egam+Q2));
+	//Epom = 0.5*(W*W+Q2)/(Egam + gamma_pz);
 	while( e_phi > 2.*starlightConstants::pi ) e_phi-= 2.*starlightConstants::pi;
 	//
 	if( (_bbs.beam1().A()==1 || _bbs.beam2().A()==1) || 
@@ -804,8 +789,8 @@ void Gammaavectormeson::momenta(double W,double Y,double Q2,
 	}//else end from pp
 	phi2 = 2.*starlightConstants::pi*_randy.Rndom();
 
-	px1 = pt1*cos(phi1);
-	py1 = pt1*sin(phi1);
+	px1 = gamma_pt*cos(phi1);
+	py1 = gamma_pt*sin(phi1);
 	px2 = pt2*cos(phi2);
 	py2 = pt2*sin(phi2);
         
@@ -814,17 +799,15 @@ void Gammaavectormeson::momenta(double W,double Y,double Q2,
 	py = py1 + py2;
 	pt = sqrt( px*px + py*py );
        
-	E  = sqrt(W*W+pt*pt)*cosh(Y);
-	pz = sqrt(W*W+pt*pt)*sinh(Y);
-	cout<<"** Lomnitz :: testing conservation Q2 "<<Q2<<endl;
-	cout<<"** Photon   (E,px,py,pz) = ("<<Egam<<","<<px1<<","<<py1<<",?)"<<endl;
-	cout<<"** Pommeron (E,px,py,pz) = ("<<Epom<<","<<px2<<","<<py2<<",?) "<<"mass"<<-Epom*Epom+pt2*pt2<<endl;
-	cout<<"** VM       (E,px,py,pz) = ("<<E<<","<<px<<","<<py<<","<<pz<<")"<<endl;
-	cout<<"** Diff.    (E,px,py,pz) = ("<<E-Egam-Epom<<","<<px-px1-px2<<","
-	    <<py-py1-py2<<",?)"<<endl;
-	cout<<"** test "<<(E-Egam-Epom)/Q2<<endl;
-	  
 
+	//cout<<" \t 0.5*std::log( (Egam+gamma_pz) / Epom ) = "<<Y<<endl;
+
+	E = Egam + Epom;
+	pz = gamma_pz - Epom;
+	// Testing different methods to extract Y
+	//Y = 0.5*std::log( (Egam+gamma_pz) / Epom ); 
+	Y = 0.5*std::log( (E+fabs(pz))/(E-fabs(pz)) );
+	  
 }
 
 
@@ -1255,54 +1238,53 @@ e_Gammaawidevm::~e_Gammaawidevm()
 
 
 //______________________________________________________________________________
-void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
+void Gammaavectormeson::pickwEgamq2(double &W, double &cmsEgamma, double &targetEgamma, 
+				 double &Q2, double &gamma_pz, double &gamma_pt,//photon in target frame
+				 double &E_prime, double &theta_e //electron
+				 )
 {
-        double dW, dY;
-	double xw,xy, xQ2, xtest, q2test, btest;
-	int  IW,IY, IQ2;
+        double dW, dEgamma;
+	double xw,xEgamma, xQ2, xtest, q2test, btest;
+	int  IW,IGamma, IQ2;
 	// ---------
-	//int y_draws = 0, w_draws =0, q2_draws =0 ;
+	//	int egamma_draws = 0, cms_egamma_draws =0, q2_draws =0 ;
 	// ---------
 	dW = (_VMWmax-_VMWmin)/double(_VMnumw);
-	dY = (_VMYmax-_VMYmin)/double(_VMnumy);
+	//
 	//std::chrono::steady_clock::time_point begin_evt = std::chrono::steady_clock::now();
 	bool pick_state = false;
+	dEgamma = std::log(_targetMaxPhotonEnergy/_targetMinPhotonEnergy);
+	double dEgamma_cms = std::log(_cmsMaxPhotonEnergy/_cmsMinPhotonEnergy);
 	while( pick_state == false ){
-
+	  //cout<<"Lomnitz start pick"<<endl;
 	  xw = _randy.Rndom();
 	  W = _VMWmin + xw*(_VMWmax-_VMWmin);
-	  //w_draws+=1;
 	  if (W < 2 * starlightConstants::pionChargedMass)
 	    continue;
 	  IW = int((W-_VMWmin)/dW);
-	  xy = _randy.Rndom();
-	  Y = _VMYmin + xy*(_VMYmax-_VMYmin);
-	  IY = int((Y-_VMYmin)/dY); 
+	  xEgamma = _randy.Rndom();
+	  //
+	  targetEgamma = std::exp(std::log(_targetMinPhotonEnergy) + xEgamma*(dEgamma));
+	  IGamma = int(_VMnumega*xEgamma);
+	  // Holds Q2 and integrated Q2 dependence. Array is saved in target frame
+	  std::pair< double, std::vector<double> > this_energy = _g_EQ2array->operator[](IGamma);
+	  double intgrated_q2 = this_energy.first;
+
 	  xtest = _randy.Rndom();
-	  //y_draws++;
-	  if( xtest > _f_WYarray[IW][IY] )
+	  if( xtest > intgrated_q2 ){
+	    //egamma_draws+=1;
 	    continue;
-	      N0++; 
-	  // Target is always nucleus or proton in eX
-	  double Egamma;
-	  if( _bbs.beam2().A()==0 && _bbs.beam1().A() != 0){ 
-	    _TargetBeam = 1;
-	    Egamma = 0.5*W*exp(-Y);
-	  } else {
-	    _TargetBeam = 2;
-	    Egamma = 0.5*W*exp(Y);
 	  }
+	  N0++; 
 	  btest = _randy.Rndom();
 	  
-	  string Egamma_tag = gammaTableParse(IW,IY);
-	  if( _g_EQ2array->find(Egamma_tag) == _g_EQ2array->end() ){
-	    continue;
-	  }
-	  std::vector<double> photon_flux = _g_EQ2array->operator[](Egamma_tag);
+	  std::vector<double> photon_flux = this_energy.second;
+	  //std::vector<double> photon_flux = _g_EQ2array->operator[](Egamma_tag);
 	  double VMQ2min = photon_flux[0];
 	  double VMQ2max = photon_flux[1];
+	  //
 	  double ratio = std::log(VMQ2max/VMQ2min);
-	  double ln_min = std::log(VMQ2min);
+ 	  double ln_min = std::log(VMQ2min);
 	  
 	  xQ2 = _randy.Rndom();
 	  Q2 = std::exp(ln_min+xQ2*ratio);
@@ -1316,22 +1298,39 @@ void Gammaavectormeson::pickwyq2(double &W, double &Y, double &Q2)
 	  double c = y_1-m*x_1;
 	  double y = m*Q2+c;
 	  q2test = _randy.Rndom();
-	  //q2_draws++;
-	  if( y < q2test )
+	  if( y < q2test ){
+	    //q2_draws++;
 	    continue;
+	  }
+	  // -- Generate electron and photon in Target frame
+	  // -- Then boost to CMS frame and check full csg
+	  E_prime = _eEnergy - targetEgamma;
+	  double cos_theta_e = 1. - Q2/(2.*_eEnergy*E_prime);
+	  theta_e = acos(cos_theta_e);
+	  double beam_y = acosh(_beamLorentzGamma);	
+	  gamma_pt = E_prime*sin(theta_e);
+	  double temp_pz = sqrt( targetEgamma*targetEgamma + Q2 - gamma_pt*gamma_pt);
+	  // Now boost to Target frame
+	  gamma_pz = temp_pz*cosh(beam_y) - targetEgamma*sinh(beam_y); 
+	  cmsEgamma = targetEgamma*cosh(beam_y) - temp_pz*sinh(beam_y);
+	  // Simple checkl, should not be needed but used for safety
+	  if( cmsEgamma < _cmsMinPhotonEnergy ){
+	      continue;
+	  }
+	  // -- Now in CMS frame, check csga (inherited from STARlight)
+	  int iGamma_cms = int( log(cmsEgamma/_cmsMinPhotonEnergy)*_VMnumega/dEgamma_cms );
+	  if( iGamma_cms < 0 || iGamma_cms > _VMnumega ){
+	    //cms_egamma_draws+=1;
+	    continue;
+	  }
+	  xtest = _randy.Rndom();
+	  if( _f_WYarray[IW][iGamma_cms] < xtest ){
+	    //cms_egamma_draws+=1;
+	    continue;
+	  }
 	  pick_state = true;
 	}
 	return;
-	//Used for debug. can be removed later
-	/*std::chrono::steady_clock::time_point end_evt = std::chrono::steady_clock::now();
-	float draw_time = chrono::duration_cast<std::chrono::microseconds>(end_evt - begin_evt).count();
-	double ndraws = w_draws+y_draws+q2_draws;
-	cout<<" **************** Event accepted "<<draw_time*1E-6<<"s ****************"<<endl;;
-	cout<<" **  (W,Y,Eg,Q2) = ("<<W<<","<<Y<<","<<Egamma<<","<<Q2<<")  **"<<endl;
-	cout<<" ** Event gen statistics :: ndraws "<<ndraws<<" "<< draw_time <<" micros ("<<draw_time/float(ndraws)<<" micros/draw "<<endl;
-	cout<<" ** Draw breakdown (W,Y,Q2) = ("<<w_draws<<","<<y_draws<<","<<q2_draws<<")"<<endl;
-	//cout<<" ** Time spent root finding "<<_root_finding<<" micros ("<<_root_finding/float(ndraws)*100.0<<"%)"<<endl;
-	cout<<" ************************************************ "<<endl;*/
 }
 
 
@@ -1351,28 +1350,27 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	double Q2 = 0;
 	double E = 0.;
 	double momx=0.,momy=0.,momz=0.;
-	double Egamma = 0;
+	double targetEgamma = 0, cmsEgamma = 0 ;
+	double gamma_pz = 0 , gamma_pt = 0, e_theta = 0;
 	double px2=0.,px1=0.,py2=0.,py1=0.,pz2=0.,pz1=0.;
-	double e_E=0., e_theta=0., e_phi=0;
+	double e_E=0., e_phi=0;
 	bool accepted = false;
-	//double target_Egamma;
 	do{
-	  pickwyq2(comenergy,rapidity,Q2);	  
-	  momenta(comenergy,rapidity,Q2,E,momx,momy,momz,
-		  e_E, e_theta, e_phi,tcheck);
+	  pickwEgamq2(comenergy,cmsEgamma, targetEgamma, 
+		   Q2, gamma_pz, gamma_pt, //photon infor in CMS frame
+		   e_E, e_theta);	 //electron info in target frame  
 	  //
-	  if( _bbs.beam2().A()==0 && _bbs.beam1().A() != 0){ 
-	    Egamma = 0.5*comenergy*exp(-rapidity);
-	  } else {
-	    Egamma = 0.5*comenergy*exp(rapidity);
-	  }
-	  // inelasticity: used for angular distribution
+	  momenta(comenergy,cmsEgamma, Q2, gamma_pz, gamma_pt, //input
+		  rapidity, E, momx, momy, momz, //VM
+		  e_phi,tcheck); //
+	  //
+	  // inelasticity: used for angular distributions
 	  double col_y = 1. - (e_E/_eEnergy)*std::pow(std::cos(e_theta/2.),2.);
 	  double col_polarization = (1 - col_y)/(1-col_y+col_y*col_y/2.);
 	  _nmbAttempts++;
 	  
 	  vmpid = ipid; 
-	  //twoBodyDecay(ipid,comenergy,momx,momy,momz,px1,py1,pz1,px2,py2,pz2,iFbadevent);
+	  // Two body dedcay in eSTARlight includes the angular corrections due to finite virtuality
 	  twoBodyDecay(ipid,comenergy,momx,momy,momz,e_phi,col_polarization,
 		       px1,py1,pz1,px2,py2,pz2,iFbadevent);
 	  double pt1chk = sqrt(px1*px1+py1*py1);
@@ -1427,18 +1425,18 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	    ipid2 = q2*ipid;
 	  }
 
-	  // - Outgoing electron
+	  // - Outgoing electron - target frame - update later
 	  double e_px = e_E*sin(e_theta)*cos(e_phi);
 	  double e_py = e_E*sin(e_theta)*sin(e_phi);
 	  double e_pz = e_E*cos(e_theta);
 	  lorentzVector electron(e_px, e_py, e_pz, e_E);
 	  event.addSourceElectron(electron);
-
-	  // - Generated photon (x, and y simply electron diff)
-	  double g_pz = _eEnergy - e_pz;
-	  lorentzVector gamma(-e_px,-e_py,g_pz,Egamma);
-	  event.addGamma(gamma, Egamma, Q2);
-
+	  // - Generated photon - CMS frame
+	  double gamma_x = gamma_pt*cos(e_phi+starlightConstants::pi);
+	  double gamma_y = gamma_pt*sin(e_phi+starlightConstants::pi);
+	  lorentzVector gamma(gamma_x,gamma_y,gamma_pz,cmsEgamma);
+	  event.addGamma(gamma, cmsEgamma, Q2);
+	  //
 	  double md = getDaughterMass(vmpid); 
 	  double Ed1 = sqrt(md*md+px1*px1+py1*py1+pz1*pz1); 
 	  starlightParticle particle1(px1, py1, pz1, Ed1, starlightConstants::UNKNOWN, ipid1, q1);
