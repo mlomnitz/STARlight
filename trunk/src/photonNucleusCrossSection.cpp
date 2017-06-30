@@ -62,7 +62,7 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	  _fixedQ2range      (inputParametersInstance.fixedQ2Range()      ),
 	  _minQ2             (inputParametersInstance.minGammaQ2()        ),
 	  _maxQ2             (inputParametersInstance.maxGammaQ2()        ),
-	  _maxPhotonEnergy   (inputParametersInstance.maxPhotonEnergy()   )
+	  _maxPhotonEnergy   (inputParametersInstance.cmsMaxPhotonEnergy()   )
 {
 	switch(_particleType) {
 	case RHO:
@@ -618,9 +618,9 @@ photonNucleusCrossSection::integrated_Q2_dep(double const Egamma, double const _
     g_int2 += (x3-x1)*( photonFlux(Egamma,x3)+photonFlux(Egamma,x1) +4.*photonFlux(Egamma,x2));
     g_int3 += (x3-x1)*( getcsgA_Q2_dep(x3)+getcsgA_Q2_dep(x1) +4.*getcsgA_Q2_dep(x2));
   }
-  return g_int2*g_int3/36.; 
+  //return g_int2*g_int3/36.; 
   //return g_int2/6.;
-  //return g_int/6.;
+  return g_int/6.;
 }
 
 
