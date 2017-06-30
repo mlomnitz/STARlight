@@ -63,6 +63,7 @@ inputParameters::inputParameters()
 	  _nmbWBins              ("W_N_BINS",0),
 	  _maxRapidity           ("RAP_MAX",0),
 	  _nmbRapidityBins       ("RAP_N_BINS",0),
+	  _nmbEnergyBins         ("EGA_N_BINS",0),
 	  _ptCutEnabled          ("CUT_PT",false, NOT_REQUIRED),
 	  _ptCutMin              ("PT_MIN",0, NOT_REQUIRED),
 	  _ptCutMax              ("PT_MAX",0, NOT_REQUIRED),
@@ -114,7 +115,9 @@ inputParameters::inputParameters()
 
 	_ip.addParameter(_maxRapidity);
 	_ip.addParameter(_nmbRapidityBins);
-	
+	//
+	_ip.addParameter(_nmbEnergyBins);
+
 	_ip.addParameter(_ptCutEnabled);
 	_ip.addParameter(_ptCutMin);
 	_ip.addParameter(_ptCutMax);
@@ -187,9 +190,9 @@ inputParameters::configureFromFile(const std::string &_configFileName)
 	std::cout << "Rapidity beam 1 in beam 2 frame: " << rap1-rap2 << ", beam 1 gamma in beam 2 frame: " << _targetLorentzGamma<< std::endl;
 	_ptBinWidthInterference = maxPtInterference() / nmbPtBinsInterference();
 	_protonEnergy           = _beamLorentzGamma * protonMass;
-	//Storing electron energy in target frame
+	//Storing electron energy, and max photon energy in target frame
 	_electronEnergy         = _targetLorentzGamma * starlightConstants::mel;
-	_maxPhotonEnergy        = (_beamLorentzGamma - 1000. ) *starlightConstants::mel;
+	//	_maxPhotonEnergy        = (_beamLorentzGamma - 1000. ) *starlightConstants::mel;
 	//_electronEnergy         = beam1LorentzGamma() * starlightConstants::mel;
 	// check for deuteron or tritium - these must be the second beam
 	if((beam1Z()==1) && (beam1A()==2)){
@@ -580,7 +583,12 @@ inputParameters::configureFromFile(const std::string &_configFileName)
 	  else
 	    _fixedQ2Range = true;
 	}
-
+	//Photon energy limits in C.M.S and target (p, or Au at rest) frames
+	_cmsMaxPhotonEnergy        = (_beamLorentzGamma - 1000. ) *starlightConstants::mel;
+	_cmsMinPhotonEnergy  = 0.5*(((mass+protonMass)*(mass+protonMass)-
+				     protonMass*protonMass)/(_protonEnergy.value()+sqrt(_protonEnergy.value()*_protonEnergy.value()-protonMass*protonMass)));
+	_targetMaxPhotonEnergy        = (_targetLorentzGamma - 1000. ) *starlightConstants::mel;
+	_targetMinPhotonEnergy   = _cmsMinPhotonEnergy*exp(fabs(rap1-rap2)/2.);  
 	printInfo << "using the following " << *this;
 	
 	return true;
@@ -602,6 +610,7 @@ inputParameters::print(ostream& out) const
 	    << "    # of W bins ............................ " << _nmbWBins.value() << endl
 	    << "    maximum absolute value for rapidity .... " << _maxRapidity.value() << endl
 	    << "    # of rapidity bins ..................... " << _nmbRapidityBins.value() << endl
+            << "    # of Egamma bins ....................... " << _nmbEnergyBins.value() << endl
 	    << "    cut in pT............................... " << yesNo(_ptCutEnabled.value()) << endl;
     if (_ptCutEnabled.value()) {
 	out << "        minumum pT.......................... " << _ptCutMin.value() << " GeV/c" << endl

@@ -186,12 +186,16 @@ public:
 	double       beamLorentzGamma      () const { return _beamLorentzGamma;       	      }  ///< returns Lorentz gamma factor of both beams in beam CMS frame
 	double       beam1LorentzGamma     () const { return _beam1LorentzGamma.value();      }  ///< returns Lorentz gamma factor of beam 1 in collider frame
 	double       beam2LorentzGamma     () const { return _beam2LorentzGamma.value();      }  ///< returns Lorentz gamma factor of beam 2 in collider frame
-	double       maxPhotonEnergy       () const { return _maxPhotonEnergy;                }  ///< returns maximum photon energy 
+	double       targetMaxPhotonEnergy       () const { return _targetMaxPhotonEnergy;    }  ///< returns maximum photon energy 
+	double       cmsMaxPhotonEnergy       () const { return _cmsMaxPhotonEnergy;          }  ///< returns maximum photon energy 
+	double       targetMinPhotonEnergy       () const { return _targetMinPhotonEnergy;    }  ///< returns maximum photon energy 
+	double       cmsMinPhotonEnergy       () const { return _cmsMinPhotonEnergy;          }  ///< returns maximum photon energy 
 	double       maxW                  () const { return _maxW.value();                   }  ///< returns maximum mass W of produced hadronic system [GeV/c^2]
 	double       minW                  () const { return _minW.value();                   }  ///< returns minimum mass W of produced hadronic system [GeV/c^2]
 	unsigned int nmbWBins              () const { return _nmbWBins.value();               }  ///< returns number of W bins in lookup table
 	double       maxRapidity           () const { return _maxRapidity.value();            }  ///< returns maximum absolute value of rapidity
 	unsigned int nmbRapidityBins       () const { return _nmbRapidityBins.value();        }  ///< returns number of rapidity bins in lookup table
+	unsigned int nmbEnergyBins         () const { return _nmbEnergyBins.value();          }  ///< return the number of Egamma bins for eSTARlight lookup
 	bool         ptCutEnabled          () const { return _ptCutEnabled.value();           }  ///< returns cut in pt
 	double       ptCutMin              () const { return _ptCutMin.value();               }  ///< returns minimum pt
 	double       ptCutMax              () const { return _ptCutMax.value();               }  ///< returns maximum pt
@@ -236,12 +240,13 @@ public:
 	void setBeamLorentzGamma      (double v)  {  _beamLorentzGamma = v;       }  ///< sets Lorentz gamma factor of both beams in beam CMS frame
 	void setBeam1LorentzGamma     (double v)  {  _beam1LorentzGamma = v;      }  ///< sets Lorentz gamma factor of beam 1 in collider frame
 	void setBeam2LorentzGamma     (double v)  {  _beam2LorentzGamma = v;      }  ///< sets Lorentz gamma factor of beam 2 in collider frame
-	void setMaxPhotonEnergy       (double v)  {  _maxPhotonEnergy = v ;       }  ///< sets maximim photon energy
+	//void setMaxPhotonEnergy       (double v)  {  _maxPhotonEnergy = v ;       }  ///< sets maximim photon energy
 	void setMaxW                  (double v)  {  _maxW = v;                   }  ///< sets maximum mass W of produced hadronic system [GeV/c^2]
 	void setMinW                  (double v)  {  _minW = v;                   }  ///< sets minimum mass W of produced hadronic system [GeV/c^2]
 	void setNmbWBins              (unsigned int v)  {  _nmbWBins = v;         }  ///< sets number of W bins in lookup table
 	void setMaxRapidity           (double v)  {  _maxRapidity = v;            }  ///< sets maximum absolute value of rapidity
 	void setNmbRapidityBins       (unsigned int v)  {  _nmbRapidityBins = v;  }  ///< sets number of rapidity bins in lookup table
+	void setNmbEgaBins            (unsigned int v)  {  _nmbEnergyBins = v;    }  ///< sets number of Ega bins for eSTARlight
 	void setPtCutEnabled          (bool v)  {  _ptCutEnabled = v;             }  ///< sets cut in pt
 	void setPtCutMin              (double v)  {  _ptCutMin = v;               }  ///< sets minimum pt
 	void setPtCutMax              (double v)  {  _ptCutMax = v;               }  ///< sets maximum pt
@@ -307,6 +312,7 @@ private:
 	parameter<unsigned int, VALIDITY_CHECK>    _nmbWBins;                ///< number of W bins in lookup table
 	parameter<double, VALIDITY_CHECK>          _maxRapidity;             ///< maximum absolute value of rapidity
 	parameter<unsigned int, VALIDITY_CHECK>    _nmbRapidityBins;         ///< number of rapidity bins in lookup table
+	parameter<unsigned int, VALIDITY_CHECK>    _nmbEnergyBins;           ///< number of Egamma bins in lookup table
 	parameter<bool, VALIDITY_CHECK>            _ptCutEnabled;            ///< en/disables cut in pt
 	parameter<double, VALIDITY_CHECK>          _ptCutMin;                ///< minimum pt, if cut is enabled
 	parameter<double, VALIDITY_CHECK>          _ptCutMax;                ///< maximum pt, if cut is enabled
@@ -357,7 +363,10 @@ private:
 
 	double                         _targetLorentzGamma;       ///< Lorentz gamma factor of the source in target frame, not an input parameter
 	double                         _beamLorentzGamma;         ///< Lorentz gamma factor of the beams in CMS frame, not an input parameter
-	double                         _maxPhotonEnergy;
+	double                         _cmsMaxPhotonEnergy;
+	double                         _cmsMinPhotonEnergy;
+	double                         _targetMaxPhotonEnergy;
+	double                         _targetMinPhotonEnergy;
 	double                         _inputBranchingRatio;      ///< Branching ratio defined for each channel
 	bool                           _fixedQ2Range;
 
