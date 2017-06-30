@@ -136,10 +136,8 @@ int eventFileWriter::writeEvent(eXEvent &event, int eventnumber)
       for( uint igam = 0 ; igam < event.getGammaEnergies()->size(); ++igam){
 	_fileStream <<"GAMMA: "<<event.getGammaEnergies()->at(igam)<<" "<<event.getGammaMasses()->at(igam)<<std::endl;
 	lorentzVector gam = event.getGamma()->at(igam);
-	double temp  = -pow(gam.GetE(),2.)+pow(gam.GetPx(),2.)+pow(gam.GetPy(),2.)+pow(gam.GetPz(),2.);
-	//_fileStream <<"GAMMA VECTOR: "<<gam.GetPx()<<" "<<gam.GetPy()<<" "<<gam.GetPz()<<" "<<gam.GetE()<<" "<<temp<<std::endl;
-	if( fabs(temp - event.getGammaMasses()->at(igam)) > 1E-6)
-	  std::cout<<" Broken energy-mass "<<std::endl;
+	// Write the photon 4-vector out to file. Might be used in later iterations, so I keep it here
+	//_fileStream <<"GAMMA VECTOR: "<<gam.GetPx()<<" "<<gam.GetPy()<<" "<<gam.GetPz()<<" "<<gam.GetE()<<" "<<-temp<<std::endl;
       }
 
       for( uint iel = 0 ; iel < event.getSources()->size(); ++iel){
