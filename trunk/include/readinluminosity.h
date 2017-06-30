@@ -56,7 +56,7 @@ class readLuminosity
   //For eSTARlight
   double **_f_WYarray;
   double **_g_Earray;
-  std::map<std::string,std::vector<double> >* _g_EQ2array;//Will store Q2 Qmin, Qmax, and g(Egamma,Q2)
+  std::vector< std::pair<double,std::vector<double> > >* _g_EQ2array;//Will store Q2 Qmin, Qmax, and g(Egamma,Q2)
 
   double _f_max;
   double _f_max1;
@@ -74,6 +74,7 @@ class readLuminosity
   const int _ReadInputNPT;
   const int _ReadInputnumy;
   const int _ReadInputnumw;
+  const int _ReadInputnumega;
   const int _ReadInputgg_or_gP;
   const int _ReadInputinterferencemode;
   const std::string _baseFileName;

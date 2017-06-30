@@ -50,6 +50,7 @@ readLuminosity::readLuminosity(const inputParameters& inputParametersInstance)
   , _ReadInputNPT(inputParametersInstance.nmbPtBinsInterference())
   , _ReadInputnumy(inputParametersInstance.nmbRapidityBins())
   , _ReadInputnumw(inputParametersInstance.nmbWBins())
+  , _ReadInputnumega(inputParametersInstance.nmbEnergyBins())
   , _ReadInputgg_or_gP(inputParametersInstance.productionMode())
   , _ReadInputinterferencemode(inputParametersInstance.interferenceEnabled())
   , _baseFileName(inputParametersInstance.baseFileName())
@@ -212,7 +213,7 @@ void readLuminosity::e_read()
     _f_WYarray = new double*[_ReadInputnumw];
     for(int i = 0; i < _ReadInputnumw; i++)
     {
-      _f_WYarray[i] = new double[_ReadInputnumy];
+      _f_WYarray[i] = new double[_ReadInputnumega+1];
     }
   }
   if(!_g_Earray) 
@@ -220,7 +221,7 @@ void readLuminosity::e_read()
     _g_Earray = new double*[_ReadInputnumw];
     for(int i = 0; i < _ReadInputnumw; i++)
     {
-      _g_Earray[i] = new double[_ReadInputnumy];
+      _g_Earray[i] = new double[_ReadInputnumw+1];
     }
   }
 
@@ -254,17 +255,17 @@ void readLuminosity::e_read()
 
   if( (A_2 == 0 && A_1 >= 1) || (A_1 ==0 && A_2 >= 1) ){ 
     for(int i=0;i<_ReadInputnumw;i++){
-      for(int j=0;j<_ReadInputnumy;j++){
+      for(int j=0;j<=_ReadInputnumega;j++){
         wylumfile >> _f_WYarray[i][j];
         if( _f_WYarray[i][j] > _f_WYmax ) _f_WYmax=_f_WYarray[i][j];
 	//
-	wylumfile >> _g_Earray[i][j];
-	if( _g_Earray[i][j] > _g_Emax ) _g_Emax = _g_Earray[i][j];
+	//wylumfile >> _g_Earray[i][j];
+	//if( _g_Earray[i][j] > _g_Emax ) _g_Emax = _g_Earray[i][j];
       }
     }
     //Normalize f_WY array, g does not need to be normalized, it is used for normalization
     for(int i=0;i<_ReadInputnumw;i++){
-      for(int j=0;j<_ReadInputnumy;j++){
+      for(int j=0;j<=_ReadInputnumega;j++){
         _f_WYarray[i][j] = _f_WYarray[i][j]/( _f_WYmax );
 	//_g_Earray[i][j] = _g_Earray[i][j]/_g_Emax;
       }
@@ -280,14 +281,18 @@ void readLuminosity::e_read()
   EQlumfile.open(EQ2FileName.c_str());
   int n_steps;
   EQlumfile >> n_steps;
-  _g_EQ2array = new map<string,std::vector<double> >();
+  double integrated_max = 0 ;
+  //  _g_EQ2array = new map<string,std::vector<double> >();
+  _g_EQ2array = new vector< std::pair< double, vector<double> > > ();
   while( !EQlumfile.eof() ){
     _g_EQ2max = 0 ;
-    std::string tag;
+    double integral;
     std::vector<double> p;
     for( int iQ2 = 0 ; iQ2 <= n_steps+3 ; ++iQ2){      
       if(iQ2 == 0 ){
-	EQlumfile >> tag;
+	EQlumfile >> integral;
+	if( integral > integrated_max)
+	  integrated_max = integral;
       }
       else{
 	double temp;
@@ -302,7 +307,12 @@ void readLuminosity::e_read()
     for( uint iQ2=2; iQ2 < p.size(); ++iQ2)
       p[iQ2] = p[iQ2]/_g_EQ2max;
     
-    _g_EQ2array->insert(std::pair< string,std::vector<double> >(tag,p));
+    _g_EQ2array->push_back(std::pair< double, std::vector<double> >(integral,p));
+  }
+  for(  std::vector< std::pair<double, std::vector<double> > >::iterator it =_g_EQ2array->begin() ; it != _g_EQ2array->end(); ++it){
+    //cout<<it->first<<endl;
+    it->first = it->first/integrated_max;
+    //cout<<"Now"<<it->first<<endl;
   }
   //normalize
   /*for(  std::map<string,std::vector<double> >::iterator it =_g_EQ2array->begin() ; it != _g_EQ2array->end(); ++it){
