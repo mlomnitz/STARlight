@@ -307,11 +307,104 @@ photonNucleusCrossSection::getcsgA(const double Egamma,
 
 //______________________________________________________________________________
 double
+photonNucleusCrossSection::e_getcsgA(const double Egamma, double Q2,
+                                   const double W, 
+                                   const int beam)
+{
+	//This function returns the cross-section for photon-nucleus interaction 
+	//producing vectormesons for e_starlight. Stuff will be returned in CMS frame, but
+        //photon input is take in target frame
+  
+	double Av,Wgp,cs,cvma;
+	double t,tmin,tmax;
+	double csgA,ax,bx;
+	int NGAUSS; 
+  
+	//     DATA FOR GAUSS INTEGRATION
+	double xg[6] = {0, 0.1488743390, 0.4333953941, 0.6794095683, 0.8650633667, 0.9739065285};
+	double ag[6] = {0, 0.2955242247, 0.2692667193, 0.2190863625, 0.1494513492, 0.0666713443};
+	NGAUSS = 6;
+  
+	//       Find gamma-proton CM energy
+	double proton_pz  = sqrt(_protonEnergy * _protonEnergy - protonMass * protonMass);
+	proton_pz = 0 ;
+	/*	Wgp = sqrt( 2.*(_protonEnergy*Egamma + proton_pz*(Egamma+Q2/(2.*_electronEnergy)))
+		+protonMass*protonMass - Q2);*/
+	Wgp = sqrt( 2.*(protonMass*Egamma)
+		    +protonMass*protonMass + Q2);
+	
+	//Used for A-A
+	tmin = (W * W / (4. * Egamma * _beamLorentzGamma)) * (W * W / (4. * Egamma * _beamLorentzGamma));
+  
+	if ((_bbs.beam1().A() <= 1) && (_bbs.beam2().A() <= 1)){
+	   // proton-proton, no scaling needed
+	   csgA = sigmagp(Wgp);
+	} else {
+	   // coherent AA interactions
+	   // Calculate V.M.+proton cross section
+           // cs = sqrt(16. * pi * _vmPhotonCoupling * _slopeParameter * hbarc * hbarc * sigmagp(Wgp) / alpha); 
+           cs = sigma_N(Wgp); //Use member function instead 
+    
+	   // Calculate V.M.+nucleus cross section
+	   cvma = sigma_A(cs,beam); 
+
+	   // Calculate Av = dsigma/dt(t=0) Note Units: fm**s/Gev**2
+	   Av = (alpha * cvma * cvma) / (16. * pi * _vmPhotonCoupling * hbarc * hbarc);
+
+           // Check if one or both beams are nuclei 
+           int A_1 = _bbs.beam1().A(); 
+           int A_2 = _bbs.beam2().A(); 
+   
+	   tmax   = tmin + 0.25;
+	   ax     = 0.5 * (tmax - tmin);
+	   bx     = 0.5 * (tmax + tmin);
+	   csgA   = 0.;
+	   for (int k = 1; k < NGAUSS; ++k) { 
+
+	       t    = ax * xg[k] + bx;
+               if( A_1 <= 1 && A_2 != 1){ 
+		  csgA = csgA + ag[k] * _bbs.beam2().formFactor(t) * _bbs.beam2().formFactor(t);
+               }else if(A_2 <=1 && A_1 != 1){
+		  csgA = csgA + ag[k] * _bbs.beam1().formFactor(t) * _bbs.beam1().formFactor(t);
+               }else{     
+                  if( beam==1 ){
+ 		     csgA = csgA + ag[k] * _bbs.beam1().formFactor(t) * _bbs.beam1().formFactor(t);
+                  }else if(beam==2){
+ 		     csgA = csgA + ag[k] * _bbs.beam2().formFactor(t) * _bbs.beam2().formFactor(t);	
+  		  }else{
+		     cout<<"Something went wrong here, beam= "<<beam<<endl; 
+                  }
+               }
+
+	       t    = ax * (-xg[k]) + bx;
+               if( A_1 <= 1 && A_2 != 1){ 
+			  csgA = csgA + ag[k] * _bbs.beam2().formFactor(t) * _bbs.beam2().formFactor(t);
+               }else if(A_2 <=1 && A_1 != 1){
+			  csgA = csgA + ag[k] * _bbs.beam1().formFactor(t) * _bbs.beam1().formFactor(t);
+               }else{     
+                  if( beam==1 ){
+ 			    csgA = csgA + ag[k] * _bbs.beam1().formFactor(t) * _bbs.beam1().formFactor(t);
+                  }else if(beam==2){
+ 			    csgA = csgA + ag[k] * _bbs.beam2().formFactor(t) * _bbs.beam2().formFactor(t);	
+  		  }else{
+			    cout<<"Something went wrong here, beam= "<<beam<<endl; 
+                  }
+	       }
+	   }
+	   csgA = 0.5 * (tmax - tmin) * csgA;
+	   csgA = Av * csgA;
+	}
+	return csgA;	
+}
+
+
+//______________________________________________________________________________
+double
 photonNucleusCrossSection::getcsgA_Q2_dep(const double Q2)
 {
   double const mv2 = getChannelMass()*getChannelMass();
   double const n = vmQ2Power(Q2);
-  return (0.15)*std::pow(mv2/(mv2+Q2),n);
+  return std::pow(mv2/(mv2+Q2),n);
 }
 
 
@@ -714,7 +807,7 @@ photonNucleusCrossSection::photonFlux(double const Egamma,
   //Do we even need a lookup table for this case? This should return N(E,Q2) from dn = N(E,Q2) dE dQ2
   double const ratio = Egamma/_electronEnergy;
   double const minQ2 = std::pow( starlightConstants::mel*Egamma,2.0) / (_electronEnergy*(_electronEnergy - Egamma));
-  double to_ret = alpha/pi *( 1- ratio + ratio*ratio/2. - (1-ratio)*( fabs(minQ2/Q2)) );
+  double to_ret = alpha/(pi) *( 1- ratio + ratio*ratio/2. - (1-ratio)*( fabs(minQ2/Q2)) );
   //Comparisons:
   //  double temp = pow(2.*_electronEnergy-Egamma,2.)/(Egamma*Egamma + Q2) + 1. - 4.*starlightConstants::mel*starlightConstants::mel/Q2;
   //temp = alpha*temp*Egamma/(4.*Q2*pi*_electronEnergy*_electronEnergy);

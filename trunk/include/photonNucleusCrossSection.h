@@ -61,6 +61,9 @@ public:
 	double getcsgA(const double Egamma,
 	               const double W,
                        const int beam);
+	double e_getcsgA(const double Egamma, double Q2,
+	               const double W,
+                       const int beam);
 	// Midification to csg due to virtuality
 	double getcsgA_Q2_dep(const double Q2);
 	double photonFlux(const double Egamma,
