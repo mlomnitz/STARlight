@@ -47,17 +47,24 @@ public:
 
 	void crossSectionCalculation(const double bwnormsave);
 	void makeGammaPQ2dependence();
+	void printCrossSection(const std::string name, const double x_section);
 
 private:
 	
 	double _Ep;
-	double _narrowYmax;
-	double _narrowYmin;
-	int    _narrowNumY;
+	//	double _narrowYmax;
+	//	double _narrowYmin;
+	//	int    _narrowNumY;
 	double _electronEnergy;
 	double _target_beamLorentz;
 	double _boost;
-	
+	//
+	double _targetMaxPhotonEnergy;
+	double _targetMinPhotonEnergy;
+	double _cmsMaxPhotonEnergy;
+	double _cmsMinPhotonEnergy;
+	//
+	double _VMnumEgamma;
 };
 
 
