@@ -175,8 +175,8 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
       // Photon energy limits are determnined in target frame - multiply by Egamma to speed up event generation
       //g_E = integrated_Q2_dep(Egamma);
       g_E = Egamma*integrated_Q2_dep(Egamma);
-      if( i==0 )
-	cout<<"Lomnitz "<<Egamma<<" , "<<integrated_Q2_dep(Egamma)*1E6<<" , "<<Egamma*integrated_Q2_dep(Egamma)*1E6<<endl;
+      //      if( i==0 )
+      //	cout<<"Lomnitz "<<Egamma<<" , "<<integrated_Q2_dep(Egamma)*1E6<<" , "<<Egamma*integrated_Q2_dep(Egamma)*1E6<<endl;
       //
       EQ2lumfile << g_E<<endl;
       //
@@ -204,7 +204,7 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
       f_WY = csgA*breitWigner(W,bwnorm);
       wylumfile << f_WY << endl;
     }
-    cout<<" Done "<<i << " out of "<<_nWbins<<endl;
+    //cout<<" Done "<<i << " out of "<<_nWbins<<endl;
   }
   
   EQ2lumfile.close();
