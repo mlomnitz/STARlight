@@ -180,6 +180,7 @@ void e_starlightStandalone::boostEvent(eXEvent &event)
    double rap1 = acosh(_inputParameters->beam1LorentzGamma());
    double rap2 = -acosh(_inputParameters->beam2LorentzGamma());
    double boost = (rap1+rap2)/2.;
-   event.boost(boost);
+   //double e_boost = 
+   event.boost(boost, rap2); //Assuming electron is beam1
 }
 
