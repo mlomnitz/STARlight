@@ -124,11 +124,22 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 		break;
 	case JPSI:
 	case JPSI_ee:
+	  //_vmQ2Power_c1 = 2.44;
+	  // _vmQ2Power_c2 = 0.0074; // [GeV^{-2}]
+	  _vmQ2Power_c1 = 2.45;
+	  _vmQ2Power_c2 = 0.00084; // [GeV^{-2}]
 	case JPSI_mumu:
 		_slopeParameter=4.0;
 		_vmPhotonCoupling=10.45;
-		_vmQ2Power_c1 = 2.15;
-		_vmQ2Power_c2 = 0.0074; // [GeV^{-2}]
+		// Best so far
+		//_vmQ2Power_c1 = 2.60;
+		//_vmQ2Power_c2 = 0.0057; // [GeV^{-2}]
+		//Clsoe second
+		//_vmQ2Power_c1 = 2.30;
+		//_vmQ2Power_c2 = 0.0098; // [GeV^{-2}]
+		//New winner
+		_vmQ2Power_c1 = 2.45;
+		_vmQ2Power_c2 = 0.00084; // [GeV^{-2}]
 		_ANORM=-2.75; 
 		_BNORM=0.0;
 		_defaultC=1.0;
