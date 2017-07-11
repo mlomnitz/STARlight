@@ -96,9 +96,11 @@ eXEvent& eXEvent::operator+(const eXEvent& ev)
   return *this;
 }
 
-void eXEvent::boost(double rapidity)
+void eXEvent::boost(double rapidity, double e_rapidity)
 {
     vector3 boostVector(0, 0, tanh(rapidity));
+    vector3 electron_boostVector(0, 0, tanh(e_rapidity));
+    //
     std::vector<starlightParticle>::iterator part = _particles.begin();
       
     for (part = _particles.begin(); part != _particles.end(); part++)
@@ -107,6 +109,6 @@ void eXEvent::boost(double rapidity)
     }
     std::vector<lorentzVector>::iterator ele = _sources.begin();
     for( ele = _sources.begin(); ele != _sources.end(); ++ele){
-      (*ele).Boost(boostVector);
+      (*ele).Boost(electron_boostVector);
     }
 }

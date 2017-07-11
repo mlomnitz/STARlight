@@ -65,7 +65,7 @@ class eXEvent
       eXEvent & operator=(const eXEvent&);
       eXEvent & operator+(const eXEvent&);
       
-      void boost(double rapidity);
+      void boost(double rapidity, double e_rapiditya);
    private:
       
       std::vector<starlightParticle> _particles;
