@@ -169,7 +169,8 @@ e_narrowResonanceCrossSection::crossSectionCalculation(const double)  // _bwnorm
 	    // Finish the Q2 integration for the three end-points (Siumpsons rule)
 	    dndE[iEgaInt] = dndE[iEgaInt]/6.; 
 	    full_int[iEgaInt] = full_int[iEgaInt]/6.;
-	  }	    
+	  }	
+	  //cout<<"Done with "<< iEgamma<<" out of "<<nEgamma<<endl;
 	  // Finishing cross-section integral 
 	  dR = full_int[0];
 	  dR += full_int[1];
@@ -225,11 +226,16 @@ e_narrowResonanceCrossSection::makeGammaPQ2dependence()
 	// This subroutine calculates the Q2 dependence of 
         // gamma+X -> VM + X cross section for a narrow resonance
   
-        int const nQ2bins = 19;
-	double const q2Edge[nQ2bins+1] = { 0.001,1.,2.,3., 4.,5.,
+  /*int const nQ2bins = 19;
+	double const q2Edge[nQ2bins+1] = { 0.1,1.,2.,3., 4.,5.,
 					   6.,7.,8.,9.,10.,
 					   11.,12.,13.,14.,15.,
 					   20.,30.,40.,50.};
+  */
+        int const nQ2bins = 11;
+	double const q2Edge[nQ2bins+1] = { 0.1,0.25,0.5,0.75,1.,1.5,
+					   2.,2.5,3.,3.5, 4.,5.
+	};
 	//
 	double full_x_section[nQ2bins] = {0};
 	double effective_flux[nQ2bins] = {0};
@@ -238,7 +244,7 @@ e_narrowResonanceCrossSection::makeGammaPQ2dependence()
 	ofstream  w_file, y_file, q2_file;
 	//
 	w_file.open("estarlight_gammap_vs_w.csv");
-	y_file.open("estarlight_gammap_vs_y.csv");
+	y_file.open("estarlight_ep_vs_q2.csv");
 	q2_file.open("estarlight_gammap_vs_q2.csv");
 	//
         double W, dEgamma, minEgamma;
@@ -326,6 +332,13 @@ e_narrowResonanceCrossSection::makeGammaPQ2dependence()
 		dndE[iEgaInt] +=(q2_2-q2_1)*( photonFlux(ega[iEgaInt],q2_1)
 					      +photonFlux(ega[iEgaInt],q2_2)
 					      +4.*photonFlux(ega[iEgaInt],q2_12) );
+		//
+		//full_int[iEgaInt] += (q2_2-q2_1)*( g(ega[iEgaInt],q2_1)*e_getcsgA(ega[iEgaInt],q2_1,W,beam) 
+		//+ g(ega[iEgaInt],q2_2)*e_getcsgA(ega[iEgaInt],q2_2,W,beam)
+		//+ 4.*g(ega[iEgaInt],q2_12)*e_getcsgA(ega[iEgaInt],q2_12,W,beam) );
+		full_int[iEgaInt] += (q2_2-q2_1)*( g(ega[iEgaInt],q2_1)*getcsgA(cms_ega1,W,beam) 
+						   + g(ega[iEgaInt],q2_2)*getcsgA(cms_ega2,W,beam)
+						   + 4.*g(ega[iEgaInt],q2_12)*getcsgA(cms_ega12,W,beam) );
 	      }
 	      // Finish the Q2 integration for the three end-points (Siumpsons rule)
 	      dndE[iEgaInt] = dndE[iEgaInt]/6.; 
@@ -351,9 +364,10 @@ e_narrowResonanceCrossSection::makeGammaPQ2dependence()
 	    gamma_x_section[iQ2Bin] += (ega[1]-ega[0])*( dsigmadE[0] + dsigmadE[1]+4.*dsigmadE[2])/6.;
 	  }
 	  cout<<q2Edge[iQ2Bin]<<" - "<<q2Edge[iQ2Bin+1]<<"\t : "<<full_x_section[iQ2Bin]*10000000
-	      <<"\t "<<effective_flux[iQ2Bin] <<"\t "<<full_x_section[iQ2Bin]/effective_flux[iQ2Bin]*10000000<<endl;
+	      <<"\t "<<effective_flux[iQ2Bin]*1E6 <<"\t "<<full_x_section[iQ2Bin]/effective_flux[iQ2Bin]*10000000<<endl;
 	  cout<<gamma_x_section[iQ2Bin]/effective_flux[iQ2Bin]*1E7<<endl;
-	  q2_file<<(q2Edge[iQ2Bin+1]+q2Edge[iQ2Bin])/2.+W*W<<","<<gamma_x_section[iQ2Bin]/effective_flux[iQ2Bin]*1E7<<endl;
+	  y_file<<(q2Edge[iQ2Bin+1]+q2Edge[iQ2Bin])/2.+W*W<<","<<full_x_section[iQ2Bin]*1E7/(q2Edge[iQ2Bin+1]-q2Edge[iQ2Bin])<<endl;
+	  q2_file<<(q2Edge[iQ2Bin+1]+q2Edge[iQ2Bin])/2.+W*W<<","<<full_x_section[iQ2Bin]/effective_flux[iQ2Bin]*1E7<<endl; //No need to remove bin width
 	}
 	//
 	//
