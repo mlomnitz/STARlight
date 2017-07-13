@@ -584,10 +584,10 @@ inputParameters::configureFromFile(const std::string &_configFileName)
 	    _fixedQ2Range = true;
 	}
 	//Photon energy limits in C.M.S and target (p, or Au at rest) frames
-	_cmsMaxPhotonEnergy        = (_beamLorentzGamma - 1000. ) *starlightConstants::mel;
+	_cmsMaxPhotonEnergy        = (_beamLorentzGamma - 10. ) *starlightConstants::mel;
 	_cmsMinPhotonEnergy  = 0.5*(((mass+protonMass)*(mass+protonMass)-
 				     protonMass*protonMass)/(_protonEnergy.value()+sqrt(_protonEnergy.value()*_protonEnergy.value()-protonMass*protonMass)));
-	_targetMaxPhotonEnergy        = (_targetLorentzGamma - 1000. ) *starlightConstants::mel;
+	_targetMaxPhotonEnergy        = (_targetLorentzGamma - 10. ) *starlightConstants::mel;
 	_targetMinPhotonEnergy   = _cmsMinPhotonEnergy*exp(fabs(rap1-rap2)/2.);  
 	printInfo << "using the following " << *this;
 	
