@@ -56,13 +56,16 @@ e_narrowResonanceCrossSection::e_narrowResonanceCrossSection(const inputParamete
 	_boost = std::acosh(inputParametersInstance.beam1LorentzGamma())
 	  -std::acosh(inputParametersInstance.beam2LorentzGamma());
 	_boost = _boost/2;
+	// Photon energy limits in the two important frames
 	_targetMaxPhotonEnergy=inputParametersInstance.targetMaxPhotonEnergy();
 	_targetMinPhotonEnergy=inputParametersInstance.targetMinPhotonEnergy();
-	// Now saving the photon energy limits
 	_cmsMaxPhotonEnergy=inputParametersInstance.cmsMaxPhotonEnergy();
 	_cmsMinPhotonEnergy=inputParametersInstance.cmsMinPhotonEnergy();
 	//
 	_VMnumEgamma = inputParametersInstance.nmbEnergyBins();
+	_useFixedRange = inputParametersInstance.fixedQ2Range();
+	_gammaMinQ2 = inputParametersInstance.minGammaQ2();
+	_gammaMaxQ2 = inputParametersInstance.maxGammaQ2();
 }
 
 
@@ -133,9 +136,13 @@ e_narrowResonanceCrossSection::crossSectionCalculation(const double)  // _bwnorm
 	  double full_int[3] = {0}; // Full e+X --> e+X+V.M. cross section
 	  //
 	  for( int iEgaInt = 0 ; iEgaInt < 3; ++iEgaInt){    // Loop over the energies for the three points to integrate over Q2
-	    //
 	    double Q2_min = std::pow(starlightConstants::mel*ega[iEgaInt],2.0)/(_electronEnergy*(_electronEnergy-ega[iEgaInt]));
+	    //
 	    double Q2_max = 4.*_electronEnergy*(_electronEnergy-ega[iEgaInt]);
+	    if(_useFixedRange == true){
+	      Q2_min = _gammaMinQ2;
+	      Q2_max = _gammaMaxQ2;
+	    }
 	    double lnQ2ratio = std::log(Q2_max/Q2_min)/nQ2;
 	    double lnQ2_min = std::log(Q2_min);
 	    //
@@ -232,9 +239,14 @@ e_narrowResonanceCrossSection::makeGammaPQ2dependence()
 					   11.,12.,13.,14.,15.,
 					   20.,30.,40.,50.};
   */
-        int const nQ2bins = 11;
-	double const q2Edge[nQ2bins+1] = { 0.1,0.25,0.5,0.75,1.,1.5,
-					   2.,2.5,3.,3.5, 4.,5.
+        int const nQ2bins = 29;
+	double const q2Edge[nQ2bins+1] = { 0.01, 0.02, 0.03, 0.05, 0.06,
+					   0.07, 0.08, 0.09, 0.1, 0.2,
+					   0.3, 0.4, 0.5, 0.75, 1.0,
+					   1.5, 2.0, 2.5, 3.0, 4.0,
+					   5.0, 6.0, 7.0, 8.0, 9.0,
+					   10., 12.5, 15., 17.5, 20
+					   
 	};
 	//
 	double full_x_section[nQ2bins] = {0};
@@ -367,6 +379,7 @@ e_narrowResonanceCrossSection::makeGammaPQ2dependence()
 	      <<"\t "<<effective_flux[iQ2Bin]*1E6 <<"\t "<<full_x_section[iQ2Bin]/effective_flux[iQ2Bin]*10000000<<endl;
 	  cout<<gamma_x_section[iQ2Bin]/effective_flux[iQ2Bin]*1E7<<endl;
 	  y_file<<(q2Edge[iQ2Bin+1]+q2Edge[iQ2Bin])/2.+W*W<<","<<full_x_section[iQ2Bin]*1E7/(q2Edge[iQ2Bin+1]-q2Edge[iQ2Bin])<<endl;
+	  cout<<" Lomnitz "<<W*W<<endl;
 	  q2_file<<(q2Edge[iQ2Bin+1]+q2Edge[iQ2Bin])/2.+W*W<<","<<full_x_section[iQ2Bin]/effective_flux[iQ2Bin]*1E7<<endl; //No need to remove bin width
 	}
 	//
