@@ -65,6 +65,9 @@ private:
 	double _cmsMinPhotonEnergy;
 	//
 	double _VMnumEgamma;
+	double _useFixedRange;
+	double _gammaMinQ2;
+	double _gammaMaxQ2;
 };
 
 
