@@ -92,7 +92,9 @@ inputParameters::inputParameters()
 	  _xsecCalcMethod	 ("XSEC_METHOD",0, NOT_REQUIRED),
           _axionMass             ("AXION_MASS",50, NOT_REQUIRED),  // AXION HACK
           _bslopeDefinition      ("BSLOPE_DEFINITION",0, NOT_REQUIRED),
-	  _bslopeValue           ("BSLOPE_VALUE",4.0,NOT_REQUIRED)
+	  _bslopeValue           ("BSLOPE_VALUE",4.0,NOT_REQUIRED),
+	  _impulseVM             ("SELECT_IMPULSE_VM",0,NOT_REQUIRED),
+	  _quantumGlauber        ("QUANTUM_GLAUBER",0,NOT_REQUIRED)
 {
   // All parameters must be initialised in initialisation list! 
   // If not: error: 'parameter<T, validate>::parameter() [with T = unsigned int, bool validate = true]' is private
@@ -146,6 +148,8 @@ inputParameters::inputParameters()
         _ip.addParameter(_axionMass);     // AXION HACK
         _ip.addParameter(_bslopeDefinition); 
         _ip.addParameter(_bslopeValue); 
+	_ip.addParameter(_impulseVM);
+	_ip.addParameter(_quantumGlauber);
 }
 
 
@@ -640,6 +644,8 @@ inputParameters::print(ostream& out) const
       out << "    fixed photon Q2 range .................. " << _minGammaQ2.value() << " < Q2 < "
 	  <<_maxGammaQ2.value() << " GeV/c^2 "<<endl;
     }
+    out     <<"    Quantum Glauber parameter...............  "<<_quantumGlauber.value()<<endl;
+    out     <<"    Impulse VM parameter....................  "<<_impulseVM.value()<<endl;
     return out;
 }
 

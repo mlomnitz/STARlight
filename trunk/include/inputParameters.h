@@ -224,6 +224,8 @@ public:
         double       axionMass             () const { return _axionMass.value();              }  ///< returns axion mass //AXION HACK
 	int          bslopeDefinition      () const { return _bslopeDefinition.value();       }  ///< returns the definition of b-slope
 	double       bslopeValue           () const { return _bslopeValue.value();            }  ///< returns the value of b-slope
+	int          impulseVM             () const { return _impulseVM.value();              }  ///< returns the impulseVM value
+	int          quantumGlauber        () const { return _quantumGlauber.value();         }  ///< returns the quantum glauber value
 	starlightConstants::particleTypeEnum    prodParticleType     () const { return _particleType;    }  ///< returns type of produced particle
 	starlightConstants::decayTypeEnum       prodParticleDecayType() const { return _decayType;       }  ///< returns decay type of produced particle
 	starlightConstants::interactionTypeEnum interactionType      () const { return _interactionType; }  ///< returns interaction type
@@ -273,6 +275,8 @@ public:
 	void setAxionMass        (double v)  {  _axionMass = v;                   }  ///< sets axion mass    //AXION HACK
 	void setbslopeDefinition      (int v)  {  _bslopeDefinition = v;          }  ///< sets the definition of b slope
         void setbslopeValue           (double v)  {  _bslopeValue = v;            }  ///< sets the value of b slope
+	void setimpulseVM             (int v)  {  _impulseVM = v;                 }  ///< sets the value of _impulseVM
+	void setquantumGlauber        (int v)  {  _quantumGlauber = v;             }  ///< sets the value of quantum_glauber
 
 	void setProdParticleType      (starlightConstants::particleTypeEnum v)    { _particleType = v;    }  ///< sets type of produced particle
 	void setProdParticleDecayType (starlightConstants::decayTypeEnum v)       { _decayType = v;       }  ///< sets decay type of produced particle
@@ -356,6 +360,8 @@ private:
         parameter<double, VALIDITY_CHECK>          _axionMass;               ///Axion mass//AXION HACK
         parameter<unsigned int, VALIDITY_CHECK>    _bslopeDefinition;        ///< Optional parameter to set different values of slope parameter
         parameter<double, VALIDITY_CHECK>          _bslopeValue;             ///< Value of slope parameter when _bslopeDefinition is set to 1
+        parameter<unsigned int, VALIDITY_CHECK>    _impulseVM;               ///< Optional parameter to use impulse approximation (no nuclear effects) for VM cross section.
+	parameter<unsigned int, VALIDITY_CHECK>    _quantumGlauber;         ///< Optional parameter.  Set = 1 to use Quantum Glauber calculation, rather than Classical Glauber
 
 	starlightConstants::particleTypeEnum       _particleType;
 	starlightConstants::decayTypeEnum          _decayType;

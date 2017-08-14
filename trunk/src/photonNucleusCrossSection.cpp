@@ -64,6 +64,9 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	  _maxQ2             (inputParametersInstance.maxGammaQ2()        ),
 	  _maxPhotonEnergy   (inputParametersInstance.cmsMaxPhotonEnergy()   )
 {
+        // new options - impulse aproximation (per Joakim) and Quantum Glauber (per SK) SKQG
+        _impulseSelected = inputParametersInstance.impulseVM();
+	_quantumGlauber = inputParametersInstance.quantumGlauber();
 	switch(_particleType) {
 	case RHO:
 		_slopeParameter = 11.0;  // [(GeV/c)^{-2}]
@@ -258,6 +261,9 @@ photonNucleusCrossSection::getcsgA(const double Egamma,
 	   // proton-proton, no scaling needed
 	   csgA = sigmagp(Wgp);
 	} else {
+	   // Check if one or both beams are nuclei 
+	   int A_1 = _bbs.beam1().A(); 
+	   int A_2 = _bbs.beam2().A(); 
 	   // coherent AA interactions
 	   // Calculate V.M.+proton cross section
            // cs = sqrt(16. * pi * _vmPhotonCoupling * _slopeParameter * hbarc * hbarc * sigmagp(Wgp) / alpha); 
@@ -266,12 +272,17 @@ photonNucleusCrossSection::getcsgA(const double Egamma,
 	   // Calculate V.M.+nucleus cross section
 	   cvma = sigma_A(cs,beam); 
 
+           // Do impulse approximation here
+           if( _impulseSelected == 1){
+             if( beam == 1 ){
+	       cvma = A_1*cs;
+	     } else if ( beam == 2 ){
+               cvma = A_2*cs;
+	     }   
+           }	   
+
 	   // Calculate Av = dsigma/dt(t=0) Note Units: fm**s/Gev**2
 	   Av = (alpha * cvma * cvma) / (16. * pi * _vmPhotonCoupling * hbarc * hbarc);
-
-           // Check if one or both beams are nuclei 
-           int A_1 = _bbs.beam1().A(); 
-           int A_2 = _bbs.beam2().A(); 
    
 	   tmax   = tmin + 0.25;
 	   ax     = 0.5 * (tmax - tmin);
@@ -997,6 +1008,9 @@ photonNucleusCrossSection::sigma_A(const double sig_N, const int beam)
                 }
     
 		Pint=1.0-exp(arg);
+		// If this is a quantum Glauber calculation, use the quantum Glauber formula
+		if (_quantumGlauber == 1){Pint=2.0*(1.0-exp(arg/2.0));}
+
 		sum=sum+2.*pi*b*Pint*ag[IB];
     
 		b = 0.5*bmax*(-xg[IB])+0.5*bmax;
@@ -1017,6 +1031,9 @@ photonNucleusCrossSection::sigma_A(const double sig_N, const int beam)
                 }
 
 		Pint=1.0-exp(arg);
+		// If this is a quantum Glauber calculation, use the quantum Glauber formula
+		if (_quantumGlauber == 1){Pint=2.0*(1.0-exp(arg/2.0));}		
+
 		sum=sum+2.*pi*b*Pint*ag[IB];
 
 	}

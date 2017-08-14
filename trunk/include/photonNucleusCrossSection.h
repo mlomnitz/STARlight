@@ -75,8 +75,6 @@ public:
 	double integrated_x_section(const double Egamma, const double _min = 0 , const double _max = 0);
 	std::pair<double,double>* Q2arraylimits(double const Egamma);
 	double g(double const Egamma, double const Q2);
-	//std::pair<double, double> two_factor_integral(double const Egamma);
-	//double g_by_parts(double const Egamma, double const Q2);
 	// ---
 	double sigmagp(const double Wgp);
 	double sigma_A(const double sig_N, 
@@ -101,6 +99,10 @@ protected:
 	const double _beamLorentzGamma;
 
 	double _photonNucleusSigma; 
+
+	int    _printDef; 
+        int    _impulseSelected;
+	int    _quantumGlauber;  // from input parameter; 1 for Quantum Glauber, 0 for classical Glauber
 	
 private:
 
