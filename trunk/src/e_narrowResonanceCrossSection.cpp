@@ -136,12 +136,14 @@ e_narrowResonanceCrossSection::crossSectionCalculation(const double)  // _bwnorm
 	  double full_int[3] = {0}; // Full e+X --> e+X+V.M. cross section
 	  //
 	  for( int iEgaInt = 0 ; iEgaInt < 3; ++iEgaInt){    // Loop over the energies for the three points to integrate over Q2
+	    //These are the physical limits
 	    double Q2_min = std::pow(starlightConstants::mel*ega[iEgaInt],2.0)/(_electronEnergy*(_electronEnergy-ega[iEgaInt]));
-	    //
 	    double Q2_max = 4.*_electronEnergy*(_electronEnergy-ega[iEgaInt]);
 	    if(_useFixedRange == true){
-	      Q2_min = _gammaMinQ2;
-	      Q2_max = _gammaMaxQ2;
+	      if( Q2_min < _gammaMinQ2 )
+		Q2_min = _gammaMinQ2;
+	      if( Q2_max > _gammaMaxQ2 )
+		Q2_max = _gammaMaxQ2;
 	    }
 	    double lnQ2ratio = std::log(Q2_max/Q2_min)/nQ2;
 	    double lnQ2_min = std::log(Q2_min);
@@ -211,14 +213,16 @@ e_narrowResonanceCrossSection::crossSectionCalculation(const double)  // _bwnorm
 	//
 	//int_r = int_r/int_r2;
 	//
-	cout<<int_r*1E4<<" / "<<int_r2*1E4<<endl;
+	//cout<<int_r*1E4<<" / "<<int_r2*1E4<<endl;
 	cout<<endl;      
+	if(_useFixedRange == true){
+	  cout<<" Using fixed Q2 range "<<_gammaMinQ2 << " < Q2 < "<<_gammaMaxQ2<<endl;
+	}
 	printCrossSection(" Total cross section: ",int_r);
 	printCrossSection(" Total effective photon flux ", int_r2);
 	printCrossSection(" gamma+X --> VM+X ", int_r/int_r2);
-       	printCrossSection(" Just csga ", csga_int);
 	//
-	cout<<endl;
+	//cout<<endl;
 	setPhotonNucleusSigma(0.01*int_r);
 	#ifdef _makeGammaPQ2_
 	makeGammaPQ2dependence();
@@ -272,11 +276,11 @@ e_narrowResonanceCrossSection::makeGammaPQ2dependence()
 	dEgamma = std::log(_targetMaxPhotonEnergy/_targetMinPhotonEnergy)/nEgamma;
 	minEgamma = std::log(_targetMinPhotonEnergy);
   
-	cout<<" Using Narrow Resonance ..."<<endl;
+	//cout<<" Using Narrow Resonance ..."<<endl;
   
 	W = getChannelMass();
 	//
-        printf(" gamma+nucleon threshold (CMS): %e GeV \n", _cmsMinPhotonEnergy);
+        //printf(" gamma+nucleon threshold (CMS): %e GeV \n", _cmsMinPhotonEnergy);
 
         int A_1 = getbbs().beam1().A(); 
         int A_2 = getbbs().beam2().A();
@@ -299,7 +303,7 @@ e_narrowResonanceCrossSection::makeGammaPQ2dependence()
 	double coshy = cosh(target_cm);
 	double sinhy = sinh(target_cm);
 	int nQ2 = 500;
-        printf(" gamma+nucleon threshold (Target): %e GeV \n", _targetMinPhotonEnergy);
+        //printf(" gamma+nucleon threshold (Target): %e GeV \n", _targetMinPhotonEnergy);
 	for( int iQ2Bin  = 0 ; iQ2Bin < nQ2bins; ++iQ2Bin){
 	  for(iEgamma = 0 ; iEgamma < nEgamma; ++iEgamma){    // Integral over photon energy
 	    // Target frame energies
@@ -375,11 +379,8 @@ e_narrowResonanceCrossSection::makeGammaPQ2dependence()
 	    effective_flux[iQ2Bin] += dR2;	      
 	    gamma_x_section[iQ2Bin] += (ega[1]-ega[0])*( dsigmadE[0] + dsigmadE[1]+4.*dsigmadE[2])/6.;
 	  }
-	  cout<<q2Edge[iQ2Bin]<<" - "<<q2Edge[iQ2Bin+1]<<"\t : "<<full_x_section[iQ2Bin]*10000000
-	      <<"\t "<<effective_flux[iQ2Bin]*1E6 <<"\t "<<full_x_section[iQ2Bin]/effective_flux[iQ2Bin]*10000000<<endl;
-	  cout<<gamma_x_section[iQ2Bin]/effective_flux[iQ2Bin]*1E7<<endl;
+	  //cout<<gamma_x_section[iQ2Bin]/effective_flux[iQ2Bin]*1E7<<endl;
 	  y_file<<(q2Edge[iQ2Bin+1]+q2Edge[iQ2Bin])/2.+W*W<<","<<full_x_section[iQ2Bin]*1E7/(q2Edge[iQ2Bin+1]-q2Edge[iQ2Bin])<<endl;
-	  cout<<" Lomnitz "<<W*W<<endl;
 	  q2_file<<(q2Edge[iQ2Bin+1]+q2Edge[iQ2Bin])/2.+W*W<<","<<full_x_section[iQ2Bin]/effective_flux[iQ2Bin]*1E7<<endl; //No need to remove bin width
 	}
 	//
@@ -404,5 +405,5 @@ void e_narrowResonanceCrossSection::printCrossSection(const string name, const d
   } else {
     cout<< name.c_str() <<1.E13*x_section<<" femtob."<<endl;
   }
-  cout<<endl;
+  //cout<<endl;
 }  
