@@ -209,9 +209,9 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	//Changed by Lomnitz for e case. Limit is now E_e - 100m_e
 	//_maxPhotonEnergy = 12. * _beamLorentzGamma * hbarc/(_bbs.beam1().nuclearRadius()+_bbs.beam2().nuclearRadius());
 	//_maxPhotonEnergy = _electronEnergy - 10.*starlightConstants::mel;
-	cout<<" Lomnitz:: max energy in target frame "<< _electronEnergy - 1000.*starlightConstants::mel<<" vs electron energy "<<_electronEnergy<<endl
+	/*cout<<" Lomnitz:: max energy in target frame "<< _electronEnergy - 1000.*starlightConstants::mel<<" vs electron energy "<<_electronEnergy<<endl
 	    <<"           max energy in cms frame    "<<_maxPhotonEnergy<<"  vs electron energy "<<_beamLorentzGamma*starlightConstants::mel<<endl;
-	cout<<" testing original limit "<< 12. * _beamLorentzGamma * hbarc/(2.*_bbs.beam2().nuclearRadius())<<endl;
+	    cout<<" testing original limit "<< 12. * _beamLorentzGamma * hbarc/(2.*_bbs.beam2().nuclearRadius())<<endl;*/
 	
 	  
 }
