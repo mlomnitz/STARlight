@@ -257,10 +257,10 @@ e_narrowResonanceCrossSection::makeGammaPQ2dependence()
 	double effective_flux[nQ2bins] = {0};
 	double gamma_x_section[nQ2bins] = {0};
 	//
-	ofstream  w_file, y_file, q2_file;
+	ofstream  w_file, flux_file, q2_file;
 	//
 	w_file.open("estarlight_gammap_vs_w.csv");
-	y_file.open("estarlight_ep_vs_q2.csv");
+	flux_file.open("estarlight_flux_cs_q2.csv");
 	q2_file.open("estarlight_gammap_vs_q2.csv");
 	//
         double W, dEgamma, minEgamma;
@@ -380,12 +380,12 @@ e_narrowResonanceCrossSection::makeGammaPQ2dependence()
 	    gamma_x_section[iQ2Bin] += (ega[1]-ega[0])*( dsigmadE[0] + dsigmadE[1]+4.*dsigmadE[2])/6.;
 	  }
 	  //cout<<gamma_x_section[iQ2Bin]/effective_flux[iQ2Bin]*1E7<<endl;
-	  y_file<<(q2Edge[iQ2Bin+1]+q2Edge[iQ2Bin])/2.+W*W<<","<<full_x_section[iQ2Bin]*1E7/(q2Edge[iQ2Bin+1]-q2Edge[iQ2Bin])<<endl;
+	  flux_file<<(q2Edge[iQ2Bin+1]+q2Edge[iQ2Bin])/2.<<","<<effective_flux[iQ2Bin]<<endl;
 	  q2_file<<(q2Edge[iQ2Bin+1]+q2Edge[iQ2Bin])/2.+W*W<<","<<full_x_section[iQ2Bin]/effective_flux[iQ2Bin]*1E7<<endl; //No need to remove bin width
 	}
 	//
 	//
-	y_file.close();
+	flux_file.close();
 	w_file.close();
 	q2_file.close();
 }
