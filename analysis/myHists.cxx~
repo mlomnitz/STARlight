@@ -92,7 +92,6 @@ void ana_hists::fill_W_hist(double W, double Egamma, double Q2, double t)
 {
   double toFill[] = { W,  Egamma,  Q2,  t};
   hWEgammaQ2t->Fill( toFill );
-  cout<<"Here"<<endl;
 }
 void ana_hists::make_W_plot()
 {

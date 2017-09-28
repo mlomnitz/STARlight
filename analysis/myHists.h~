@@ -38,7 +38,7 @@ class ana_hists
   ~ana_hists();
   void fill_detector_hists(double d1_y, double d2_y, double p_y, double p_pt);
   void make_detector_plot();
-  void fill_W_hist(double W, double Egamma, double Q2, double t);
+  void fill_W_hist(double W, double Egamma, double Q2);
   void make_W_plot();
  private:
   std::string accel;
