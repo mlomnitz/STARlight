@@ -173,8 +173,8 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
       Egamma = std::exp( std::log(_targetMinPhotonEnergy)+j*dE_target); 
       g_E = 0;
       // Photon energy limits are determnined in target frame - multiply by Egamma to speed up event generation
-      //g_E = integrated_Q2_dep(Egamma);
-      g_E = Egamma*integrated_Q2_dep(Egamma);
+      g_E = integrated_Q2_dep(Egamma);
+      //g_E = Egamma*integrated_Q2_dep(Egamma);
       //      if( i==0 )
       //	cout<<"Lomnitz "<<Egamma<<" , "<<integrated_Q2_dep(Egamma)*1E6<<" , "<<Egamma*integrated_Q2_dep(Egamma)*1E6<<endl;
       //
