@@ -593,6 +593,8 @@ inputParameters::configureFromFile(const std::string &_configFileName)
 				     protonMass*protonMass)/(_protonEnergy.value()+sqrt(_protonEnergy.value()*_protonEnergy.value()-protonMass*protonMass)));
 	_targetMaxPhotonEnergy        = (_targetLorentzGamma - 10. ) *starlightConstants::mel;
 	_targetMinPhotonEnergy   = _cmsMinPhotonEnergy*exp(fabs(rap1-rap2)/2.);  
+	//Lomnitz new test
+	//_targetMinPhotonEnergy   = (mass*mass-protonMass*protonMass)/(2.*protonMass);
 	printInfo << "using the following " << *this;
 	
 	return true;
