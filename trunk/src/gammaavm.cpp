@@ -1435,7 +1435,8 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	  double gamma_x = gamma_pt*cos(e_phi+starlightConstants::pi);
 	  double gamma_y = gamma_pt*sin(e_phi+starlightConstants::pi);
 	  lorentzVector gamma(gamma_x,gamma_y,gamma_pz,cmsEgamma);
-	  event.addGamma(gamma, cmsEgamma, Q2);
+	  //event.addGamma(gamma, cmsEgamma, Q2);
+	  event.addGamma(gamma, targetEgamma, Q2);
 	  //
 	  double md = getDaughterMass(vmpid); 
 	  double Ed1 = sqrt(md*md+px1*px1+py1*py1+pz1*pz1); 
