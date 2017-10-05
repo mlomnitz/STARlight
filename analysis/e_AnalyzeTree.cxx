@@ -84,7 +84,7 @@ void e_AnalyzeTree::Loop()
 				   parent->Rapidity(), parent->Pt() );
      double t = (parent->Pt())*(parent->Pt());
      double y_ratio = Egamma/27.5;
-     double proton_P = 27.5*(920+sqrt(pow(920.,2)-pow(0.9383,2.)));
+     double proton_P = (920+sqrt(pow(920.,2)-pow(0.9383,2.)));
      double scalar_W = std::sqrt( - q2 + +2.0*y_ratio*27.5*proton_P+2.*0.9383 );
      my_hist.fill_W_hist(scalar_W, Egamma, q2, t );
      //     
@@ -93,5 +93,6 @@ void e_AnalyzeTree::Loop()
    cout<<"Lomnitz Making plot"<<endl;
    my_hist.make_detector_plot();
    my_hist.make_W_plot();
+   //my_hist.make_t_plot();
 }
 #endif

@@ -26,9 +26,13 @@ namespace ana_const{
   int w_marker[qbins] = {20, 22, 33, 24};
   double Q2Bins[qbins][2] = { {3.2,3.4}, {3.,4.},
 			      {4.,5.}, {5.,10.} };
-  int const wbins = 10;
-  double WBins[wbins +1] = {40,50,60,75,80,90,
-			    100,125,150,175,200};
+  int const wbins = 6;
+  double WBins[wbins +1] = {40,45,50,55,60,70,80};
+  //
+  int const ntBins = 7;
+  double tBins[ntBins+1] = {0,0.1, 0.2, 0.3, 0.4, 0.6,
+			    0.8,1.};
+  //
 };
 //
 class ana_hists
@@ -40,6 +44,7 @@ class ana_hists
   void make_detector_plot();
   void fill_W_hist(double W, double Egamma, double Q2, double t);
   void make_W_plot();
+  void make_t_plot();
  private:
   std::string accel;
   std::string particle;
@@ -54,6 +59,7 @@ class ana_hists
   void delete_histos();
   void load_data();
   double photonFlux(double Egamma, double Q2);
+  double photonFlux_HERA(double Egamma, double Q2);
   double get_scale(TGraph* data, TGraph* simu);
 };
 
