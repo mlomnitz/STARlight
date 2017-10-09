@@ -703,8 +703,8 @@ void Gammaavectormeson::momenta(double W,double Egam,double Q2, double gamma_pz,
 	phi1 = 2.*starlightConstants::pi*_randy.Rndom();
 	e_phi = starlightConstants::pi+phi1;
 	// Pomeron energy now included photon virtuality and finite transverse momenta
-	Epom = 0.5*(W*W+Q2)/(Egam + std::sqrt(Egam*Egam+Q2));
-	//Epom = 0.5*(W*W+Q2)/(Egam + gamma_pz);
+	//Epom = 0.5*(W*W+Q2)/(Egam + std::sqrt(Egam*Egam+Q2));
+	Epom = 0.5*(W*W-Q2)/(Egam + gamma_pz);
 	while( e_phi > 2.*starlightConstants::pi ) e_phi-= 2.*starlightConstants::pi;
 	//
 	if( (_bbs.beam1().A()==1 || _bbs.beam2().A()==1) || 
@@ -1309,7 +1309,10 @@ void Gammaavectormeson::pickwEgamq2(double &W, double &cmsEgamma, double &target
 	  theta_e = acos(cos_theta_e);
 	  double beam_y = acosh(_beamLorentzGamma);	
 	  gamma_pt = E_prime*sin(theta_e);
-	  double temp_pz = sqrt( targetEgamma*targetEgamma + Q2 - gamma_pt*gamma_pt);
+	  double pz_squared = targetEgamma*targetEgamma - Q2 - gamma_pt*gamma_pt;
+	  if( pz_squared < 0 )
+	    continue;
+	  double temp_pz = sqrt(pz_squared);
 	  // Now boost to Target frame
 	  gamma_pz = temp_pz*cosh(beam_y) - targetEgamma*sinh(beam_y); 
 	  cmsEgamma = targetEgamma*cosh(beam_y) - temp_pz*sinh(beam_y);
@@ -1323,6 +1326,7 @@ void Gammaavectormeson::pickwEgamq2(double &W, double &cmsEgamma, double &target
 	    //cms_egamma_draws+=1;
 	    continue;
 	  }
+	  //double Wgp = sqrt(targetEgamma*0.938 + Q2 + 0.938*0.938);
 	  xtest = _randy.Rndom();
 	  if( _f_WYarray[IW][iGamma_cms] < xtest ){
 	    //cms_egamma_draws+=1;
