@@ -173,23 +173,22 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
       Egamma = std::exp( std::log(_targetMinPhotonEnergy)+j*dE_target); 
       g_E = 0;
       // Photon energy limits are determnined in target frame - multiply by Egamma to speed up event generation
-      //g_E = integrated_Q2_dep(Egamma);
-      g_E = Egamma*integrated_Q2_dep(Egamma);
-      //      if( i==0 )
-      //	cout<<"Lomnitz "<<Egamma<<" , "<<integrated_Q2_dep(Egamma)*1E6<<" , "<<Egamma*integrated_Q2_dep(Egamma)*1E6<<endl;
-      //
-      EQ2lumfile << g_E<<endl;
-      //
       std::pair< double, double >* this_energy = Q2arraylimits(Egamma);
       double Q2min = this_energy->first;
       double Q2max = this_energy->second;
       if( Q2min > Q2max)
 	continue;
+      //g_E = integrated_Q2_dep(Egamma);
+      g_E = Egamma*integrated_Q2_dep(Egamma, Q2min, Q2max);
+      //      if( i==0 )
+      //	cout<<"Lomnitz "<<Egamma<<" , "<<integrated_Q2_dep(Egamma)*1E6<<" , "<<Egamma*integrated_Q2_dep(Egamma)*1E6<<endl;
+      //
+      EQ2lumfile << g_E<<endl;
       //
       //EQ2lumfile << gammaTableParse(i,j) <<endl;
       EQ2lumfile << Q2min << endl;
       EQ2lumfile << Q2max << endl;
-      for( int iQ2 =0 ;iQ2<=100; ++iQ2){
+      for( int iQ2 =0 ;iQ2<=nQ2steps; ++iQ2){
 	double Q2 = std::exp( std::log(Q2min)+iQ2*std::log(Q2max/Q2min)/100 );
 	//multiply by Q2 to speed up generation
 	//EQ2lumfile<< Q2*g(Egamma,Q2) <<endl;
