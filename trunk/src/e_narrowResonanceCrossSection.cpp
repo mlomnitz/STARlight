@@ -29,7 +29,7 @@
 //
 //
 ///////////////////////////////////////////////////////////////////////////
-#define _makeGammaPQ2_
+//#define _makeGammaPQ2_
 
 #include <iostream>
 #include <iomanip>
@@ -145,6 +145,7 @@ e_narrowResonanceCrossSection::crossSectionCalculation(const double)  // _bwnorm
 	      if( Q2_max > _gammaMaxQ2 )
 		Q2_max = _gammaMaxQ2;
 	    }
+	    //cout<<" Lomnitz :: integrating in range "<<Q2_min<<" - "<<Q2_max<<endl;
 	    double lnQ2ratio = std::log(Q2_max/Q2_min)/nQ2;
 	    double lnQ2_min = std::log(Q2_min);
 	    //
@@ -227,6 +228,7 @@ e_narrowResonanceCrossSection::crossSectionCalculation(const double)  // _bwnorm
 	#ifdef _makeGammaPQ2_
 	makeGammaPQ2dependence();
 	#endif
+	cout<<"Here"<<endl;
 }
 
 
