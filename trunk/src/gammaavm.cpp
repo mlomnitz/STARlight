@@ -1317,7 +1317,8 @@ void Gammaavectormeson::pickwEgamq2(double &W, double &cmsEgamma, double &target
 	  gamma_pz = temp_pz*cosh(beam_y) - targetEgamma*sinh(beam_y); 
 	  cmsEgamma = targetEgamma*cosh(beam_y) - temp_pz*sinh(beam_y);
 	  // Simple checkl, should not be needed but used for safety
-	  if( cmsEgamma < _cmsMinPhotonEnergy ){
+	  //cout<<2.*targetEgamma/(Q2+W*W)<<" and CMS info (Q2,Egam,pz) "<<Q2<<" , "<<targetEgamma<<" , "<<gamma_pz<<endl;
+	  if( cmsEgamma < _cmsMinPhotonEnergy || 2.*targetEgamma/(Q2+W*W) < 4.4){ //This cut is roughly RA = 0.8 fm the radius of proton 
 	      continue;
 	  }
 	  // -- Now in CMS frame, check csga (inherited from STARlight)
