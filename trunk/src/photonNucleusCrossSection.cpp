@@ -775,13 +775,17 @@ photonNucleusCrossSection::integrated_x_section(double const Egamma, double cons
 //______________________________________________________________________________
 pair< double, double >*photonNucleusCrossSection::Q2arraylimits(double const Egamma)
 {
-  double Q2max= 4.*_electronEnergy*(_electronEnergy-Egamma);
+  //double Q2max= 4.*_electronEnergy*(_electronEnergy-Egamma);
+  //  double Q2max = Egamma*Egamma;
+  double Q2max = 10.;
   double Q2min= std::pow(starlightConstants::mel*Egamma,2.0)/(_electronEnergy*(_electronEnergy-Egamma));
+  //cout<<"Egamma^2 "<<Egamma*Egamma<<" natural limits "<<Q2min<<" - "<<Q2max<<endl;
   if( _fixedQ2range == true){
     if( Q2min < _minQ2 )
       Q2min = _minQ2;
     if( Q2max > _maxQ2 )
       Q2max = _maxQ2;
+    //cout<<" Imposed limits "<<Q2min<<" - "<<Q2max<<endl;
     std::pair<double,double>* to_ret = new std::pair<double, double>(Q2min,Q2max);
     return to_ret;
   }
@@ -804,6 +808,7 @@ pair< double, double >*photonNucleusCrossSection::Q2arraylimits(double const Ega
   }
   if( std::exp(ln_min+iNstep*ratio) < Q2max)
     Q2max = std::exp(ln_min+iNstep*ratio);
+  //cout<<Q2max<<" "<<g(Egamma,Q2max)*1E9<<endl;
   std::pair<double, double>* to_ret = new std::pair<double, double>(Q2min,Q2max);
 
   return to_ret;
