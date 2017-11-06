@@ -592,9 +592,9 @@ inputParameters::configureFromFile(const std::string &_configFileName)
 	_cmsMinPhotonEnergy  = 0.5*(((mass+protonMass)*(mass+protonMass)-
 				     protonMass*protonMass)/(_protonEnergy.value()+sqrt(_protonEnergy.value()*_protonEnergy.value()-protonMass*protonMass)));
 	_cmsMaxPhotonEnergy        = 0.5*mass*exp(9);
-	//	_cmsMinPhotonEnergy = 0.5*mass*exp(-9);
-	_targetMaxPhotonEnergy        = (_targetLorentzGamma - 1. ) *starlightConstants::mel;
-	_targetMinPhotonEnergy   = mass;  
+	//_cmsMinPhotonEnergy = 0.5*mass*exp(-9);
+	_targetMaxPhotonEnergy        = (_targetLorentzGamma - 10. ) *starlightConstants::mel;
+	_targetMinPhotonEnergy = mass;
 	printInfo << "using the following " << *this;
 	
 	return true;
