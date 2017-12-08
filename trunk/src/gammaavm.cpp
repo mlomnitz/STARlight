@@ -237,7 +237,7 @@ void Gammaavectormeson::twoBodyDecay(starlightConstants::particleTypeEnum &ipid,
 void Gammaavectormeson::twoBodyDecay(starlightConstants::particleTypeEnum &ipid,
                                      double  W,
                                      double  px0, double  py0, double  pz0,
-				     double  e_phi, double polarization,
+				     double  spin_element,
                                      double& px1, double& py1, double& pz1,
                                      double& px2, double& py2, double& pz2,
                                      int&    iFbadevent)
@@ -264,16 +264,12 @@ void Gammaavectormeson::twoBodyDecay(starlightConstants::particleTypeEnum &ipid,
   
 	//  pick an orientation, based on the spin
 	//  phi has a flat distribution in 2*pi
-	pair<double,double>* angles = getThetaPsi(e_phi,polarization);
-	theta = angles->first;
-	phi = angles->second;
-
-	//phi = _randy.Rndom()*2.*starlightConstants::pi;
+	phi = _randy.Rndom()*2.*starlightConstants::pi;
                                                                                                                 
 	//  find theta, the angle between one of the outgoing particles and
 	//  the beamline, in the frame of the two photons
 
-	//theta=getTheta(ipid);
+	theta=getTheta(ipid, spin_element);
  
 	//  compute unboosted momenta
 	px1 = sin(theta)*cos(phi)*pmag;
@@ -453,44 +449,56 @@ double Gammaavectormeson::getTheta(starlightConstants::particleTypeEnum ipid)
   
 }
 
-
 //______________________________________________________________________________
-pair<double,double>* Gammaavectormeson::getThetaPsi(double const e_plane_angle, double const epsilon)
+double Gammaavectormeson::getTheta(starlightConstants::particleTypeEnum ipid, double r_04_00)
 {
-  int i_plane[2] = { floor(epsilon*100.) , ceil(epsilon*100.) }; 
-  // constants
-  //using r_{1-1}^1 = 0.122, r_{00}^{04}=0.674 and cos(delta) = 0.925 from HERA arXiv:hep-ex/9902019
-  const double r_1_1_1 = 0.122;
-  const double r_04_00 = 0.674;
-  const double R = (1./epsilon)*r_04_00/(1.-r_04_00);
-  const double cos_delta = 0.925;
-  //sample intgrated function for psi
-  double theta, psi;
-  double xtest = 999.;
-  double this_test = 0;
-  //
-  while( xtest > this_test){
-    psi = 2.*starlightConstants::pi*_randy.Rndom();
-    this_test = (1.+2.*epsilon*r_1_1_1*std::cos(2.*psi))/(2.*starlightConstants::pi);
-    xtest = _randy.Rndom();
-    if( xtest > this_test )
-      continue;
-    int i_psi[2] = { floor( psi*100./starlightConstants::pi ), ceil( psi*100./starlightConstants::pi ) }; 
-    // Got good psi, now sample for costheta
-    theta = 2.*starlightConstants::pi*_randy.Rndom();
-    //quick test
-    this_test = std::pow(std::sin(theta),2.)*(1+epsilon*cos(2.*psi)) + 2.*epsilon*R*std::pow(std::cos(theta),2.)
-      +std::sqrt(2.*epsilon*(1+epsilon))*cos_delta*std::sin(2.*theta)*std::cos(psi);
-    this_test = this_test /_angular_max[ i_plane[0] ][ i_psi[0] ];
+	//This depends on the decay angular distribution
+	//Valid for rho, phi, omega.
+	double theta=0.;
+	double xtest=1.;
+	double dndtheta=0.;
 
-    xtest = _randy.Rndom();
-    /*if( xtest < this_test)
-      break;*/
-  }
-  std::pair<double,double>* to_ret = new std::pair<double,double>(theta, psi-e_plane_angle);
-  return to_ret;
+	while(xtest > dndtheta){
+    
+	  theta = starlightConstants::pi*_randy.Rndom();
+	  xtest = _randy.Rndom();
+	  //  Follow distribution for helicity +/-1 with finite Q2
+	  //  Physics Letters B 449, 328; The European Physical Journal C - Particles and Fields 13, 37; 
+	  //  The European Physical Journal C - Particles and Fields 6, 603
+  
+	  switch(ipid){
+	    
+	  case starlightConstants::MUON:
+	  case starlightConstants::ELECTRON:
+	    //primarily for upsilon/j/psi.  VM->ee/mumu
+	    dndtheta = 1 + r_04_00+( 1-3.*r_04_00 )*cos(theta)*cos(theta);
+	    break;
+	    
+	  case starlightConstants::PION:
+	  case starlightConstants::KAONCHARGE:
+	    //rhos etc
+	    dndtheta=  1 - r_04_00+( 3.*r_04_00-1 )*cos(theta)*cos(theta);
+	    break;
+	    
+	  default: cout<<"No proper theta dependence defined, check gammaavectormeson::gettheta"<<endl;
+	  }//end of switch
+	  
+	  if(xtest > dndtheta)
+	    break;
+	}
+	return theta;
+
 }
 
+
+//______________________________________________________________________________
+double Gammaavectormeson::getSpinMatrixElement(double W, double Q2, double epsilon)
+{
+  double m2 = 0.6*(W*W);
+  double R = starlightConstants::pi/2.*m2/Q2 - std::pow(m2,3./2.)/sqrt(Q2)/(Q2+m2) - m2/Q2*atan(sqrt(m2/Q2));
+  R = (Q2+m2)*(Q2+m2)*R*R/m2;
+  return epsilon*R/(1+epsilon*R);
+}
 
 
 //______________________________________________________________________________
@@ -1372,11 +1380,12 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	  // inelasticity: used for angular distributions
 	  double col_y = 1. - (e_E/_eEnergy)*std::pow(std::cos(e_theta/2.),2.);
 	  double col_polarization = (1 - col_y)/(1-col_y+col_y*col_y/2.);
+	  double spin_element = getSpinMatrixElement(comenergy, Q2, col_polarization);
 	  _nmbAttempts++;
 	  
 	  vmpid = ipid; 
 	  // Two body dedcay in eSTARlight includes the angular corrections due to finite virtuality
-	  twoBodyDecay(ipid,comenergy,momx,momy,momz,e_phi,col_polarization,
+	  twoBodyDecay(ipid,comenergy,momx,momy,momz,spin_element,
 		       px1,py1,pz1,px2,py2,pz2,iFbadevent);
 	  double pt1chk = sqrt(px1*px1+py1*py1);
 	  double pt2chk = sqrt(px2*px2+py2*py2);
