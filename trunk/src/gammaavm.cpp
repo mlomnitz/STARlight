@@ -65,6 +65,7 @@ Gammaavectormeson::Gammaavectormeson(const inputParameters& inputParametersInsta
         _bslopeDef=inputParametersInstance.bslopeDefinition();
 	_bslopeVal=inputParametersInstance.bslopeValue();
 	_pEnergy= inputParametersInstance.protonEnergy();
+	_beamNucleus = inputParametersInstance.beam2A();
 	// electron energy in CMS frame
 	_eEnergy= inputParametersInstance.electronEnergy();
 	_VMpidtest=inputParametersInstance.prodParticleType();
@@ -696,7 +697,7 @@ void Gammaavectormeson::momenta(double W,double Y,double &E,double &px,double &p
 //______________________________________________________________________________
 void Gammaavectormeson::momenta(double W,double Egam,double Q2, double gamma_pz, double gamma_pt,
 				double &Y,double &E,double &px,double &py,double &pz,
-				double &e_phi,int &tcheck)
+				double &t_px, double &t_py, double &t_pz, double &e_phi,int &tcheck)
 {
 	//     This subroutine calculates momentum and energy of vector meson
 	//     given W and Y,   without interference.  Subroutine vmpt handles
@@ -801,7 +802,11 @@ void Gammaavectormeson::momenta(double W,double Egam,double Q2, double gamma_pz,
 	py1 = gamma_pt*sin(phi1);
 	px2 = pt2*cos(phi2);
 	py2 = pt2*sin(phi2);
-        
+	//
+	t_px = -pt2*cos(phi2);
+	t_py = -pt2*sin(phi2);
+	double pz2 = pow(_pEnergy*_beamNucleus,2.) - pow(starlightConstants::protonMass*_beamNucleus,2.);
+	t_pz = -(sqrt(pz2)-Epom); //Only works for proton as of yet, assumes mp << Ep
 	// Compute vector sum Pt = Pt1 + Pt2 to find pt for the vector meson
 	px = px1 + px2;
 	py = py1 + py2;
@@ -1367,6 +1372,7 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	double gamma_pz = 0 , gamma_pt = 0, e_theta = 0;
 	double px2=0.,px1=0.,py2=0.,py1=0.,pz2=0.,pz1=0.;
 	double e_E=0., e_phi=0;
+	double t_px =0, t_py=0., t_pz=0;
 	bool accepted = false;
 	do{
 	  pickwEgamq2(comenergy,cmsEgamma, targetEgamma, 
@@ -1375,7 +1381,7 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	  //
 	  momenta(comenergy,cmsEgamma, Q2, gamma_pz, gamma_pt, //input
 		  rapidity, E, momx, momy, momz, //VM
-		  e_phi,tcheck); //
+		  t_px, t_py, t_pz, e_phi,tcheck); //
 	  //
 	  // inelasticity: used for angular distributions
 	  double col_y = 1. - (e_E/_eEnergy)*std::pow(std::cos(e_theta/2.),2.);
@@ -1461,7 +1467,9 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	  starlightParticle particle2(px2, py2, pz2, Ed2, starlightConstants::UNKNOWN, ipid2, q2);
 	  event.addParticle(particle2);
 	  
-	  
+	  double energy2 = t_px*t_px + t_py*t_py + t_pz*t_pz - pow(starlightConstants::protonMass*_beamNucleus,2.);
+	  lorentzVector target(t_px, t_py, t_pz, sqrt(energy2));
+	  event.addScatteredTarget(target);
 	}
 	return event;
 
