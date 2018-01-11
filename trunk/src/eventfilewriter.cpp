@@ -139,12 +139,15 @@ int eventFileWriter::writeEvent(eXEvent &event, int eventnumber)
 	// Write the photon 4-vector out to file. Might be used in later iterations, so I keep it here
 	//_fileStream <<"GAMMA VECTOR: "<<gam.GetPx()<<" "<<gam.GetPy()<<" "<<gam.GetPz()<<" "<<gam.GetE()<<" "<<-temp<<std::endl;
       }
-
+      for( uint itarget = 0 ; itarget < event.getTarget()->size(); ++itarget){
+	lorentzVector target = event.getTarget()->at(itarget);
+	_fileStream <<"TARGET: "<<target.GetPx()<<" "<<target.GetPy()<<" "<<target.GetPz()<<" "<<target.GetE()<<std::endl;
+      }
       for( uint iel = 0 ; iel < event.getSources()->size(); ++iel){
 	lorentzVector el = event.getSources()->at(iel); 
 	_fileStream <<"SOURCE: "<<el.GetPx()<<" "<<el.GetPy()<<" "<<el.GetPz()<<" "<<el.GetE()<<std::endl;
       }
-
+	     
       int ipart = 0;
       std::vector<starlightParticle>::const_iterator part = (event.getParticles())->begin();
       
