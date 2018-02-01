@@ -59,7 +59,7 @@ public:
 	// Use the wide or narrow constructor to calculate sigma
 	// wide/narrow will inherit this.
 	double getcsgA(const double Egamma,
-	               const double W,
+	               const double Q2,
                        const int beam);
 	double e_getcsgA(const double Egamma, double Q2,
 	               const double W,

@@ -54,11 +54,12 @@ Gammaavectormeson::Gammaavectormeson(const inputParameters& inputParametersInsta
 	_VMNPT=inputParametersInstance.nmbPtBinsInterference();
 	_VMWmax=inputParametersInstance.maxW();
 	_VMWmin=inputParametersInstance.minW();
-	_VMYmax=inputParametersInstance.maxRapidity();
-	_VMYmin=-1.*_VMYmax;
+	//_VMYmax=inputParametersInstance.maxRapidity();
+	//_VMYmin=-1.*_VMYmax;
 	_VMnumw=inputParametersInstance.nmbWBins();
-	_VMnumy=inputParametersInstance.nmbRapidityBins();
+	//_VMnumy=inputParametersInstance.nmbRapidityBins();
 	_VMnumega=inputParametersInstance.nmbEnergyBins();
+	_VMnumQ2=inputParametersInstance.nmbGammaQ2Bins(); 
 	_VMgamma_em=inputParametersInstance.beamLorentzGamma();
 	_VMinterferencemode=inputParametersInstance.interferenceEnabled();
 	_VMbslope=0.;//Will define in wide/narrow constructor
@@ -78,6 +79,8 @@ Gammaavectormeson::Gammaavectormeson(const inputParameters& inputParametersInsta
 	_cmsMaxPhotonEnergy=inputParametersInstance.cmsMaxPhotonEnergy();
 	_cmsMinPhotonEnergy=inputParametersInstance.cmsMinPhotonEnergy();
 	_beamLorentzGamma = inputParametersInstance.beamLorentzGamma();
+	_targetRadius = inputParametersInstance.targetRadius();
+
         N0 = 0; N1 = 0; N2 = 0; 
 	if (_VMpidtest == starlightConstants::FOURPRONG){
 	  // create n-body phase-spage generator
@@ -1267,14 +1270,16 @@ void Gammaavectormeson::pickwEgamq2(double &W, double &cmsEgamma, double &target
 	//std::chrono::steady_clock::time_point begin_evt = std::chrono::steady_clock::now();
 	bool pick_state = false;
 	dEgamma = std::log(_targetMaxPhotonEnergy/_targetMinPhotonEnergy);
-	double dEgamma_cms = std::log(_cmsMaxPhotonEnergy/_cmsMinPhotonEnergy);
 	while( pick_state == false ){
 	  //cout<<"Lomnitz start pick"<<endl;
 	  xw = _randy.Rndom();
 	  W = _VMWmin + xw*(_VMWmax-_VMWmin);
+	  double w_test = _randy.Rndom();
 	  if (W < 2 * starlightConstants::pionChargedMass)
 	    continue;
 	  IW = int((W-_VMWmin)/dW);
+	  if (_BWarray[IW] < w_test)
+	    continue;
 	  xEgamma = _randy.Rndom();
 	  //
 	  targetEgamma = std::exp(std::log(_targetMinPhotonEnergy) + xEgamma*(dEgamma));
@@ -1282,7 +1287,6 @@ void Gammaavectormeson::pickwEgamq2(double &W, double &cmsEgamma, double &target
 	  // Holds Q2 and integrated Q2 dependence. Array is saved in target frame
 	  std::pair< double, std::vector<double> > this_energy = _g_EQ2array->operator[](IGamma);
 	  double intgrated_q2 = this_energy.first;
-
 	  xtest = _randy.Rndom();
 	  if( xtest > intgrated_q2 ){
 	    //egamma_draws+=1;
@@ -1301,7 +1305,8 @@ void Gammaavectormeson::pickwEgamq2(double &W, double &cmsEgamma, double &target
 	  
 	  xQ2 = _randy.Rndom();
 	  Q2 = std::exp(ln_min+xQ2*ratio);
-	  IQ2 = int(100*xQ2);	
+	  IQ2 = int(_VMnumQ2*xQ2);	
+	  //cout<<"Lomnitz :: q2 draw"<<endl;
 	  // Load from look-up table. Use linear interpolation to evaluate at Q2
 	  double y_1 = photon_flux[IQ2+2];
 	  double y_2 = photon_flux[IQ2+3];
@@ -1331,18 +1336,12 @@ void Gammaavectormeson::pickwEgamq2(double &W, double &cmsEgamma, double &target
 	  cmsEgamma = targetEgamma*cosh(beam_y) - temp_pz*sinh(beam_y);
 	  // Simple checkl, should not be needed but used for safety
 	  //cout<<2.*targetEgamma/(Q2+W*W)<<" and CMS info (Q2,Egam,pz) "<<Q2<<" , "<<targetEgamma<<" , "<<gamma_pz<<endl;
-	  if( cmsEgamma < _cmsMinPhotonEnergy || 2.*targetEgamma/(Q2+W*W) < 4.4){ //This cut is roughly RA = 0.8 fm the radius of proton 
+	  if( cmsEgamma < _cmsMinPhotonEnergy || 2.*targetEgamma/(Q2+W*W) < _targetRadius){ //This cut is roughly RA = 0.8 fm the radius of proton and 1 eV^{-1} = 1.97 x 10 ^{-7} m
 	      continue;
 	  }
-	  // -- Now in CMS frame, check csga (inherited from STARlight)
-	  int iGamma_cms = int( log(cmsEgamma/_cmsMinPhotonEnergy)*_VMnumega/dEgamma_cms );
-	  if( iGamma_cms < 0 || iGamma_cms > _VMnumega ){
-	    //cms_egamma_draws+=1;
-	    continue;
-	  }
-	  //double Wgp = sqrt(targetEgamma*0.938 + Q2 + 0.938*0.938);
 	  xtest = _randy.Rndom();
-	  if( _f_WYarray[IW][iGamma_cms] < xtest ){
+	  //if( _BWarray[IW]*_f_WYarray[IQ2][IGamma] < xtest ){
+	  if( _f_WYarray[IGamma][IQ2] < xtest ){
 	    //cms_egamma_draws+=1;
 	    continue;
 	  }

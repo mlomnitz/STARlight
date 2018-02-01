@@ -62,11 +62,11 @@ class photonElectronLuminosity : public photonNucleusCrossSection
   const int    _nEBins;
   const double _minGammaQ2;
   const double _maxGammaQ2;
+  const unsigned int _nmbGammaQ2Bins;
   const double _cmsMaxPhotonEnergy;
   const double _cmsMinPhotonEnergy;
   const double _targetMaxPhotonEnergy;
   const double _targetMinPhotonEnergy;
-  const unsigned int _nmbGammaQ2Bins;
   const int _productionMode;
   const int _beamBreakupMode;
 };

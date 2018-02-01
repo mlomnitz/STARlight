@@ -49,6 +49,7 @@ class readLuminosity
   void e_read();
 
   double *_Warray;
+  double *_BWarray;
   double *_Yarray;
   double **_Farray; 
   double **_Farray1;
@@ -75,6 +76,7 @@ class readLuminosity
   const int _ReadInputnumy;
   const int _ReadInputnumw;
   const int _ReadInputnumega;
+  const int _ReadInputnumQ2;
   const int _ReadInputgg_or_gP;
   const int _ReadInputinterferencemode;
   const std::string _baseFileName;

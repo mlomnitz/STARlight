@@ -232,8 +232,8 @@ photonNucleusCrossSection::crossSectionCalculation(const double)
 
 //______________________________________________________________________________
 double
-photonNucleusCrossSection::getcsgA(const double Egamma,
-                                   const double W, 
+photonNucleusCrossSection::getcsgA(const double targetEgamma,
+                                   const double Q2, 
                                    const int beam)
 {
 	//This function returns the cross-section for photon-nucleus interaction 
@@ -243,23 +243,38 @@ photonNucleusCrossSection::getcsgA(const double Egamma,
 	double t,tmin,tmax;
 	double csgA,ax,bx;
 	int NGAUSS; 
-  
+	//
+	double W = _channelMass; //new change, channel mass center used for the t min integration.
+	  
 	//     DATA FOR GAUSS INTEGRATION
 	double xg[6] = {0, 0.1488743390, 0.4333953941, 0.6794095683, 0.8650633667, 0.9739065285};
 	double ag[6] = {0, 0.2955242247, 0.2692667193, 0.2190863625, 0.1494513492, 0.0666713443};
 	NGAUSS = 6;
-  
-	//       Find gamma-proton CM energy
+	
+	//       Note: The photon energy passed to this function is now in the target frame. The rest of the calculations are done in the
+	//       CMS frame. The next lines boost the photon into the CM frame.
+	double E_prime = _electronEnergy - targetEgamma;
+	double cos_theta_e = 1. - Q2/(2.*_electronEnergy*E_prime);
+	double theta_e = acos(cos_theta_e);
+	double beam_y = acosh(_beamLorentzGamma);	
+	double gamma_pt = E_prime*sin(theta_e);
+	double pz_squared = targetEgamma*targetEgamma - Q2 - gamma_pt*gamma_pt;
+	double temp_pz = sqrt(pz_squared);
+	// Now boost to CM frame
+	double Egamma = targetEgamma*cosh(beam_y) - temp_pz*sinh(beam_y);
+
+	//       Find gamma-proton CM energy in CMS frame in the limit Q2->0 (this is our assumption, the Q2 dependence is in the factor)
+	
 	Wgp = sqrt(2. * Egamma * (_protonEnergy
 	                          + sqrt(_protonEnergy * _protonEnergy - protonMass * protonMass))
-	           + protonMass * protonMass);
+				  + protonMass * protonMass);
 	
 	//Used for A-A
 	tmin = (W * W / (4. * Egamma * _beamLorentzGamma)) * (W * W / (4. * Egamma * _beamLorentzGamma));
   
 	if ((_bbs.beam1().A() <= 1) && (_bbs.beam2().A() <= 1)){
 	   // proton-proton, no scaling needed
-	   csgA = sigmagp(Wgp);
+	  csgA = getcsgA_Q2_dep(Q2)*sigmagp(Wgp);
 	} else {
 	   // Check if one or both beams are nuclei 
 	   int A_1 = _bbs.beam1().A(); 
@@ -267,7 +282,7 @@ photonNucleusCrossSection::getcsgA(const double Egamma,
 	   // coherent AA interactions
 	   // Calculate V.M.+proton cross section
            // cs = sqrt(16. * pi * _vmPhotonCoupling * _slopeParameter * hbarc * hbarc * sigmagp(Wgp) / alpha); 
-           cs = sigma_N(Wgp); //Use member function instead 
+           cs = getcsgA_Q2_dep(Q2)*sigma_N(Wgp); //Use member function instead 
     
 	   // Calculate V.M.+nucleus cross section
 	   cvma = sigma_A(cs,beam); 
@@ -820,7 +835,8 @@ double
 photonNucleusCrossSection::g(double const Egamma,
 			     double const Q2)
 {
-  return photonFlux(Egamma,Q2)*getcsgA_Q2_dep(Q2);
+  //return photonFlux(Egamma,Q2)*getcsgA_Q2_dep(Q2);
+  return photonFlux(Egamma,Q2); //This could be done more elegantly in the future, but this one change should account for everything
 }
 
 //______________________________________________________________________________

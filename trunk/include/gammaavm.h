@@ -89,6 +89,7 @@ class Gammaavectormeson : public eventChannel
   int _VMnumw;
   int _VMnumy;
   int _VMnumega;
+  int _VMnumQ2;
   int _VMinterferencemode;
   int _ProductionMode;
   double _targetMaxPhotonEnergy;
@@ -96,6 +97,7 @@ class Gammaavectormeson : public eventChannel
   double _cmsMaxPhotonEnergy;
   double _cmsMinPhotonEnergy;
   double _beamLorentzGamma;
+  double _targetRadius;
   int _TargetBeam; 
   int N0;
   int N1;

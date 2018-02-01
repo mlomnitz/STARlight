@@ -86,7 +86,7 @@ inputParameters::inputParameters()
 	  _maxGammaEnergy	 ("MAX_GAMMA_ENERGY",600000.0, NOT_REQUIRED),
 	  _minGammaQ2            ("MIN_GAMMA_Q2",0,NOT_REQUIRED),
 	  _maxGammaQ2            ("MAX_GAMMA_Q2",0,NOT_REQUIRED),
-	  _nmbGammaQ2Bins       ("INT_GAMMA_Q2_BINS",0,NOT_REQUIRED),
+	  _nmbGammaQ2Bins       ("INT_GAMMA_Q2_BINS",400,NOT_REQUIRED),
 	  _pythiaParams          ("PYTHIA_PARAMS","", NOT_REQUIRED),
 	  _pythiaFullEventRecord ("PYTHIA_FULL_EVENTRECORD",false, NOT_REQUIRED),
 	  _xsecCalcMethod	 ("XSEC_METHOD",0, NOT_REQUIRED),
@@ -189,6 +189,12 @@ inputParameters::configureFromFile(const std::string &_configFileName)
 	double rap2 = -acosh(beam2LorentzGamma());
 	_beamLorentzGamma = cosh((rap1-rap2)/2);
 	_targetLorentzGamma = cosh(rap1-rap2);
+
+	if( beam2A() == 1) //proton case 0.87 fm = 4.4 GeV^{-1}
+	  _targetR = 4.4;
+	else
+	  _targetR = 6.1 * pow(beam2A(), 1./3.);
+
 	_fixedQ2Range = false;
 	std::cout << "Rapidity beam 1: " << rap1 << ", rapidity beam 2: " << rap2 << ", rapidity CMS system: " << (rap1+rap2)/2 << ", beam gamma in CMS: " << _beamLorentzGamma<< std::endl;
 	std::cout << "Rapidity beam 1 in beam 2 frame: " << rap1-rap2 << ", beam 1 gamma in beam 2 frame: " << _targetLorentzGamma<< std::endl;
@@ -646,6 +652,7 @@ inputParameters::print(ostream& out) const
       out << "    fixed photon Q2 range .................. " << _minGammaQ2.value() << " < Q2 < "
 	  <<_maxGammaQ2.value() << " GeV/c^2 "<<endl;
     }
+    out<< " Q2_BINS"       <<nmbGammaQ2Bins        () <<endl;
     out     <<"    Quantum Glauber parameter...............  "<<_quantumGlauber.value()<<endl;
     out     <<"    Impulse VM parameter....................  "<<_impulseVM.value()<<endl;
     return out;
@@ -688,6 +695,7 @@ inputParameters::write(ostream& out) const
 	  out << "Q2_MIN"      << minGammaQ2           () <<endl
 	      << "Q2_MAX"      << maxGammaQ2           () <<endl;
 	}
+	out<< " Q2_BINS"       <<nmbGammaQ2Bins        () <<endl;
 	return out;
 }
 

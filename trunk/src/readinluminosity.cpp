@@ -51,6 +51,7 @@ readLuminosity::readLuminosity(const inputParameters& inputParametersInstance)
   , _ReadInputnumy(inputParametersInstance.nmbRapidityBins())
   , _ReadInputnumw(inputParametersInstance.nmbWBins())
   , _ReadInputnumega(inputParametersInstance.nmbEnergyBins())
+  , _ReadInputnumQ2(inputParametersInstance.nmbGammaQ2Bins())
   , _ReadInputgg_or_gP(inputParametersInstance.productionMode())
   , _ReadInputinterferencemode(inputParametersInstance.interferenceEnabled())
   , _baseFileName(inputParametersInstance.baseFileName())
@@ -208,20 +209,21 @@ void readLuminosity::e_read()
 {
   if(!_Warray) _Warray = new double[_ReadInputnumw];
   if(!_Yarray) _Yarray = new double[_ReadInputnumy];
+  if(!_BWarray) _BWarray = new double[_ReadInputnumw];
   if(!_f_WYmax) 
   {
-    _f_WYarray = new double*[_ReadInputnumw];
-    for(int i = 0; i < _ReadInputnumw; i++)
+    _f_WYarray = new double*[_ReadInputnumega];
+    for(int i = 0; i < _ReadInputnumega; i++)
     {
-      _f_WYarray[i] = new double[_ReadInputnumega+1];
+      _f_WYarray[i] = new double[_ReadInputnumQ2];
     }
   }
   if(!_g_Earray) 
   {
-    _g_Earray = new double*[_ReadInputnumw];
-    for(int i = 0; i < _ReadInputnumw; i++)
+    _g_Earray = new double*[_ReadInputnumega];
+    for(int i = 0; i < _ReadInputnumQ2; i++)
     {
-      _g_Earray[i] = new double[_ReadInputnumw+1];
+      _g_Earray[i] = new double[_ReadInputnumQ2+1];
     }
   }
 
@@ -249,13 +251,26 @@ void readLuminosity::e_read()
   for(int i=0;i<_ReadInputnumw;i++){
     wylumfile >> _Warray[i];
   }
+  //No longer needed, can be removed later
   for(int i=0;i<_ReadInputnumy;i++){
     wylumfile >> _Yarray[i];
   }
 
+  //New table saving the Breit-Wigner function for form factor
+  double bw_max = 0 ;
+  for(int i=0;i<_ReadInputnumw;i++){
+    wylumfile >> _BWarray[i];
+    if( _BWarray[i] > bw_max )
+      bw_max = _BWarray[i];
+  }
+  for(int i=0;i<_ReadInputnumw;i++){
+    _BWarray[i] = _BWarray[i]/bw_max;
+  }
+
+
   if( (A_2 == 0 && A_1 >= 1) || (A_1 ==0 && A_2 >= 1) ){ 
-    for(int i=0;i<_ReadInputnumw;i++){
-      for(int j=0;j<=_ReadInputnumega;j++){
+    for(int i=0;i<_ReadInputnumega;i++){
+      for(int j=0;j<_ReadInputnumQ2;j++){
         wylumfile >> _f_WYarray[i][j];
         if( _f_WYarray[i][j] > _f_WYmax ) _f_WYmax=_f_WYarray[i][j];
 	//
@@ -264,8 +279,8 @@ void readLuminosity::e_read()
       }
     }
     //Normalize f_WY array, g does not need to be normalized, it is used for normalization
-    for(int i=0;i<_ReadInputnumw;i++){
-      for(int j=0;j<=_ReadInputnumega;j++){
+    for(int i=0;i<_ReadInputnumega;i++){
+      for(int j=0;j<_ReadInputnumQ2;j++){
         _f_WYarray[i][j] = _f_WYarray[i][j]/( _f_WYmax );
 	//_g_Earray[i][j] = _g_Earray[i][j]/_g_Emax;
       }
@@ -274,6 +289,7 @@ void readLuminosity::e_read()
   wylumfile >> _bwnormsave;
 
   wylumfile.close();
+  cout<<"Done reading wylumi file"<<endl;
   std::string EQ2FileName;
   EQ2FileName = "e_"+_baseFileName+".txt";
   ifstream EQlumfile;
@@ -288,7 +304,7 @@ void readLuminosity::e_read()
     _g_EQ2max = 0 ;
     double integral;
     std::vector<double> p;
-    for( int iQ2 = 0 ; iQ2 <= n_steps+3 ; ++iQ2){      
+    for( int iQ2 = 0 ; iQ2 < _ReadInputnumQ2+3 ; ++iQ2){      
       if(iQ2 == 0 ){
 	EQlumfile >> integral;
 	if( integral > integrated_max)
@@ -314,6 +330,7 @@ void readLuminosity::e_read()
     it->first = it->first/integrated_max;
     //cout<<"Now"<<it->first<<endl;
   }
+
   //normalize
   /*for(  std::map<string,std::vector<double> >::iterator it =_g_EQ2array->begin() ; it != _g_EQ2array->end(); ++it){
     std::string key = it->first;

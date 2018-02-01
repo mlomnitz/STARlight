@@ -232,7 +232,8 @@ public:
 	double protonEnergy                () const { return _protonEnergy.value(); }
 	double electronEnergy              () const { return _electronEnergy.value(); }
         double inputBranchingRatio         () const { return _inputBranchingRatio; }
-	
+	double targetRadius                () const { return _targetR; }
+
         void setBaseFileName          (std::string v )  {  _baseFileName = v;     }
 	void setBeam1Z                (unsigned int v)  {  _beam1Z = v;           }  ///< sets atomic number of beam particle 1
 	void setBeam1A                (unsigned int v)  {  _beam1A = v;           }  ///< sets atomic mass number of beam particle 1
@@ -369,6 +370,7 @@ private:
 
 	double                         _targetLorentzGamma;       ///< Lorentz gamma factor of the source in target frame, not an input parameter
 	double                         _beamLorentzGamma;         ///< Lorentz gamma factor of the beams in CMS frame, not an input parameter
+	double                         _targetR;
 	double                         _cmsMaxPhotonEnergy;
 	double                         _cmsMinPhotonEnergy;
 	double                         _targetMaxPhotonEnergy;
