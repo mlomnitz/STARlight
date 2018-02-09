@@ -62,7 +62,8 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	  _fixedQ2range      (inputParametersInstance.fixedQ2Range()      ),
 	  _minQ2             (inputParametersInstance.minGammaQ2()        ),
 	  _maxQ2             (inputParametersInstance.maxGammaQ2()        ),
-	  _maxPhotonEnergy   (inputParametersInstance.cmsMaxPhotonEnergy()   )
+	  _maxPhotonEnergy   (inputParametersInstance.cmsMaxPhotonEnergy()),
+	  _targetRadii       (inputParametersInstance.targetRadius()      )
 {
         // new options - impulse aproximation (per Joakim) and Quantum Glauber (per SK) SKQG
         _impulseSelected = inputParametersInstance.impulseVM();
@@ -259,10 +260,12 @@ photonNucleusCrossSection::getcsgA(const double targetEgamma,
 	double beam_y = acosh(_beamLorentzGamma);	
 	double gamma_pt = E_prime*sin(theta_e);
 	double pz_squared = targetEgamma*targetEgamma - Q2 - gamma_pt*gamma_pt;
+	if( pz_squared < 0 || fabs(cos_theta_e) > 1)
+	  return 0;
 	double temp_pz = sqrt(pz_squared);
 	// Now boost to CM frame
 	double Egamma = targetEgamma*cosh(beam_y) - temp_pz*sinh(beam_y);
-
+	//cout<<" ::: Lomnitz test in photonNucleus ::: pz^2 = "<<pz_squared << " CMS Egamma = "<<Egamma<<endl;
 	//       Find gamma-proton CM energy in CMS frame in the limit Q2->0 (this is our assumption, the Q2 dependence is in the factor)
 	
 	Wgp = sqrt(2. * Egamma * (_protonEnergy
@@ -724,6 +727,7 @@ photonNucleusCrossSection::integrated_Q2_dep(double const Egamma, double const _
   //Integration over full limits gives more accurate result
   double Q2_min =  std::pow(starlightConstants::mel*Egamma,2.0)/(_electronEnergy*(_electronEnergy-Egamma));
   double Q2_max = 4.*_electronEnergy*(_electronEnergy-Egamma);
+  //double Q2_max = 2.*Egamma/_targetRadii - _wMax*_wMax;
   if( _min != 0 || _max !=0){
     if( _min > Q2_min )
       Q2_min = _min;
@@ -760,7 +764,8 @@ photonNucleusCrossSection::integrated_x_section(double const Egamma, double cons
 {
   //Integration over full limits gives more accurate result
   double Q2_min =  std::pow(starlightConstants::mel*Egamma,2.0)/(_electronEnergy*(_electronEnergy-Egamma));
-  double Q2_max = 4.*_electronEnergy*(_electronEnergy-Egamma);
+  //double Q2_max = 2.*Egamma/_targetRadii - _wMax*_wMax;
+  double Q2_max  = 4.*_electronEnergy*(_electronEnergy-Egamma);
   // Fixed ranges for plot
   if( _min != 0 || _max!=0){
     if( _min > Q2_min)
@@ -790,11 +795,10 @@ photonNucleusCrossSection::integrated_x_section(double const Egamma, double cons
 //______________________________________________________________________________
 pair< double, double >*photonNucleusCrossSection::Q2arraylimits(double const Egamma)
 {
-  //double Q2max= 4.*_electronEnergy*(_electronEnergy-Egamma);
-  //  double Q2max = Egamma*Egamma;
-  double Q2max = 10.;
+  //double Q2max = 2.*Egamma/_targetRadii - _wMax*_wMax;
+  double Q2max = 4.*_electronEnergy*(_electronEnergy-Egamma);
   double Q2min= std::pow(starlightConstants::mel*Egamma,2.0)/(_electronEnergy*(_electronEnergy-Egamma));
-  //cout<<"Egamma^2 "<<Egamma*Egamma<<" natural limits "<<Q2min<<" - "<<Q2max<<endl;
+
   if( _fixedQ2range == true){
     if( Q2min < _minQ2 )
       Q2min = _minQ2;
