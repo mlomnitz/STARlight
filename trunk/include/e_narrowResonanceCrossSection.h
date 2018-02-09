@@ -68,6 +68,7 @@ private:
 	double _useFixedRange;
 	double _gammaMinQ2;
 	double _gammaMaxQ2;
+	double _targetRadii;
 };
 
 
