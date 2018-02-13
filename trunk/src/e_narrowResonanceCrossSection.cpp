@@ -173,9 +173,9 @@ e_narrowResonanceCrossSection::crossSectionCalculation(const double)  // _bwnorm
 						 + g(ega[iEgaInt],q2_2)*e_getcsgA(ega[iEgaInt],q2_2,W,beam)
 						 + 4.*g(ega[iEgaInt],q2_12)*e_getcsgA(ega[iEgaInt],q2_12,W,beam) );
 	      */
-	      full_int[iEgaInt] += (q2_2-q2_1)*( g(ega[iEgaInt],q2_1)*getcsgA_Q2_dep(q2_1)*getcsgA(ega[iEgaInt],q2_1,beam)
-						 + g(ega[iEgaInt],q2_2)*getcsgA_Q2_dep(q2_2)*getcsgA(ega[iEgaInt],q2_2,beam)
-						 + 4.*g(ega[iEgaInt],q2_12)*getcsgA_Q2_dep(q2_12)*getcsgA(ega[iEgaInt],q2_12,beam) );
+	      full_int[iEgaInt] += (q2_2-q2_1)*( g(ega[iEgaInt],q2_1)*getcsgA(ega[iEgaInt],q2_1,beam)
+						 + g(ega[iEgaInt],q2_2)*getcsgA(ega[iEgaInt],q2_2,beam)
+						 + 4.*g(ega[iEgaInt],q2_12)*getcsgA(ega[iEgaInt],q2_12,beam) );
 	      //	      cout<<" (Egamma,q2) =  ("<<ega[iEgaInt] << " , "<<q2_1<<") "<<g(ega[iEgaInt],q2_1)<<" "<<getcsgA_Q2_dep(q2_1)<<" "<<getcsgA(ega[iEgaInt],q2_1,beam)<<endl;
 	      //cout<<" (Egamma,q2) =  ("<<ega[iEgaInt] << " , "<<q2_2<<") "<<g(ega[iEgaInt],q2_2)<<" "<<getcsgA_Q2_dep(q2_2)<<" "<<getcsgA(ega[iEgaInt],q2_2,beam)<<endl;
 	      //	      cout<<" Running total "<<full_int[iEgaInt]<<endl;
