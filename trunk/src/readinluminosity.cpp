@@ -221,9 +221,9 @@ void readLuminosity::e_read()
   if(!_g_Earray) 
   {
     _g_Earray = new double*[_ReadInputnumega];
-    for(int i = 0; i < _ReadInputnumQ2; i++)
+    for(int i = 0; i < _ReadInputnumega; i++)
     {
-      _g_Earray[i] = new double[_ReadInputnumQ2+1];
+      _g_Earray[i] = new double[_ReadInputnumQ2];
     }
   }
 
