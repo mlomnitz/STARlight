@@ -195,7 +195,7 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
       //multiply by Q2 to speed up generation
       //EQ2lumfile<< Q2*g(Egamma,Q2) <<endl;
       EQ2lumfile<< g(Egamma,Q2) <<endl;
-      csgA=getcsgA_Q2_dep(Q2)*getcsgA(Egamma,Q2,beam);
+      csgA=getcsgA(Egamma,Q2,beam);
       wylumfile << csgA << endl;
     }
   }
