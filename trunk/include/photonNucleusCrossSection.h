@@ -130,6 +130,7 @@ private:
 	double _minQ2;            ///< min Q2 range in case it is fixed
 	double _maxQ2;            ///< max Q3 range in case it is fixed
 	double _maxPhotonEnergy;  ///< max photon energy in lab frame [GeV] (for vectormesons only)
+	double _cmsMinPhotonEnergy;
 	double _targetRadii;
 	
 };

@@ -63,6 +63,7 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 	  _minQ2             (inputParametersInstance.minGammaQ2()        ),
 	  _maxQ2             (inputParametersInstance.maxGammaQ2()        ),
 	  _maxPhotonEnergy   (inputParametersInstance.cmsMaxPhotonEnergy()),
+	  _cmsMinPhotonEnergy(inputParametersInstance.cmsMinPhotonEnergy()),
 	  _targetRadii       (inputParametersInstance.targetRadius()      )
 {
         // new options - impulse aproximation (per Joakim) and Quantum Glauber (per SK) SKQG
@@ -260,17 +261,20 @@ photonNucleusCrossSection::getcsgA(const double targetEgamma,
 	double beam_y = acosh(_beamLorentzGamma);	
 	double gamma_pt = E_prime*sin(theta_e);
 	double pz_squared = targetEgamma*targetEgamma - Q2 - gamma_pt*gamma_pt;
-	if( pz_squared < 0 || fabs(cos_theta_e) > 1)
+	if( pz_squared < 0 || fabs(cos_theta_e) > 1 || 2.*targetEgamma/(Q2+W*W) < _targetRadii)
 	  return 0;
 	double temp_pz = sqrt(pz_squared);
 	// Now boost to CM frame
 	double Egamma = targetEgamma*cosh(beam_y) - temp_pz*sinh(beam_y);
+	if( Egamma < _cmsMinPhotonEnergy || Egamma > _maxPhotonEnergy){
+	  return 0;
+	}
 	//cout<<" ::: Lomnitz test in photonNucleus ::: pz^2 = "<<pz_squared << " CMS Egamma = "<<Egamma<<endl;
 	//       Find gamma-proton CM energy in CMS frame in the limit Q2->0 (this is our assumption, the Q2 dependence is in the factor)
-	
-	Wgp = sqrt(2. * Egamma * (_protonEnergy
+	Wgp = sqrt( 2.*(protonMass*targetEgamma)+protonMass*protonMass);
+	/*Wgp = sqrt(2. * Egamma * (_protonEnergy
 	                          + sqrt(_protonEnergy * _protonEnergy - protonMass * protonMass))
-				  + protonMass * protonMass);
+				  + protonMass * protonMass);*/
 	
 	//Used for A-A
 	tmin = (W * W / (4. * Egamma * _beamLorentzGamma)) * (W * W / (4. * Egamma * _beamLorentzGamma));
