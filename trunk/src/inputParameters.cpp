@@ -191,9 +191,9 @@ inputParameters::configureFromFile(const std::string &_configFileName)
 	_targetLorentzGamma = cosh(rap1-rap2);
 
 	if( beam2A() == 1) //proton case 0.87 fm = 4.4 GeV^{-1}
-	  _targetR = 4.4;
+	  _targetR = 4.4/2.;
 	else
-	  _targetR = 6.1 * pow(beam2A(), 1./3.);
+	  _targetR = 6.1/2.0 * pow(beam2A(), 1./3.);
 
 	_fixedQ2Range = false;
 	std::cout << "Rapidity beam 1: " << rap1 << ", rapidity beam 2: " << rap2 << ", rapidity CMS system: " << (rap1+rap2)/2 << ", beam gamma in CMS: " << _beamLorentzGamma<< std::endl;
