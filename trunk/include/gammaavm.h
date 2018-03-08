@@ -66,7 +66,8 @@ class Gammaavectormeson : public eventChannel
   void momenta(double W,double Y,double &E,double &px,double &py,double &pz,int &tcheck);
   void momenta(double W,double Egam,double Q2, double gamma_pz, double gamma_pt,
 	       double &rapidity, double &E,double &px,double &py,double &pz,
-	       double &t_px, double &t_py, double &t_pz, double &e_phi,int &tcheck);
+	       double &t_px, double &t_py, double &t_pz, double &t_E,
+	       double &e_phi,int &tcheck);
   double pTgamma(double E); 
   void vmpt(double W,double Y,double &E,double &px,double &py, double &pz,int &tcheck);
   void twoBodyDecay(starlightConstants::particleTypeEnum &ipid,double W,double px0,double py0,double pz0,double &px1,double &py1,double&pz1,double &px2,double &py2,double &pz2,int &iFbadevent);
