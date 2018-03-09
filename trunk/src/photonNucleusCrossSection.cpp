@@ -143,8 +143,8 @@ photonNucleusCrossSection::photonNucleusCrossSection(const inputParameters& inpu
 		//_vmQ2Power_c1 = 2.30;
 		//_vmQ2Power_c2 = 0.0098; // [GeV^{-2}]
 		//New winner
-		_vmQ2Power_c1 = 2.45;
-		_vmQ2Power_c2 = 0.00084; // [GeV^{-2}]
+		_vmQ2Power_c1 = 2.36;
+		_vmQ2Power_c2 = 0.0029; // [GeV^{-2}]
 		_ANORM=-2.75; 
 		_BNORM=0.0;
 		_defaultC=1.0;
