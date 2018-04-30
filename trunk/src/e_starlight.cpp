@@ -26,7 +26,7 @@
 //
 // Description:
 //
-// Main interfqce for eSTARlight code inherited from STARlight
+// Main interface for eSTARlight code inherited from STARlight
 //
 //
 ///////////////////////////////////////////////////////////////////////////
@@ -134,7 +134,7 @@ e_starlight::init()
 
 	bool createChannel = true;
 	switch (_inputParameters->interactionType())	{
-	  //This case will be implemented in eSTARlight later
+	  // Photon-photon scattering is not implemented in eSTARlight as of yet
 	  /*
 	    case PHOTONPHOTON:
 		if (!lumTableIsValid) {
@@ -150,6 +150,7 @@ e_starlight::init()
 			photonElectronLuminosity lum(*_inputParameters, *_beamSystem);
 		}
 		break;
+		// Incoherent electro-production is still pending 
 		/*        case PHOTONPOMERONINCOHERENT:  // narrow and wide resonances use
                 if (!lumTableIsValid) {
                         printInfo << "creating luminosity table for incoherent photon-Pomeron channel" << endl;
@@ -204,7 +205,7 @@ e_starlight::luminosityTableIsValid() const
 	double       maxRapidity = 0;
 	unsigned int nmbRapidityBins;
 	int          productionMode, beamBreakupMode;
-	//Remveo interference options for eX collisions (no logner symmetric)
+	//Remove interference options for eX collisions (no logner symmetric)
 	//	bool         interferenceEnabled = false;
 	//	double       interferenceStrength = 0;
 	bool         coherentProduction = false;
@@ -224,7 +225,7 @@ e_starlight::luminosityTableIsValid() const
 	      >> nmbPtBinsInterference
 	      >> coherentProduction >> incoherentFactor
 	      >> deuteronSlopePar))
-		// cannot read parameters from lookup table file
+	  // cannot read parameters from lookup table file
 		return false;
         	
 	std::string validationKeyEnd;
