@@ -73,6 +73,7 @@ eXEvent& eXEvent::operator=(const eXEvent& rhs)
     this->_gammaEnergies = rhs._gammaEnergies;
     this->_sources = rhs._sources;
     this->_target = rhs._target;
+    this->_vertext = rhs._vertext;
   }
   return *this;
 }
@@ -96,6 +97,9 @@ eXEvent& eXEvent::operator+(const eXEvent& ev)
  }
  for(unsigned int n = 0; n<ev._target.size(); ++n){
    this->_target.push_back(ev._target.at(n));
+ }
+ for(unsigned int n = 0; n<ev._vertext.size(); ++n){
+   this->_vertext.push_back(ev._vertext.at(n));
  }
   return *this;
 }

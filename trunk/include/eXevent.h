@@ -54,7 +54,7 @@ class eXEvent
       void addVertex(vector3 &vertex) { _vertices.push_back(vertex); }
       void addGamma(lorentzVector gamma,float egamma, float Q2) { _gamma.push_back(gamma); _gammaEnergies.push_back(egamma); _gammaMasses.push_back(Q2); }
       void addSourceElectron(lorentzVector &el){ _sources.push_back(el); }
-      void addScatteredTarget( lorentzVector &target){ _target.push_back(target); }
+      void addScatteredTarget( lorentzVector &target, double t){ _target.push_back(target); _vertext.push_back(t);}
 
       const std::vector<starlightParticle> * getParticles() const { return &_particles; }
       const std::vector<vector3> * getVertices() const { return &_vertices; }
@@ -63,6 +63,7 @@ class eXEvent
       const std::vector<float> * getGammaMasses() const {return &_gammaMasses; }
       const std::vector<lorentzVector> * getGamma() const { return &_gamma; }
       const std::vector<lorentzVector> * getTarget() const{ return &_target; }
+      const std::vector<double> * getVertext() const{ return &_vertext; }
       eXEvent & operator=(const eXEvent&);
       eXEvent & operator+(const eXEvent&);
       
@@ -73,6 +74,7 @@ class eXEvent
       std::vector<vector3> _vertices;
       std::vector<lorentzVector> _sources;
       std::vector<lorentzVector> _target;
+      std::vector<double> _vertext;
       std::vector<float> _gammaMasses;
       std::vector<float> _gammaEnergies;
       std::vector<lorentzVector> _gamma;
