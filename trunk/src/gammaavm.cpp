@@ -818,7 +818,7 @@ void Gammaavectormeson::momenta(double W,double Egam,double Q2, double gamma_pz,
 	pt = sqrt( px*px + py*py );
 	
 	double proton_pz = _beamNucleus*sqrt(_pEnergy*_pEnergy - pow(starlightConstants::protonMass,2.) );
-	double complementM2 = pow(_beamNucleus*starlightConstants::protonMass,2.) + t_px*t_px + t_py*t_py + (proton_pz+t_pz)*(proton_pz+t_pz);
+	double complementM2 = pow(_beamNucleus*starlightConstants::protonMass,2.) + t_px*t_px + t_py*t_py + (proton_pz-t_pz)*(proton_pz-t_pz);
 	t_E = _beamNucleus*_pEnergy - sqrt(complementM2);
 	E = Egam + t_E;
 	pz = gamma_pz - t_pz;
@@ -1468,9 +1468,11 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	  double Ed2 = sqrt(md*md+px2*px2+py2*py2+pz2*pz2); 
 	  starlightParticle particle2(px2, py2, pz2, Ed2, starlightConstants::UNKNOWN, ipid2, q2);
 	  event.addParticle(particle2);
-	  //
-	  lorentzVector target(t_px, t_py, t_pz, t_E);
-	  event.addScatteredTarget(target);
+	  //Scattered proton
+	  double target_pz =  - _beamNucleus*sqrt(_pEnergy*_pEnergy - pow(starlightConstants::protonMass,2.) ) + t_pz;
+	  lorentzVector target(-t_px, -t_py, target_pz, _beamNucleus*_pEnergy - t_E);
+	  double t_var = t_E*t_E - t_px*t_px - t_py*t_py - t_pz*t_pz;
+	  event.addScatteredTarget(target, t_var);
 	}
 	return event;
 

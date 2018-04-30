@@ -180,7 +180,7 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
     double Q2max = this_energy->second;
     if( Q2min > Q2max)
       continue;
-    //g_E = integrated_Q2_dep(Egamma, Q2min, Q2max);
+    //Accounts for the phase space factor 
     g_E = Egamma*integrated_Q2_dep(Egamma, Q2min, Q2max);
     //      if( i==0 )
     //	cout<<"Lomnitz "<<Egamma<<" , "<<integrated_Q2_dep(Egamma)*1E6<<" , "<<Egamma*integrated_Q2_dep(Egamma)*1E6<<endl;
