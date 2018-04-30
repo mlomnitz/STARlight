@@ -141,6 +141,7 @@ int eventFileWriter::writeEvent(eXEvent &event, int eventnumber)
       }
       for( uint itarget = 0 ; itarget < event.getTarget()->size(); ++itarget){
 	lorentzVector target = event.getTarget()->at(itarget);
+	_fileStream <<"t: "<<event.getVertext()->at(itarget)<<std::endl;
 	_fileStream <<"TARGET: "<<target.GetPx()<<" "<<target.GetPy()<<" "<<target.GetPz()<<" "<<target.GetE()<<std::endl;
       }
       for( uint iel = 0 ; iel < event.getSources()->size(); ++iel){
