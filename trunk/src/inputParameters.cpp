@@ -201,11 +201,8 @@ inputParameters::configureFromFile(const std::string &_configFileName)
 	std::cout << "Rapidity beam 1 in beam 2 frame: " << rap1-rap2 << ", beam 1 gamma in beam 2 frame: " << _targetLorentzGamma<< std::endl;
 	_ptBinWidthInterference = maxPtInterference() / nmbPtBinsInterference();
 	_protonEnergy           = _beamLorentzGamma * protonMass;
-	//Storing electron energy, and max photon energy in target frame
+	// Electron energy in the target frame of reference
 	_electronEnergy         = _targetLorentzGamma * starlightConstants::mel;
-	//	_maxPhotonEnergy        = (_beamLorentzGamma - 1000. ) *starlightConstants::mel;
-	//_electronEnergy         = beam1LorentzGamma() * starlightConstants::mel;
-	// check for deuteron or tritium - these must be the second beam
 	if((beam1Z()==1) && (beam1A()==2)){
 		if((beam2Z()==1) && (beam2A()==2)){
 		printWarn << "deuteron-deuteron collisions are not supported" << endl;
@@ -586,7 +583,7 @@ inputParameters::configureFromFile(const std::string &_configFileName)
 		return false;
 	}
 
-	//
+	// Sanity check on Q2 range in case it is specified by user
 	if( _minGammaQ2.value() != 0 || _maxGammaQ2.value() != 0){
 	  if( _minGammaQ2.value() <0 || _maxGammaQ2.value() <=_minGammaQ2.value() )
 	    printWarn << "Input values for min and max Q2 are inconsistent: "<<_minGammaQ2.value()<<","<<_maxGammaQ2.value()
@@ -594,12 +591,11 @@ inputParameters::configureFromFile(const std::string &_configFileName)
 	  else
 	    _fixedQ2Range = true;
 	}
-	//Photon energy limits in C.M.S and target (p, or Au at rest) frames
-	//	_cmsMaxPhotonEnergy        = 10.*(_beamLorentzGamma - 10. ) *starlightConstants::mel;
+	//Photon energy limits in C.M.S frame, used for some basic safety chekcs
 	_cmsMinPhotonEnergy  = 0.5*(((mass+protonMass)*(mass+protonMass)-
 				     protonMass*protonMass)/(_protonEnergy.value()+sqrt(_protonEnergy.value()*_protonEnergy.value()-protonMass*protonMass)));
 	_cmsMaxPhotonEnergy        = 0.5*mass*exp(9);
-	//_cmsMinPhotonEnergy = 0.5*mass*exp(-9);
+	// Photon limits in target frame: this is where the photon flux is well described
 	_targetMaxPhotonEnergy        = (_targetLorentzGamma - 10. ) *starlightConstants::mel;
 	_targetMinPhotonEnergy = mass;
 	printInfo << "using the following " << *this;
