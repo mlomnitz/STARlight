@@ -703,20 +703,18 @@ void Gammaavectormeson::momenta(double W,double Egam,double Q2, double gamma_pz,
 				double &t_px, double &t_py, double &t_pz, double &t_E, //return target
 				double &e_phi,int &tcheck) //return electron (angle already known by Q2)
 {
-	//     This subroutine calculates momentum and energy of vector meson
-	//     given W and Y,   without interference.  Subroutine vmpt handles
-	//     production with interference
+	//     This subroutine calculates momentum and energy of vector meson for electroproduction (eSTARlight)
+	//     given W and photon 4-vector,   without interference.  No intereference in asymetric eX collisions
  
 	double Pom_pz,tmin,pt2,phi1,phi2;
 	double px1,py1,px2,py2;
 	double pt,xt,xtest,ytest;
 	double t2;
       
-	// Calculations done in CMS frame (need to recalculate electron energy)
 	phi1 = 2.*starlightConstants::pi*_randy.Rndom();
 	e_phi = starlightConstants::pi+phi1;
-	// Pomeron energy now included photon virtuality and finite transverse momenta
-	//Epom = 0.5*(W*W+Q2)/(Egam + std::sqrt(Egam*Egam+Q2));
+	// Pomeron pz is != than its energy in eSTARlight, in order to conserve energy/momentum of scattered
+	// target
         Pom_pz = 0.5*(W*W-Q2)/(Egam + gamma_pz);
 	while( e_phi > 2.*starlightConstants::pi ) e_phi-= 2.*starlightConstants::pi;
 	//
@@ -799,7 +797,7 @@ void Gammaavectormeson::momenta(double W,double Egam,double Q2, double gamma_pz,
 	      std::cout<<"Can't find the electron for eX"<<std::endl;
             if( xtest > comp ) goto L663vm;
        		
-	}//else end from pp
+	}
 	phi2 = 2.*starlightConstants::pi*_randy.Rndom();
 
 	px1 = gamma_pt*cos(phi1);
@@ -809,21 +807,19 @@ void Gammaavectormeson::momenta(double W,double Egam,double Q2, double gamma_pz,
 	//
 	t_px = -pt2*cos(phi2);
 	t_py = -pt2*sin(phi2);
-	//double pz2 = pow(_pEnergy*_beamNucleus,2.) - pow(starlightConstants::protonMass*_beamNucleus,2.);
-	//t_pz = -(sqrt(pz2)-Pom_pz); //Only works for proton as of yet, assumes mp << Ep
+	// Used to return the pomeron pz to generator
 	t_pz = Pom_pz;
 	// Compute vector sum Pt = Pt1 + Pt2 to find pt for the vector meson
 	px = px1 + px2;
 	py = py1 + py2;
 	pt = sqrt( px*px + py*py );
-	
-	double proton_pz = _beamNucleus*sqrt(_pEnergy*_pEnergy - pow(starlightConstants::protonMass,2.) );
-	double complementM2 = pow(_beamNucleus*starlightConstants::protonMass,2.) + t_px*t_px + t_py*t_py + (proton_pz-t_pz)*(proton_pz-t_pz);
+	// Computing the pomeron energy using the fact that the target invariant mass is unchanged in collision
+	double target_pz = _beamNucleus*sqrt(_pEnergy*_pEnergy - pow(starlightConstants::protonMass,2.) );
+	double complementM2 = pow(_beamNucleus*starlightConstants::protonMass,2.) + t_px*t_px + t_py*t_py + (target_pz-t_pz)*(target_pz-t_pz);
 	t_E = _beamNucleus*_pEnergy - sqrt(complementM2);
+	// Finally V.M. energy, pz and rapidity from photon + pommeron.
 	E = Egam + t_E;
 	pz = gamma_pz - t_pz;
-	// Testing different methods to extract Y
-	//Y = 0.5*std::log( (Egam+gamma_pz) / Epom ); 
 	Y = 0.5*std::log( (E+fabs(pz))/(E-fabs(pz)) );
 	  
 }
@@ -1268,12 +1264,11 @@ void Gammaavectormeson::pickwEgamq2(double &W, double &cmsEgamma, double &target
 	//	int egamma_draws = 0, cms_egamma_draws =0, q2_draws =0 ;
 	// ---------
 	dW = (_VMWmax-_VMWmin)/double(_VMnumw);
-	//
+	// Following used for debugging/timing for event generation
 	//std::chrono::steady_clock::time_point begin_evt = std::chrono::steady_clock::now();
 	bool pick_state = false;
 	dEgamma = std::log(_targetMaxPhotonEnergy/_targetMinPhotonEnergy);
 	while( pick_state == false ){
-	  //cout<<"Lomnitz start pick"<<endl;
 	  xw = _randy.Rndom();
 	  W = _VMWmin + xw*(_VMWmax-_VMWmin);
 	  double w_test = _randy.Rndom();
@@ -1289,6 +1284,7 @@ void Gammaavectormeson::pickwEgamq2(double &W, double &cmsEgamma, double &target
 	  // Holds Q2 and integrated Q2 dependence. Array is saved in target frame
 	  std::pair< double, std::vector<double> > this_energy = _g_EQ2array->operator[](IGamma);
 	  double intgrated_q2 = this_energy.first;
+	  // Sample single differential photon flux to obtain photon energy
 	  xtest = _randy.Rndom();
 	  if( xtest > intgrated_q2 ){
 	    //egamma_draws+=1;
@@ -1296,9 +1292,8 @@ void Gammaavectormeson::pickwEgamq2(double &W, double &cmsEgamma, double &target
 	  }
 	  N0++; 
 	  btest = _randy.Rndom();
-	  
+	  // Load double differential photon flux table for selected energy
 	  std::vector<double> photon_flux = this_energy.second;
-	  //std::vector<double> photon_flux = _g_EQ2array->operator[](Egamma_tag);
 	  double VMQ2min = photon_flux[0];
 	  double VMQ2max = photon_flux[1];
 	  //
@@ -1308,7 +1303,6 @@ void Gammaavectormeson::pickwEgamq2(double &W, double &cmsEgamma, double &target
 	  xQ2 = _randy.Rndom();
 	  Q2 = std::exp(ln_min+xQ2*ratio);
 	  IQ2 = int(_VMnumQ2*xQ2);	
-	  //cout<<"Lomnitz :: q2 draw"<<endl;
 	  // Load from look-up table. Use linear interpolation to evaluate at Q2
 	  double y_1 = photon_flux[IQ2+2];
 	  double y_2 = photon_flux[IQ2+3];
@@ -1323,7 +1317,6 @@ void Gammaavectormeson::pickwEgamq2(double &W, double &cmsEgamma, double &target
 	    continue;
 	  }
 	  // -- Generate electron and photon in Target frame
-	  // -- Then boost to CMS frame and check full csg
 	  E_prime = _eEnergy - targetEgamma;
 	  double cos_theta_e = 1. - Q2/(2.*_eEnergy*E_prime);
 	  theta_e = acos(cos_theta_e);
@@ -1333,18 +1326,16 @@ void Gammaavectormeson::pickwEgamq2(double &W, double &cmsEgamma, double &target
 	  if( pz_squared < 0 )
 	    continue;
 	  double temp_pz = sqrt(pz_squared);
-	  // Now boost to Target frame
+	  // Now boost to CMS frame to check validity
 	  gamma_pz = temp_pz*cosh(beam_y) - targetEgamma*sinh(beam_y); 
 	  cmsEgamma = targetEgamma*cosh(beam_y) - temp_pz*sinh(beam_y);
 	  // Simple checkl, should not be needed but used for safety
-	  //cout<<2.*targetEgamma/(Q2+W*W)<<" and CMS info (Q2,Egam,pz) "<<Q2<<" , "<<targetEgamma<<" , "<<gamma_pz<<endl;
 	  if( cmsEgamma < _cmsMinPhotonEnergy || 2.*targetEgamma/(Q2+W*W) < _targetRadius){ //This cut is roughly RA = 0.8 fm the radius of proton and 1 eV^{-1} = 1.97 x 10 ^{-7} m
 	      continue;
 	  }
 	  xtest = _randy.Rndom();
-	  //if( _BWarray[IW]*_f_WYarray[IQ2][IGamma] < xtest ){
+	  // Test against photonuclear cross section gamma+X --> VM+X
 	  if( _f_WYarray[IGamma][IQ2] < xtest ){
-	    //cms_egamma_draws+=1;
 	    continue;
 	  }
 	  pick_state = true;
@@ -1453,22 +1444,21 @@ eXEvent Gammaavectormeson::e_produceEvent()
 	  double e_pz = e_E*cos(e_theta);
 	  lorentzVector electron(e_px, e_py, e_pz, e_E);
 	  event.addSourceElectron(electron);
-	  // - Generated photon - CMS frame
+	  // - Generated photon - target frame
 	  double gamma_x = gamma_pt*cos(e_phi+starlightConstants::pi);
 	  double gamma_y = gamma_pt*sin(e_phi+starlightConstants::pi);
 	  lorentzVector gamma(gamma_x,gamma_y,gamma_pz,cmsEgamma);
-	  //event.addGamma(gamma, cmsEgamma, Q2);
 	  event.addGamma(gamma, targetEgamma, Q2);   
-	  //
+	  // - Saving V.M. daughters
 	  double md = getDaughterMass(vmpid); 
 	  double Ed1 = sqrt(md*md+px1*px1+py1*py1+pz1*pz1); 
 	  starlightParticle particle1(px1, py1, pz1, Ed1, starlightConstants::UNKNOWN, ipid1, q1);
 	  event.addParticle(particle1);
-	  
+	  //
 	  double Ed2 = sqrt(md*md+px2*px2+py2*py2+pz2*pz2); 
 	  starlightParticle particle2(px2, py2, pz2, Ed2, starlightConstants::UNKNOWN, ipid2, q2);
 	  event.addParticle(particle2);
-	  //Scattered proton
+	  // - Scattered target and transfered momenta at target vertex
 	  double target_pz =  - _beamNucleus*sqrt(_pEnergy*_pEnergy - pow(starlightConstants::protonMass,2.) ) + t_pz;
 	  lorentzVector target(-t_px, -t_py, target_pz, _beamNucleus*_pEnergy - t_E);
 	  double t_var = t_E*t_E - t_px*t_px - t_py*t_py - t_pz*t_pz;

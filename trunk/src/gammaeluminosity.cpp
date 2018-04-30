@@ -114,9 +114,10 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
   dW = (_wMax-_wMin)/_nWbins;
   dY  = (_yMax-(-1.0)*_yMax)/_nYbins;
 
-  // Write values for Q2 at constant Egamma slices
+  // Look-up table storing double and single photon flux differentials
   EQ2lumfile.open(EQ2FileName.c_str());
   EQ2lumfile << _nmbGammaQ2Bins <<endl;
+  // Look-up table storing photo-nuclear cross section
   // Write the values of W used in the calculation to slight.txt.  
   wylumfile.open(wyFileName.c_str());
   wylumfile << getbbs().beam1().Z() <<endl;
@@ -150,8 +151,6 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
     wylumfile << Y << endl;
   }
     
-  //Eth=0.5*(((_wMin+starlightConstants::mel)*(_wMin +starlightConstants::mel)-starlightConstants::mel*starlightConstants::mel)/(_electronEnergy+sqrt(_electronEnergy*_electronEnergy-starlightConstants::mel*starlightConstants::mel))); 
-
   int A_1 = getbbs().beam1().A(); 
   int A_2 = getbbs().beam2().A();
   if( A_2 == 0 && A_1 != 0 ){
@@ -163,7 +162,6 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
   }
   // Exponential steps for both tables: Target frame for photon generation and CMS frame for final state generation
   double dE_target = std::log(_targetMaxPhotonEnergy/_targetMinPhotonEnergy)/_nEBins;
-  //double dE_cms = std::log(_cmsMaxPhotonEnergy/_cmsMinPhotonEnergy)/_nEBins;
   // - - - - Calculations in Target frame
   for(unsigned int i = 0; i < _nWbins; ++i) {
 
@@ -182,18 +180,12 @@ void photonElectronLuminosity::photonNucleusDifferentialLuminosity()
       continue;
     //Accounts for the phase space factor 
     g_E = Egamma*integrated_Q2_dep(Egamma, Q2min, Q2max);
-    //      if( i==0 )
-    //	cout<<"Lomnitz "<<Egamma<<" , "<<integrated_Q2_dep(Egamma)*1E6<<" , "<<Egamma*integrated_Q2_dep(Egamma)*1E6<<endl;
-    //
     EQ2lumfile << g_E<<endl;
-    //
-    //EQ2lumfile << gammaTableParse(i,j) <<endl;
+    // Write out Q2 range used for generation
     EQ2lumfile << Q2min << endl;
     EQ2lumfile << Q2max << endl;
     for( uint iQ2 =0 ;iQ2<_nmbGammaQ2Bins; ++iQ2){
       double Q2 = std::exp( std::log(Q2min)+iQ2*std::log(Q2max/Q2min)/100 );
-      //multiply by Q2 to speed up generation
-      //EQ2lumfile<< Q2*g(Egamma,Q2) <<endl;
       EQ2lumfile<< g(Egamma,Q2) <<endl;
       csgA=getcsgA(Egamma,Q2,beam);
       wylumfile << csgA << endl;
