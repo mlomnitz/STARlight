@@ -49,13 +49,18 @@ public:
 	void makeGammaPQ2dependence(const double bwnormsave);
 private:
 
-	double _Ep;  // Proton Energy
 	double _wideWmax;
 	double _wideWmin;
-	double _wideYmax;
-	double _wideYmin;		
+	double _targetMaxPhotonEnergy;
+	double _targetMinPhotonEnergy;
+	double _Ep;
 	double _electronEnergy;
 	double _target_beamLorentz;
+	double _VMnumEgamma;
+	double _useFixedRange;
+	double _gammaMinQ2;
+	double _gammaMaxQ2;
+	double _targetRadii;
 
 };
 

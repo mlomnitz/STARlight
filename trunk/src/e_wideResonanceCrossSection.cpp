@@ -29,7 +29,7 @@
 //
 //
 ///////////////////////////////////////////////////////////////////////////
-#define _makeGammaPQ2_
+//#define _makeGammaPQ2_
 
 #include <iostream>
 #include <fstream>
@@ -49,11 +49,16 @@ e_wideResonanceCrossSection::e_wideResonanceCrossSection(const inputParameters& 
 {
 	_wideWmax = _wMax;
 	_wideWmin = _wMin;
-	_wideYmax = _yMax;
-	_wideYmin = -1.0 * _wideYmax;
+	_targetMaxPhotonEnergy=inputParametersInstance.targetMaxPhotonEnergy();
+	_targetMinPhotonEnergy=inputParametersInstance.targetMinPhotonEnergy();
 	_Ep       = inputParametersInstance.protonEnergy();
 	_electronEnergy = inputParametersInstance.electronEnergy();
 	_target_beamLorentz = inputParametersInstance.beamLorentzGamma();
+	_VMnumEgamma = inputParametersInstance.nmbEnergyBins();
+	_useFixedRange = inputParametersInstance.fixedQ2Range();
+	_gammaMinQ2 = inputParametersInstance.minGammaQ2();
+	_gammaMaxQ2 = inputParametersInstance.maxGammaQ2();
+	_targetRadii = inputParametersInstance.targetRadius();
 }
 
 
@@ -71,25 +76,26 @@ e_wideResonanceCrossSection::crossSectionCalculation(const double bwnormsave)
 	//     This subroutine calculates the cross-section assuming a wide
 	//     (Breit-Wigner) resonance.
 
-	double W,dW,dY;
-	double y1,y2,y12,ega1,ega2,ega12;
+  double W,dW, dEgamma, minEgamma;
+	double ega[3] = {0};
 	double int_r,dR;
-	double g_Eg1, g_Eg2, g_Eg12;
-	double csgA1, csgA2, csgA12;
 	double Eth;
-	int    I,J,NW,NY,beam;
+	int    iW,nW,iEgamma,nEgamma,beam;
 
 	double bwnorm = bwnormsave; //used to transfer the bwnorm from the luminosity tables
 
 	//gamma+nucleon threshold.
 	Eth=0.5*(((_wideWmin+protonMass)*(_wideWmin+protonMass)
 	          -protonMass*protonMass)/(_Ep+sqrt(_Ep*_Ep-protonMass*protonMass)));
-                   
-	NW   = 100;
-	dW   = (_wideWmax-_wideWmin)/double(NW);
-  
-	NY   =  1200;
-	dY   = (_wideYmax-_wideYmin)/double(NY);
+        
+	// For W integration           
+	nW   = 100;
+	dW   = (_wideWmax-_wideWmin)/double(nW);
+	// For Egamma integration
+	nEgamma = 1000;
+	dEgamma = std::log(_targetMaxPhotonEnergy/_targetMinPhotonEnergy)/nEgamma;
+	minEgamma = std::log(_targetMinPhotonEnergy);
+	
   
 	if (getBNORM()  ==  0.){
 		cout<<" Using Breit-Wigner Resonance Profile."<<endl;
@@ -103,82 +109,69 @@ e_wideResonanceCrossSection::crossSectionCalculation(const double bwnormsave)
         int A_1 = getbbs().beam1().A(); 
         int A_2 = getbbs().beam2().A();
 
+	if( A_2 == 0 && A_1 >= 1 ){
+          // eA, first beam is the nucleus and is in this case the target
+          beam = 1;
+        } else if( A_1 ==0 && A_2 >= 1){
+	  // eA, second beam is the nucleus and is in this case the target
+          beam = 2;
+        } else {
+          beam = 2;
+        }
+
 	int_r=0.;
     
         // Do this first for the case when the first beam is the photon emitter 
-        // Treat pA separately with defined beams 
         // The variable beam (=1,2) defines which nucleus is the target 
 	// Integration done using Simpson's rule
-	//double target_cm = -acosh(_beamLorentzGamma);
-	double target_cm = -acosh(_target_beamLorentz);
-	// another - sign from subraction in addition rule
-	double exp_target_cm = exp(-target_cm);
-	
-	for(I=0;I<=NW-1;I++){
+	for(iW=0;iW<=nW-1;iW++){
     
-		W = _wideWmin + double(I)*dW + 0.5*dW;
-		for(J=0;J<=NY-1;J++){
-		  
-			y1  = _wideYmin + double(J)*dY;
-			y2  = _wideYmin + double(J+1)*dY;
-			y12 = 0.5*(y1+y2);
-			//Integration is done using trpaezoid rule
-			double target_ega1, target_ega2, target_ega12;
-                        if( A_2 == 0 && A_1 >= 1 ){
-                          // eX, first beam is the nucleus and is in this case the target  
-                          // Egamma = 0.5*W*exp(-Y); 
-                          ega1  = 0.5*W*exp(-y1);
-                          ega2  = 0.5*W*exp(-y2);
-                          ega12 = 0.5*W*exp(-y12);
-                          beam = 1; 
-                        } else if( A_1 ==0 && A_2 >= 1){
-                          // eX, second beam is the nucleus and is in this case the target 
-                          ega1  = 0.5*W*exp(y1);
-                          ega2  = 0.5*W*exp(y2);
-                          ega12 = 0.5*W*exp(y12);
-                          beam = 2; 
-                        } else {
-                          ega1  = 0.5*W*exp(y1);
-                          ega2  = 0.5*W*exp(y2);
-                          ega12 = 0.5*W*exp(y12);
-                          beam = 2; 
-                        }
-      
-      
-			if(ega1 < Eth || ega2 < Eth) continue;
-			if(ega2 > maxPhotonEnergy()) continue;
-			//
-			    		  // photon energy in Target frame 
-			target_ega1 = ega1*exp_target_cm;
-			target_ega2 = ega2*exp_target_cm;
-			target_ega12 = ega12*exp_target_cm;
-			//			
-			g_Eg1 = integrated_Q2_dep(target_ega1);
-			csgA1=getcsgA(ega1,W,beam);
-			//         >> Middle Point                      =====>>>
-			g_Eg12 = integrated_Q2_dep(target_ega12);
-			csgA12=getcsgA(ega12,W,beam);         
-			//         >> Second Point                      =====>>>
-			g_Eg2 = integrated_Q2_dep(target_ega2);
-			csgA2=getcsgA(ega2,W,beam);
-      
-			//>> Sum the contribution for this W,Y. The 2 accounts for the 2 beams
-			dR  = target_ega1*g_Eg1*csgA1;
-			dR  = dR + 4.*ega12*g_Eg12*csgA12;
-			dR  = dR + ega2*g_Eg2*csgA2;
-			dR  = dR*(dY/6.)*breitWigner(W,bwnorm)*dW;
-      
-			//For identical beams, we double.  Either may emit photon/scatter
-			//For large differences in Z, we approx, that only beam1 emits photon
-			//and beam2 scatters, eg d-Au where beam1=au and beam2=d
-			//if(getbbs().beam1().A()==getbbs().beam2().A()){
-			//	dR  = 2.*dR;
-			//}
-			int_r = int_r+dR;  
+		W = _wideWmin + double(iW)*dW + 0.5*dW;
+		int nQ2 = 1000;
+		for(iEgamma = 0 ; iEgamma < nEgamma; ++iEgamma){    // Integral over photon energy
+		  // Target frame photon energies
+		  ega[0] = exp(minEgamma + iEgamma*dEgamma );
+		  ega[1] = exp(minEgamma + (iEgamma+1)*dEgamma );
+		  ega[2] = 0.5*(ega[0]+ega[1]);
+		  // Integral over Q2				  
+		  double full_int[3] = {0}; // Full e+X --> e+X+V.M. cross section
+		  //
+		  for( int iEgaInt = 0 ; iEgaInt < 3; ++iEgaInt){    // Loop over the energies for the three points to integrate over Q2
+		    //These are the physical limits
+		    double Q2_min = std::pow(starlightConstants::mel*ega[iEgaInt],2.0)/(_electronEnergy*(_electronEnergy-ega[iEgaInt]));	    
+		    double Q2_max = 4.*_electronEnergy*(_electronEnergy-ega[iEgaInt]);
+		    if(_useFixedRange == true){
+		      if( Q2_min < _gammaMinQ2 )
+			Q2_min = _gammaMinQ2;
+		      if( Q2_max > _gammaMaxQ2 )
+			Q2_max = _gammaMaxQ2;
+		    }
+		    double lnQ2ratio = std::log(Q2_max/Q2_min)/nQ2;
+		    double lnQ2_min = std::log(Q2_min);
+		    //
+		    int q2end = -99;
+		    for( int iQ2 = 0 ; iQ2 < nQ2; ++iQ2){     // Integral over photon virtuality
+		      //
+		      double q2_1 = exp( lnQ2_min + iQ2*lnQ2ratio);	    
+		      double q2_2 = exp( lnQ2_min + (iQ2+1)*lnQ2ratio);
+		      double q2_12 = (q2_2+q2_1)/2.;
+		      //			
+		      // Integrating cross section
+		      full_int[iEgaInt] += (q2_2-q2_1)*( g(ega[iEgaInt],q2_1)*getcsgA(ega[iEgaInt],q2_1,beam)
+							 + g(ega[iEgaInt],q2_2)*getcsgA(ega[iEgaInt],q2_2,beam)
+							 + 4.*g(ega[iEgaInt],q2_12)*getcsgA(ega[iEgaInt],q2_12,beam) );	      
+		    }
+		    q2end = -99 ;
+		    full_int[iEgaInt] = full_int[iEgaInt]/6.;
+		  }
+		  // Finishing cross-section integral 
+		  dR = full_int[0];
+		  dR += full_int[1];
+		  dR += 4.*full_int[2];
+		  dR = dR*(ega[1]-ega[0])/6.;
+		  int_r = int_r + dR*breitWigner(W,bwnorm)*dW;
 		}
 	}
-
-
 	cout<<endl;
 	if (0.01*int_r > 1.){
 	  cout<< " Total cross section: "<<0.01*int_r<<" barn."<<endl;
@@ -201,7 +194,7 @@ e_wideResonanceCrossSection::crossSectionCalculation(const double bwnormsave)
 #endif
 }
 
-
+#ifdef _makeGammaPQ2_
 //______________________________________________________________________________
 void
 e_wideResonanceCrossSection::makeGammaPQ2dependence( double bwnormsave)
@@ -226,9 +219,6 @@ e_wideResonanceCrossSection::makeGammaPQ2dependence( double bwnormsave)
 	NW   = 100;
 	dW   = (_wideWmax-_wideWmin)/double(NW);
   
-	NY   =  1200;
-	dY   = (_wideYmax-_wideYmin)/double(NY);
-  
 	if (getBNORM()  ==  0.){
 		cout<<" Using Breit-Wigner Resonance Profile."<<endl;
 	}
@@ -250,7 +240,7 @@ e_wideResonanceCrossSection::makeGammaPQ2dependence( double bwnormsave)
         int A_1 = getbbs().beam1().A(); 
         int A_2 = getbbs().beam2().A();
   
-
+	
         // Do this first for the case when the first beam is the photon emitter 
         // The variable beam (=1,2) defines which nucleus is the target 
 	// Target beam ==2 so repidity is negative. Can generalize later
@@ -270,10 +260,9 @@ e_wideResonanceCrossSection::makeGammaPQ2dependence( double bwnormsave)
 	    
 	    W = _wideWmin + double(I)*dW + 0.5*dW;
 	    for(J=0;J<=(NY-1);J++){
-	      
 	      y1  = _wideYmin + double(J)*dY;
 	      y2  = _wideYmin + double(J+1)*dY;
-	      y12 = 0.5*(y1+y2);
+	      y12 = 0.5*(y1+y2);  
 	      double target_ega1, target_ega2, target_ega12;
 	      if( A_2 == 0 && A_1 >= 1 ){
 		// pA, first beam is the nucleus and is in this case the target  
@@ -337,3 +326,4 @@ e_wideResonanceCrossSection::makeGammaPQ2dependence( double bwnormsave)
 	}
 	
 }
+#endif
