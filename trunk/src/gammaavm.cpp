@@ -86,7 +86,7 @@ Gammaavectormeson::Gammaavectormeson(const inputParameters& inputParametersInsta
 	  // create n-body phase-spage generator
 	  _phaseSpaceGen = new nBodyPhaseSpaceGen(_randy);
 	}
-	if(_ProductionMode == 11 || _ProductionMode == 12) //Need to define later, for full eSTARlight
+	if(_ProductionMode == 12 || _ProductionMode == 13) // Narrow and wide coherent photon-pommeron in eSTARlight
 	  _dummy_pncs = new photonNucleusCrossSection(inputParametersInstance, bbsystem);
 	//
 	const double r_04_00 = 0.674;
