@@ -185,8 +185,8 @@ e_narrowResonanceCrossSection::crossSectionCalculation(const double)  // _bwnorm
 	  cout<<" Using fixed Q2 range "<<_gammaMinQ2 << " < Q2 < "<<_gammaMaxQ2<<endl;
 	}
 	printCrossSection(" Total cross section: ",int_r);
-	printCrossSection(" Total effective photon flux ", int_r2);
-	printCrossSection(" gamma+X --> VM+X ", int_r/int_r2);
+	//	printCrossSection(" Total effective photon flux ", int_r2); // These are used to obtain the photon flux and gammaX --> VM X x-section
+	//      printCrossSection(" gamma+X --> VM+X ", int_r/int_r2);      // commented out for the mean time, not necesary in current implementation
 	//
 	//cout<<endl;
 	setPhotonNucleusSigma(0.01*int_r);
