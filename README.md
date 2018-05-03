@@ -33,7 +33,7 @@ The following instructions illustrate the procedure to install and run eSTARligh
  - Set up the desired running conditions in the input file:
      - cp ~/the_path/eSTARlight/slight.in .
      - vim slight.in
-     - As of yet, the electron beam must be set to beam1, it is selected by setting:
+     - *Note:* As of yet, the electron beam must be set to beam1, it is selected by setting:
          - BEAM_1_Z = 1
          - BEAM_1_A = 0
  - Run the simulation:
@@ -44,25 +44,6 @@ The following instructions illustrate the procedure to install and run eSTARligh
      - root -b -q -l ~/the_path/eSTARlight/trunk/utils/ConvertStarlightAsciiToTree.C
      - TTree is output to slight.root
 
-## What is new?
-Although eSTARlight inherits many methods from STARlight, it required sufficient changes to motiviate a separate distribution. As such, the source code includes many new/changed classes relative to the original STARlight package. In this section we will provide a brief overview of some important chages.
-
-### New classes
- - gammaeluminosity: Generates look-up tables for electron-ion collisions.
- - e_wideResonanceCrossSection: Coherent vector meson production using wide resonance in _eX_ collisions.
- - e_narrowResonanceCrossSection: Coherent vector meson production using narrow resonance in _eX_ collisions.
- - e_starlightStandalone: Similar to STARlight case, calls methods to initialize and produce events and decay them.
- - e_starlight: Reads in inputParameters and checks their validity. 
- - e_main: Driver program, initiates and calls e_starlightStandalone.
- - eXevent: Contained for e+X event information (analogous to upcEvent in STARlight).
-
- 
-### Modified classes
- - beambeamsystem: Add support for electron beam.
- - readinluminosity: Methods to read the look up tables for _ep_ and _eA_ have been added.
- - photonNucleusCrossSection: Methods to calculate photon flux and _$\gamma$X --> VX_ cross-section.
- - nucleus: Add support for electron (Z=1,A=0).
- - inputParameters: Add inputParamters for eSTARlight, including: min(max) $\gamma$ energy($k$) and virtuality($Q^2$), number of $k$ and $Q^2$ bins, electron energy, ...
- - gammaavm: Add methods to generate kinematic variables and momenta to finite virtuality. Also generate outgoing electron and target.
- - filewriter: Increased precision for event catalogue. Necesary for scattered target and electron.
- - eventfilewriter: Add implementation for eXevent to include scattered target and electron in event catalogue.
+ - A more detailed version of the [README](https://github.com/mlomnitz/eSTARlight/blob/master/trunk/Readme.pdf) is included as part of the software package, located in:
+     - ~/the_path/eSTARlight/trunk/Readme.pdf
+     - ~/the_path/eSTARlight/trunk/Readme.docx
