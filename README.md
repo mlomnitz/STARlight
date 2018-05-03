@@ -44,6 +44,20 @@ The following instructions illustrate the procedure to install and run eSTARligh
      - root -b -q -l ~/the_path/eSTARlight/trunk/utils/ConvertStarlightAsciiToTree.C
      - TTree is output to slight.root
 
- - A more detailed version of the [README](https://github.com/mlomnitz/eSTARlight/blob/master/trunk/Readme.pdf) is included as part of the software package, located in:
-     - ~/the_path/eSTARlight/trunk/Readme.pdf
-     - ~/the_path/eSTARlight/trunk/Readme.docx
+## Documentation
+A more detailed version of the [README](https://github.com/mlomnitz/eSTARlight/blob/master/trunk/Readme.pdf) is included as part of the software package, located in:
+ - ~/the_path/eSTARlight/trunk/Readme.pdf
+ - ~/the_path/eSTARlight/trunk/Readme.docx
+
+Finally, the full documentation with class description and dependencies is also available with the package download. To view the documentation:
+     - Open the file ~/the_path/eSTARlight/trunk/doxygen/html/index.html
+
+We have also included a config file to generate a fresh version of the documentation (for instance in the case of any updates). To following steps can be used to generate the documentation:
+ - Download and install the [doxygen](https://www.stack.nl/~dimitri/doxygen/manual/install.html)
+ - Move into the source code trunk:
+     - cd ~/the_path/eSTARlight/trunk/
+ - If necessary, delete previous documentation to avoid any conflicts:
+     - rm ~/the_path/eSTARlight/trunk/doxygen/html/*
+ - Generate the documentation:
+     - doxygen estarlightDoxyfile.conf
+ - The documentation should be generated and available in the previous location
