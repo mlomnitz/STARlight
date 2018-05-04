@@ -122,7 +122,9 @@ e_starlightStandalone::run()
         _baseFileName = _inputParameters->baseFileName();
         _eventDataFileName = _baseFileName +".out";
 	fileWriter.open(_eventDataFileName);
-
+	//
+	fileWriter.writeInit(*_inputParameters);
+	//
 	printInfo << "generating events:" << endl;
 	unsigned int nmbEvents = 0;
 	std::chrono::steady_clock::time_point begin= std::chrono::steady_clock::now();

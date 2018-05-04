@@ -34,7 +34,6 @@
 #include "eventfilewriter.h"
 #include "starlightparticlecodes.h"
 
-
 //______________________________________________________________________________
 eventFileWriter::eventFileWriter()
 : fileWriter()
@@ -47,6 +46,20 @@ eventFileWriter::eventFileWriter(std::string filename)
 : fileWriter(filename)
 { }
 
+//______________________________________________________________________________
+int eventFileWriter::writeInit(inputParameters &_p)
+{
+  _fileStream<<" ************* SIMULATION SET-UP ************* "<<std::endl;
+  _fileStream<<"CONFIG OPT: "<<_p.productionMode()<<" "<<_p.prodParticleId()<<" "<<_p.nmbEvents()
+	     <<" "<<_p.quantumGlauber()<<" "<<_p.impulseVM()<<std::endl;
+  _fileStream<<"BEAM 1: "<<_p.beam1Z()<<" "<<_p.beam1A()<<" "<<_p.beam1LorentzGamma()<<std::endl;
+  _fileStream<<"BEAM 2: "<<_p.beam2Z()<<" "<<_p.beam2A()<<" "<<_p.beam2LorentzGamma()<<std::endl;
+  _fileStream<<"PHOTON: "<<_p.nmbEnergyBins()<<" "<<_p.fixedQ2Range()<<" "<<_p.nmbGammaQ2Bins()
+	     <<" "<<_p.minGammaQ2()<<" "<<_p.maxGammaQ2()<<std::endl;
+  _fileStream<<" ************* BEGIN EVENT RECORD ************* "<<std::endl;
+  
+  return 0;
+}
 
 //______________________________________________________________________________
 int eventFileWriter::writeEvent(upcEvent &event, int eventnumber)
