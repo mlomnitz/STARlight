@@ -66,32 +66,10 @@ void e_AnalyzeTree::Loop()
      TLorentzVector *D1 = (TLorentzVector*)daughters->At(0);
      TLorentzVector *D2 = (TLorentzVector*)daughters->At(1);
      // if desired, acceptance or analysis cuts can be applied here, before filling histograms
-     // if (Cut(ientry) < 0) continue;     
-     double mel = 0.000510998928;
-     //before collision
-     //TLorentzVector el_in(0,0,sqrt(pow(27.5,2)-pow(0.000510998928,2.)) ,27.5);
-     TLorentzVector el_in(0,0,27.5,27.5);
-     TLorentzVector hera_proton(0,0,-sqrt(pow(920,2)-pow(0.9383,2.)),920); // traveling in the negative z direction
-     //energy conservation
-     TLorentzVector init = el_in+hera_proton;
-     TLorentzVector end = *source + hera_proton + *parent;
-     TLorentzVector diff = end - init;
-     // momentum transfer
-     TLorentzVector q = el_in - *source;
-     TLorentzVector W = q+hera_proton;
-     // -- Fill detector acceptance plots
-     my_hist.fill_detector_hists(D1->PseudoRapidity(), D2->PseudoRapidity(),
-				   parent->Rapidity(), parent->Pt() );
-     double y_ratio = Egamma/27.5;
-     double proton_P = 27.5*(920+sqrt(pow(920.,2)-pow(0.9383,2.)));
-     double scalar_W = std::sqrt( - q2 + +2.0*y_ratio*27.5*proton_P+2.*0.9383 );
-     my_hist.fill_W_hist(scalar_W, Egamma, q2);
-     //
+     // -- Fill detector acceptance plots     
+     my_hist.fill_detector_hists( parent->Rapidity(), D1->PseudoRapidity(), D2->PseudoRapidity(), Egamma);
      
    }// jentry
-   // -- Lomnitz
-   cout<<"Lomnitz Making plot"<<endl;
-   my_hist.make_detector_plot();
-   my_hist.make_W_plot();
+   my_hist.make_plots();
 }
 #endif

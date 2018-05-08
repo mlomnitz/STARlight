@@ -19,152 +19,93 @@ ana_hists::~ana_hists()
 void ana_hists::init_histos()
 {
   setGraphicsStyle();
-  hParentW_PhotonEQ2 = new TH3D("ParentW_vs_PhotonEQ","Hadronic invariant mass vs photon E,q",200,0,200,
-				750,0,1.5,600,0,60);
-  for( int ii = 0 ; ii<n_detectors+1; ++ii)
-    hParentYPt[ii] = new TH2D(Form("detector_%i",ii),Form("detector_%i",ii),
-			      plot_bins, plot_limits[0], plot_limits[1], 500,0,5);
-  load_data();
-  
+  // - All parents Y
+  hParentY_all = new TH1D("hParentY_all", "hParentY_all", nYBins,yPlotLim[0],yPlotLim[1]);
+  setStyle(hParentY_all, 22, kBlack);
+  hParentY_all->SetLineColor(1);
+  hParentY_all->GetXaxis()->SetTitle("VM rapidity");
+  hParentY_all->GetYaxis()->SetTitle("# of events [arb. units]");
+  // - Detector acceptance plot
+  for( int iDet = 0; iDet < ana_const::n_detectors; ++iDet){
+    hParentY_acceptance[iDet] = new TH1D(Form("acceptance_plot_%i",iDet), Form("acceptance_plot_%i",iDet),
+					 nYBins,yPlotLim[0],yPlotLim[1]);
+    setStyle(hParentY_acceptance[iDet], marker_type[iDet], marker_color[iDet]);
+    hParentY_acceptance[iDet]->SetLineColor(marker_color[iDet]);
+  }
+  // - Photon energy band plot
+  for( int iGamma = 0 ; iGamma < ana_const::n_EgammaBins; ++iGamma){
+    hParentY_Egamma[iGamma] = new TH1D(Form("gammaBand_%i",iGamma), Form("gammaBand_%i",iGamma), 
+				       nYBins,yPlotLim[0],yPlotLim[1]);
+    setStyle(hParentY_Egamma[iGamma], marker_type[iGamma],marker_color[iGamma]);
+    hParentY_Egamma[iGamma]->SetLineColor(marker_color[iGamma]);
+    hParentY_Egamma[iGamma]->SetFillColor(marker_color[iGamma]);
+    hParentY_Egamma[iGamma]->SetFillStyle(3001);
+  }
 }
 void ana_hists::delete_histos()
 {
-  if(hParentW_PhotonEQ2) delete hParentW_PhotonEQ2;
-  for( int ii = 0 ; ii < n_detectors+1; ++ii)
-    if(hParentYPt[ii]) delete hParentYPt[ii];
   //
-  if(gDataXsec_vs_Q2) delete gDataXsec_vs_Q2;
-  if(gDataXsec_vs_W) delete gDataXsec_vs_W;
 }
-void ana_hists::load_data()
+void ana_hists::fill_detector_hists(double parentY, double d1_y, double d2_y, double eGamma)
 {
-  gDataXsec_vs_Q2 = new TGraph("HERA_comparison/H1_phi.csv","%lg , %lg");
-  int const n_points = 5;
-  double h1_x[n_points] = {41, 54, 67, 80, 93};
-  double h1_y[n_points] = {41.2, 55.1, 49.2, 57.5, 69.6};
-  gDataXsec_vs_W = new TGraph(n_points,h1_x,h1_y);
-  setStyle(gDataXsec_vs_W,21, kBlack);
-}
-void ana_hists::fill_detector_hists(double d1_y, double d2_y, double p_y, double p_pt)
-{
-  for( int ii = 0 ; ii < n_detectors; ++ii){
+  //All parents
+  hParentY_all->Fill(parentY);
+  // - Detector plot
+  for( int ii = 0 ; ii < ana_const::n_detectors; ++ii){
     if( std::fabs(d1_y) < detector_rap[ii] && std::fabs(d2_y) < detector_rap[ii] )
-      hParentYPt[ii] -> Fill( p_y, p_pt);
+      hParentY_acceptance[ii]->Fill(parentY);
   }
-  hParentYPt[n_detectors] -> Fill( p_y, p_pt ); //all parents
+  // - Egamma bands
+  for( int ii = 0 ; ii<ana_const::n_EgammaBins; ++ii){
+    if( eGamma >= egammaBins[ii] && eGamma < egammaBins[ii+1] )
+      hParentY_Egamma[ii]->Fill(parentY);
+  }
+}
+void ana_hists::make_plots()
+{
+  make_detector_plot();
+  make_gammaE_plot();
 }
 void ana_hists::make_detector_plot()
 {
-  float const all_parents = hParentYPt[n_detectors] ->GetEntries();
-  float const rapididty_bin_width = hParentYPt[n_detectors] ->GetXaxis()->GetBinWidth(1);
-  float const ratio = sample_xsec/all_parents/rapididty_bin_width;
-  TH1* parent_y[n_detectors+1];
-  parent_y[n_detectors] = hParentYPt[n_detectors]->ProjectionX( Form("this_hist%i",n_detectors) );
-  parent_y[n_detectors]->Scale(ratio);
-  // -- 
-  TCanvas *cv = canvas(false);
-  cv->cd();
-  TLegend *leg = legend(Form("eSTARlight %s @ %s ",particle.c_str(),accel.c_str()),
-			0.75,0.93,0.15,0.3);
-  //
-  setStyle(parent_y[n_detectors], 29, kBlack);
-  parent_y[n_detectors]->Draw("l");
-  leg->AddEntry(parent_y[n_detectors], "Generated parents","l");
-  // -- 
-  for( int ii = 0 ; ii < n_detectors ; ++ii){
-    parent_y[ii] = hParentYPt[ii]->ProjectionX( Form("this_hist%i",ii) );
-    float eff = parent_y[ii]->GetEntries()/all_parents;      
-    parent_y[ii]->Scale(ratio);
-    setStyle(parent_y[ii], marker[ii],plot_color[ii]);
-    parent_y[ii]->Draw("same:l");
-    leg->AddEntry(parent_y[ii],Form("|#eta_{i}|<%1.0lf, eff.=%.2lf ",detector_rap[ii],eff),"l");
+  TLine *zero = new TLine(-6,20,10,20);
+  zero->SetLineWidth(3);
+  TCanvas* cv_1 = canvas(false);
+  cv_1->cd();
+  cv_1->SetLogy();
+  TLegend* leg1 = legend("Detector acceptance",0.6,0.9,0.65,0.9);
+  hParentY_all->Draw("l");
+  hParentY_all->GetYaxis()->SetRangeUser(20,8E3);
+  hParentY_all->GetXaxis()->SetRangeUser(-6,10);
+  leg1->AddEntry(hParentY_all,"All VM","l");
+  for( int ii = 0 ; ii < ana_const::n_detectors; ++ii){
+    hParentY_acceptance[ii]->Draw("same:l");
+    leg1 ->AddEntry(hParentY_acceptance[ii], Form("|#eta| < %i = %2.2lf", ii+1,
+					      hParentY_acceptance[ii]->GetEntries()/hParentY_all->GetEntries()), "l");
   }
-  leg->Draw();
-  cout<<"Lomitz here"<<endl;
-  cv->SaveAs( Form("scaled_%s_y.eps",particle.c_str()) );
+  zero->Draw("same");
+  leg1->Draw();
+  cv_1->SaveAs("detector_acceptance.eps");  
 }
-void ana_hists::fill_W_hist(double W, double Egamma, double Q2)
+void ana_hists::make_gammaE_plot()
 {
-  hParentW_PhotonEQ2->Fill(W,Egamma, Q2);
-}
-void ana_hists::make_W_plot()
-{
-  double mv = particle_mass[0];
-  TGraph* w_plots[qbins];
-  TCanvas* w_cv = canvas(false);
-  w_cv->cd();
-  w_cv->SetLogy();
-  gDataXsec_vs_W->Draw("a:p");
-  gDataXsec_vs_W->GetYaxis()->SetRangeUser(1e-3,1e4);
-  gDataXsec_vs_W->GetXaxis()->SetLimits(35,250);
-  gDataXsec_vs_W->GetYaxis()->SetTitle(" #sigma_{#gamma p #rightarrow #phi p} [nb]");
-  for( int i = 0 ; i< qbins; ++i){
-    int minQ2 = hParentW_PhotonEQ2->GetZaxis()->FindBin(Q2Bins[i][0]+1e-6);
-    int maxQ2 = hParentW_PhotonEQ2->GetZaxis()->FindBin(Q2Bins[i][1]-1e-6);
-    hParentW_PhotonEQ2->GetZaxis()->SetRange(minQ2,maxQ2);
-    double this_plot_x[wbins] = {0};
-    double this_plot_y[wbins] = {0};
-    double q2 = hParentW_PhotonEQ2->GetMean(3);
-    double Egamma = hParentW_PhotonEQ2->GetMean(2);
-    double scale = gDataXsec_vs_Q2->Eval(q2+1.019*1.019)/(Q2Bins[i][1]-Q2Bins[i][0]); // no weighting
-    cout<<Q2Bins[i][0]<< " < Q2 < "<<Q2Bins[i][1]<<" : <Q2> = "<<hParentW_PhotonEQ2->GetMean(3)
-	<<" <Egamma> = "<<Egamma<<endl;
-    double bin_entries = 0;
-    for( int j = 0 ; j < wbins; ++j){
-      int min = hParentW_PhotonEQ2->GetXaxis()->FindBin(WBins[j]+1e-6);
-      int max  = hParentW_PhotonEQ2->GetXaxis()->FindBin(WBins[j+1]-1e-6);
-      //
-      hParentW_PhotonEQ2->GetZaxis()->SetRange(minQ2,maxQ2); 
-      hParentW_PhotonEQ2->GetXaxis()->SetRange(min,max); 
-      double Egamma = hParentW_PhotonEQ2->GetMean(2);
-      TH1D* this_bin  = (TH1D*)(hParentW_PhotonEQ2->Project3D("x")->Clone(Form("this_bin_%i",j)));
-      //
-      this_plot_x[j] = hParentW_PhotonEQ2->GetMean(1);
-      double integral =  0 ;
-      for( int a = 0 ; a<(max-min); ++a){
-	integral+=this_bin->GetBinContent(a+1);
-      }
-      double d_int = integral/(photonFlux(Egamma,q2)*Egamma)/(WBins[j+1]-WBins[j]); //kinda works      
-      //double d_int = integral/(photonFlux(Egamma,q2))/(WBins[j+1]-WBins[j]); //kinda works      
-      this_plot_y[j] = d_int;
-      bin_entries+= d_int;
-      //      cout<<" W bin" <<j <<" : "<<bin_entries<<endl;
-    }
-    scale = scale/bin_entries;
-    w_plots[i] = new TGraph(wbins,this_plot_x,this_plot_y);
-    setStyle(w_plots[i],w_marker[i],w_color[i]);    
-    double temp_scale = get_scale(gDataXsec_vs_W,w_plots[i]);
-    cout<<" TEsting "<<scale<<" vs. "<<temp_scale<<endl;
-    for( int jj = 0 ; jj<w_plots[i]->GetN(); ++jj) {
-      //w_plots[i]->GetY()[jj] *= scale;
-      w_plots[i]->GetY()[jj] *= temp_scale;
-    }
-    if( i == 0 )
-      w_plots[i]->Draw("same:p");
-      //w_plots[i]->Draw("same:p");
-    //if( i == 0 ){
-    //  w_plots[i]->Draw("a:p");
-    //  w_plots[i]->GetYaxis()->SetRangeUser(1,1e3);
-    //}
-    //else
-    //      w_plots[i]->Draw("same:p");
+  TLine *zero = new TLine(-6,20,10,20);
+  zero->SetLineWidth(3);
+  TCanvas* cv_1 = canvas(false);
+  cv_1->cd();
+  cv_1->SetLogy();
+  TLegend* leg1 = legend("Photon energy [GeV]",0.6,0.9,0.65,0.9);
+  hParentY_all->Draw("l");
+  for( int ii = 0 ; ii < ana_const::n_EgammaBins; ++ii){
+    hParentY_Egamma[ii]->Draw("same:c:CF");
+    if( ii == n_EgammaBins-1 )
+      leg1 ->AddEntry(hParentY_Egamma[ii],Form("%0.0lf < k ",egammaBins[ii]) , "l");
+    else
+      leg1 ->AddEntry(hParentY_Egamma[ii],Form("%0.0lf < k < %0.0lf",egammaBins[ii],egammaBins[ii+1]) , "l");
   }
-  w_cv->SaveAs("w_plot.eps");
-}
-double ana_hists::photonFlux(double Egamma, double Q2)
-{
-  //Some constants
-  double mel = 0.000510998928; //electron mass
-  double rap1 = acosh(53921); //27.5 GeV electrons HERA
-  double rap2 = -acosh(981);  //920 GeV protons HERA
-  double alpha    = 1/137.035999074;
-  double pi       = 3.141592654;
-  double targetLorentzGamma = cosh(rap1-rap2);
-  double electronEnergy         = targetLorentzGamma * mel;
-  double const ratio = Egamma/electronEnergy;
-  double const minQ2 = std::pow( mel*Egamma,2.0) / (electronEnergy*(electronEnergy - Egamma));
-  double to_ret = alpha/(pi) *( 1- ratio + ratio*ratio/2. - (1-ratio)*( fabs(minQ2/Q2)) );
-  return to_ret/( Egamma*fabs(Q2) );
+  zero->Draw("same");
+  leg1->Draw();
+  cv_1->SaveAs("photon_energy_bands.eps");  
 }
 double ana_hists::get_scale(TGraph* data, TGraph* simu)
 {
