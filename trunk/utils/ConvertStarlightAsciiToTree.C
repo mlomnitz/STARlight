@@ -100,7 +100,6 @@ void ConvertStarlightAsciiToTree(const char* inFileName  = "slight.out",
 		    break;
 		  ++countLines;		
 		  lineStream.str(line);
-		  cout<<line<<endl;
 		  assert( lineStream >> label >> set_up["prod_id"] >> set_up["part_id"] >> set_up["nevents"]
 			  >> set_up["qc"] >> set_up["impulse"] >> set_up["rnd_seed"] );
 		  assert(label == "CONFIG_OPT:");
