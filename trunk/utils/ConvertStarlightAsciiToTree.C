@@ -17,6 +17,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <string>
 
 #include "TLorentzVector.h"
 #include "TClonesArray.h"
@@ -36,6 +37,19 @@ struct source_electron
     gamma_mass = Q2;
   };
 };
+TLorentzVector* make_beam_particle(double lorentz, int Z, int A,int dir){
+  double mass;
+  if( std::fabs(Z) == 1 )
+    mass = 0.000510998928; //Electron GeV/c^2
+  else
+    mass = A*0.938272046; //A*proton GeV/c^2
+  E = lorentz*mass;
+  pz = std::sqrt(E*E-mass*mass);
+  TLorentzVector* to_ret = new TLorentzVector(0,0,dir*pz, E);
+  return to_ret;
+  
+}
+
 
 void ConvertStarlightAsciiToTree(const char* inFileName  = "slight.out",
                         const char* outFileName = "starlight.root")
@@ -52,8 +66,17 @@ void ConvertStarlightAsciiToTree(const char* inFileName  = "slight.out",
   	TClonesArray*   daughterParticles = new TClonesArray("TLorentzVector");
 	TLorentzVector* source            = new TLorentzVector();
 	TLorentzVector* target            = new TLorentzVector();
+	//
+	TLorentzVector* beam1 = new TLorentzVector();
+	TLorentzVector* beam2 = new TLorentzVector();
+	std::map<string, int> set_up;
+	double photon_setup[5];
+	//
 	Float_t        q2, Egamma, vertex_t;
-
+	outTree->Branch("set_up","std::map<string,int>", &set_up,32000,-1);
+	outTree->Branch("beam1","TLorentzVector", &beam1,            32000, -1);	
+	outTree->Branch("beam2","TLorentzVector", &beam2,            32000, -1);	
+	//
 	outTree->Branch("Egamma",         &Egamma, "Egamma/F");
 	outTree->Branch("Q2",         &q2, "q2/F");
 	outTree->Branch("t",         &vertex_t, "vertex_t/F");
@@ -61,17 +84,64 @@ void ConvertStarlightAsciiToTree(const char* inFileName  = "slight.out",
 	outTree->Branch("source",    "TLorentzVector", &source,            32000, -1);
 	outTree->Branch("parent",    "TLorentzVector", &parentParticle,    32000, -1);
 	outTree->Branch("daughters", "TClonesArray",   &daughterParticles, 32000, -1);
-
+	//
 	ifstream inFile;
 	inFile.open(inFileName);
 	unsigned int countLines = 0;
 	int tot_events=0;
+	bool loaded_head = false;
 	while (inFile.good()) {
-		string       line;
-		stringstream lineStream;
-		
-		// read EVENT
+		string line;
 		string label;
+		stringstream lineStream;
+		// event simulation header     
+		if( loaded_head == false){
+		  if( !getline(inFile, line))
+		    break;
+		  ++countLines;		
+		  lineStream.str(line);
+		  cout<<line<<endl;
+		  assert( lineStream >> label >> set_up["prod_id"] >> set_up["part_id"] >> set_up["nevents"]
+			  >> set_up["qc"] >> set_up["impulse"] >> set_up["rnd_seed"] );
+		  assert(label == "CONFIG_OPT:");
+		  
+		  lineStream.clear();
+		  // beam 1 and 2
+		  int Z,A;
+		  double lorentz;
+		  if( !getline(inFile, line))
+		    break;
+		  ++countLines;		
+		  lineStream.str(line);
+		  assert( lineStream >> label >> Z >> A >> lorentz );
+		  assert(label == "BEAM_1:" );
+		  beam1 = make_beam_particle(lorentz, Z, A, 1);		
+		  
+		  lineStream.clear();
+		  //
+		  if( !getline(inFile, line))
+		    break;
+		  ++countLines;		
+		  lineStream.str(line);
+		  assert( lineStream >> label >> Z >> A >> lorentz );
+		  assert(label == "BEAM_2:" );
+		  beam2 = make_beam_particle(lorentz, Z, A, -1);
+		  
+		  lineStream.clear();
+		  // Photon set-up
+		  if( !getline(inFile, line))
+		    break;
+		  ++countLines;		
+		  lineStream.str(line);
+		  int g_bins, q_bins, fixed_q;
+		  double q2_min, q2_max;
+		  assert( lineStream >> label >> g_bins >> fixed_q>> q_bins 
+			  >> q2_min>> q2_max);
+		  assert(label == "PHOTON:");
+		  loaded_head = true;
+		}
+		lineStream.clear();
+		// read EVENT
 		int    eventNmb, nmbTracks;
 		if (!getline(inFile, line))
 			break;
