@@ -93,6 +93,24 @@ void nucleus::init()
 		  }
 		}
 		break;
+	case -1: 
+		{
+		  //is this a anti-proton
+		  if(_A==1){
+		    _Radius = 0.7;
+		    _rho0 = -1.0; //Not relevant for protons
+		  }
+		  // this is positron
+		  else if(_A==0){
+		    _Radius = 0.;
+		    _rho0 = -1.0;
+		  }
+		  else {
+		    _Radius = 2.1;
+		    _rho0 = _A;
+		  }
+		}
+		break;
 	default:
 		printWarn << "density not defined for projectile with Z = " << _Z << ". using defaults." << endl;
                 _Radius = 1.2*pow(_A, 1. / 3.);

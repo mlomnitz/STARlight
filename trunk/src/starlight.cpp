@@ -112,11 +112,11 @@ starlight::init()
 	const bool lumTableIsValid = luminosityTableIsValid();
 
 	// Do some sanity checks of the input parameters here.
-        if( _inputParameters->beam1Z() > _inputParameters->beam1A() ){
+        if( (uint)std::abs(_inputParameters->beam1Z()) > _inputParameters->beam1A() ){
 	  printErr << endl << "A must be >= Z; A beam1 = "<<_inputParameters->beam1A()<<", Z beam1 = "<<_inputParameters->beam1Z()<<". Terminating."<<endl ;
 	  return false;
 	}
-        if( _inputParameters->beam2Z() > _inputParameters->beam2A() ){
+        if( (uint)std::abs(_inputParameters->beam2Z()) > _inputParameters->beam2A() ){
 	  printErr << endl << "A must be >= Z; A beam2 = "<<_inputParameters->beam2A()<<", Z beam2 = "<<_inputParameters->beam2Z()<<". Terminating."<<endl ;
 	  return false;
 	}

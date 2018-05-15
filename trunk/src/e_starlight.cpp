@@ -123,11 +123,11 @@ e_starlight::init()
 	  printErr << endl << "Only one of the two beams can be electron in eSTARlight"<< endl;
 	  return false;
 	}
-	if( _inputParameters->beam1A() == 0 && _inputParameters->beam1Z() != 1 ){
-	  printErr << endl << "Beam 1 should be electron, but has wrong Z"<< endl;
+	if( _inputParameters->beam1A() == 0 && std::abs(_inputParameters->beam1Z()) != 1 ){
+	  printErr << endl << "Beam 1 should be electron, but has wrong Z"<< endl;	  
 	  return false;
 	}
-	if( _inputParameters->beam2A() == 0 && _inputParameters->beam2Z() != 1 ){
+	if( _inputParameters->beam2A() == 0 && _inputParameters->beam2Z() != std::abs(1) ){
 	  printErr << endl << "Beam 1 should be electron, but has wrong Z"<< endl;
 	  return false;
 	}

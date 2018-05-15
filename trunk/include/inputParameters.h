@@ -178,9 +178,9 @@ public:
 	bool configureFromFile(const std::string &configFileName = "./config/slight.in");
 
         std::string  baseFileName          () const { return _baseFileName.value();           }
-	unsigned int beam1Z                () const { return _beam1Z.value();                 }  ///< returns atomic number of beam particle 1
+	int beam1Z                () const { return _beam1Z.value();                 }  ///< returns atomic number of beam particle 1
 	unsigned int beam1A                () const { return _beam1A.value();                 }  ///< returns atomic mass number of beam particle 1
-	unsigned int beam2Z                () const { return _beam2Z.value();                 }  ///< returns atomic number of beam particle 2
+	int beam2Z                () const { return _beam2Z.value();                 }  ///< returns atomic number of beam particle 2
 	unsigned int beam2A                () const { return _beam2A.value();                 }  ///< returns atomic mass number of beam particle 2
 	double       targetLorentzGamma    () const { return _targetLorentzGamma;             }  ///< returns Lorentz gamma factor of source in target frame
 	double       beamLorentzGamma      () const { return _beamLorentzGamma;       	      }  ///< returns Lorentz gamma factor of both beams in beam CMS frame
@@ -306,9 +306,9 @@ private:
 
 	// config file parameters
         parameter<std::string,NO_VALIDITY_CHECK>   _baseFileName;
-	parameter<unsigned int,VALIDITY_CHECK>     _beam1Z;                  ///< atomic number of beam particle 1
+	parameter<int,VALIDITY_CHECK>     _beam1Z;                  ///< atomic number of beam particle 1
 	parameter<unsigned int,VALIDITY_CHECK>     _beam1A;                  ///< atomic mass number of beam particle 1
-	parameter<unsigned int,VALIDITY_CHECK>     _beam2Z;                  ///< atomic number of beam particle 2
+	parameter<int,VALIDITY_CHECK>     _beam2Z;                  ///< atomic number of beam particle 2
 	parameter<unsigned int,VALIDITY_CHECK>     _beam2A;                  ///< atomic mass number of beam particle 2
 	parameter<double, VALIDITY_CHECK>          _beam1LorentzGamma;       ///< Lorentz gamma factor of beam 1 in collider frame
 	parameter<double, VALIDITY_CHECK>          _beam2LorentzGamma;       ///< Lorentz gamma factor of beam 2 in collider frame
