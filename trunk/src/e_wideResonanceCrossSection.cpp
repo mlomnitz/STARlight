@@ -79,6 +79,7 @@ e_wideResonanceCrossSection::crossSectionCalculation(const double bwnormsave)
   double W,dW, dEgamma, minEgamma;
 	double ega[3] = {0};
 	double int_r,dR;
+	double int_r2,dR2;
 	double Eth;
 	int    iW,nW,iEgamma,nEgamma,beam;
 
@@ -120,7 +121,7 @@ e_wideResonanceCrossSection::crossSectionCalculation(const double bwnormsave)
         }
 
 	int_r=0.;
-    
+	int_r2 = 0.;
         // Do this first for the case when the first beam is the photon emitter 
         // The variable beam (=1,2) defines which nucleus is the target 
 	// Integration done using Simpson's rule
@@ -135,6 +136,7 @@ e_wideResonanceCrossSection::crossSectionCalculation(const double bwnormsave)
 		  ega[2] = 0.5*(ega[0]+ega[1]);
 		  // Integral over Q2				  
 		  double full_int[3] = {0}; // Full e+X --> e+X+V.M. cross section
+		  double dndE[3] = {0}; // Full e+X --> e+X+V.M. cross section
 		  //
 		  for( int iEgaInt = 0 ; iEgaInt < 3; ++iEgaInt){    // Loop over the energies for the three points to integrate over Q2
 		    //These are the physical limits
@@ -160,9 +162,14 @@ e_wideResonanceCrossSection::crossSectionCalculation(const double bwnormsave)
 		      full_int[iEgaInt] += (q2_2-q2_1)*( g(ega[iEgaInt],q2_1)*getcsgA(ega[iEgaInt],q2_1,beam)
 							 + g(ega[iEgaInt],q2_2)*getcsgA(ega[iEgaInt],q2_2,beam)
 							 + 4.*g(ega[iEgaInt],q2_12)*getcsgA(ega[iEgaInt],q2_12,beam) );	      
+		      // Effective flux
+		      dndE[iEgaInt] +=(q2_2-q2_1)*( getcsgA_Q2_dep(q2_1)*photonFlux(ega[iEgaInt],q2_1)
+						    +getcsgA_Q2_dep(q2_2)*photonFlux(ega[iEgaInt],q2_2)
+						    +4.*getcsgA_Q2_dep(q2_12)*photonFlux(ega[iEgaInt],q2_12) );
 		    }
 		    q2end = -99 ;
 		    full_int[iEgaInt] = full_int[iEgaInt]/6.;
+		    dndE[iEgaInt] = dndE[iEgaInt]/6.;
 		  }
 		  // Finishing cross-section integral 
 		  dR = full_int[0];
@@ -170,23 +177,21 @@ e_wideResonanceCrossSection::crossSectionCalculation(const double bwnormsave)
 		  dR += 4.*full_int[2];
 		  dR = dR*(ega[1]-ega[0])/6.;
 		  int_r = int_r + dR*breitWigner(W,bwnorm)*dW;
+		  // Finishing effective flux integral
+		  	  // Finishing integral over the effective photon flux
+		  dR2 = dndE[0];
+		  dR2 += dndE[1];
+		  dR2 += 4.*dndE[2];
+		  dR2 = dR2*(ega[1]-ega[0])/6.;
+		  int_r2 = int_r2 + dR2*breitWigner(W,bwnorm)*dW;
 		}
 	}
 	cout<<endl;
-	if (0.01*int_r > 1.){
-	  cout<< " Total cross section: "<<0.01*int_r<<" barn."<<endl;
-	} else if (10.*int_r > 1.){
-	  cout<< " Total cross section: " <<10.*int_r<<" mb."<<endl;
-        } else if (10000.*int_r > 1.){
-	  cout<< " Total cross section: " <<10000.*int_r<<" microb."<<endl;
-        } else if (10000000.*int_r > 1.){
-	  cout<< " Total cross section: " <<10000000.*int_r<<" nanob."<<endl;
-        } else if (1.E10*int_r > 1.){
-	  cout<< " Total cross section: "<<1.E10*int_r<<" picob."<<endl;
-        } else {
-	  cout<< " Total cross section: " <<1.E13*int_r<<" femtob."<<endl;
-        }
-	cout<<endl;
+	if(_useFixedRange == true){
+	  cout<<" Using fixed Q2 range "<<_gammaMinQ2 << " < Q2 < "<<_gammaMaxQ2<<endl;
+	}
+	printCrossSection(" Total cross section: ",int_r);
+	//printCrossSection(" gamma+X --> VM+X ", int_r/int_r2); 
 	setPhotonNucleusSigma(0.01*int_r);
 	//
 #ifdef _makeGammaPQ2_
@@ -327,3 +332,20 @@ e_wideResonanceCrossSection::makeGammaPQ2dependence( double bwnormsave)
 	
 }
 #endif
+void e_wideResonanceCrossSection::printCrossSection(const string name, const double x_section)
+{
+  if (0.01*x_section > 1.){
+    cout<< name.c_str() <<0.01*x_section<<" barn."<<endl;
+  } else if (10.*x_section > 1.){
+    cout<< name.c_str() <<10.*x_section<<" mb."<<endl;
+  } else if (10000.*x_section > 1.){
+    cout<< name.c_str() <<10000.*x_section<<" microb."<<endl;
+  } else if (10000000.*x_section > 1.){
+    cout<< name.c_str() <<10000000.*x_section<<" nanob."<<endl;
+  } else if (1.E10*x_section > 1.){
+    cout<< name.c_str() <<1.E10*x_section<<" picob."<<endl;
+  } else {
+    cout<< name.c_str() <<1.E13*x_section<<" femtob."<<endl;
+  }
+  //cout<<endl;
+}

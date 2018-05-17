@@ -47,6 +47,7 @@ public:
 
 	void crossSectionCalculation(const double bwnormsave);
 	void makeGammaPQ2dependence(const double bwnormsave);
+	void printCrossSection(const std::string name, const double x_section);
 private:
 
 	double _wideWmax;
