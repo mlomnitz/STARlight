@@ -39,7 +39,7 @@ struct source_electron
 };
 TLorentzVector* make_beam_particle(double lorentz, int Z, int A,int dir){
   double mass;
-  if( std::fabs(Z) == 1 )
+  if( std::abs(Z) == 1 )
     mass = 0.000510998928; //Electron GeV/c^2
   else
     mass = A*0.938272046; //A*proton GeV/c^2
@@ -103,7 +103,12 @@ void ConvertStarlightAsciiToTree(const char* inFileName  = "slight.out",
 		  assert( lineStream >> label >> set_up["prod_id"] >> set_up["part_id"] >> set_up["nevents"]
 			  >> set_up["qc"] >> set_up["impulse"] >> set_up["rnd_seed"] );
 		  assert(label == "CONFIG_OPT:");
-		  
+		  // - Cout the set up for user 
+		  cout << " -------------------- Simulation set up -------------------- "<<endl; 
+		  cout << "prod_id: " << set_up["prod_id"] << "\t part_id: " << set_up["part_id"] << "\t nevents: " << set_up["nevents"] << endl;
+		  cout << "q_glauber: "<< set_up["qc"] << "\t impulse: "<<  set_up["impulse"] << "\t rnd_seed: "<< set_up["rnd_seed"] << endl;
+		  cout << " ___________________________________________________________ "<<endl; 
+		    //
 		  lineStream.clear();
 		  // beam 1 and 2
 		  int Z,A;
