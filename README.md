@@ -44,7 +44,7 @@ The following instructions illustrate the procedure to install and run eSTARligh
      - root -b -q -l ~/the_path/eSTARlight/trunk/utils/ConvertStarlightAsciiToTree.C
      - TTree is output to starlight.root
  - Analyze your data:
-     - We have included template [analysis](https://github.com/mlomnitz/eSTARlight/tree/master/analysis) (analysis directory) code that reads slight.root and fill histograms. For more details please look at the [README](https://github.com/mlomnitz/eSTARlight/blob/master/trunk/Readme.pdf)
+     - We have included template [analysis](https://github.com/mlomnitz/eSTARlight/tree/master/analysis) (~/the_path/eSTARlight/analysis/) code that reads slight.root and fill histograms. For more details please look at the [README](https://github.com/mlomnitz/eSTARlight/blob/master/trunk/Readme.pdf)
      - cd ~/the_path/eSTARlight/analysis
      - sh e_run.sh ~/the_path/starlight.root
 
