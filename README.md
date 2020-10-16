@@ -1,3 +1,5 @@
+# DEPRECATED
+** This version of the eSTARlight package is no longer maintained. For the current version [visit](https://github.com/eic/estarlight/) **
 # eSTARlight
 eSTARlight is a Monte Carlo that simulates coherent vector meson photo- and electro-production in electro-ion collisions. It can produce a variety of final states at different center of mass energies for different collision systems at arbitrary values for the photon virtuality.
 
